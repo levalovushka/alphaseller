@@ -1,5 +1,29 @@
 # Worklog
 
+## 2026-09-02 — xl scales with the screen, frame settles at 513 on a laptop
+
+**What changed.** `assets/css/base.css` only: `--fs-xl` became
+`clamp(40px, calc(28px + 0.8333vw), 44px)` with `--lh-xl: var(--fs-xl)`, so titles set 40/40
+at 1440 and 44/44 at 1920; `--col-min` went 360 → 380. `CONTEXT.md` updated.
+
+**Why.** Client wanted the frame's growth to be more moderate still, and the xl size a
+little smaller on a MacBook while 1920 keeps the full 44.
+
+**How it was verified.** Live DOM at three widths, collision sweep over the six
+frame-bearing sections each time.
+
+| viewport | xl | frame | collisions |
+|---|---|---|---|
+| 1440×900 | 40 / 40 | 513 | none |
+| 1512×830 | 40.6 | 577 | none |
+| 1920×1080 | 44 / 44 | 760 | none |
+
+No horizontal overflow at any of them. The marketplaces title is back to three lines: at a
+380px column and 40px type, its longest word measures exactly 380 with `hyphens: none`, so
+nothing is being hyphenated on a laptop any more — the rule stays as a safety net. The
+closer still lands correctly at 1440: head at y=120, button 200×150 centred at 450 against a
+screen centre of 450, footer bottom at 852.
+
 ## 2026-09-02 — closer spacing, and reveals that survive a jump
 
 **What changed.** `assets/css/base.css`: `.section--closer` gets

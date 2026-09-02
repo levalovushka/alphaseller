@@ -272,25 +272,23 @@ ground's own data attributes, `isSection` is false only for the footer.
 
 ### The three-column stage
 
-`--page-pad` and `--col-gap` are themselves `clamp()`ed — `clamp(32px, 3.3vw, 64px)` and
-`clamp(24px, 2.5vw, 48px)` — so a narrower screen spends less on edges and gutters and the
-frame keeps a usable width. `--col-min` (360px) is a hard floor on the two text columns; the
-frame takes what is left, capped at 760px.
+`--page-pad` and `--col-gap` are `clamp()`ed — `clamp(32px, 3.3vw, 64px)` and
+`clamp(24px, 2.5vw, 48px)` — so a narrower screen spends less on edges and gutters. The two
+text columns have a floor of `--col-min` (380px) and the frame takes what is left, capped at
+760px.
 
-**Titles hyphenate**, which is what makes that floor a composition choice rather than a
-constraint. It was 400px because `маркетплейсах` is 391px wide in the xl style and would
-otherwise run out of its column into the frame — it did exactly that on a 14" MacBook at a
-340px floor. With `hyphens: auto` on `.section__title` (plus `overflow-wrap: break-word` as
-the fallback for a browser with no Russian patterns) the word breaks instead. Verified in
-Chrome: at 360px the title fits with hyphenation on and overflows to 390px with it off, so
-Russian patterns really are applied. The cost is that this one title runs to four lines
-instead of three.
+That floor is a composition choice, not a constraint: how much screen the text keeps before
+the frame takes the rest. It stopped being a constraint once titles were allowed to
+hyphenate — `hyphens: auto` on `.section__title`, with `overflow-wrap: break-word` as the
+fallback for a browser with no Russian patterns. The longest unbreakable word in the copy is
+`маркетплейсах`; at 380px and the laptop's 40px xl it measures exactly 380 and fits without
+breaking, so hyphenation is a safety net rather than something the reader sees. It was
+visible at the earlier 360px floor and a 44px xl, where that title ran to four lines.
 
-Resulting frame widths: **553px at 1440, 617px at 1512, 760px at 1920**. The same page was
-416 / 488 / 760 before the clamped padding and 473 / 537 / 760 before hyphenation.
-
-A 300px floor would take the frame to 673 at 1440; the client judged that too big for a
-laptop and chose 360. The number is meant to be tuned — it is one token.
+Resulting frame widths: **513px at 1440, 577px at 1512, 760px at 1920**. The history, for
+anyone tempted to re-tune: 416 / 488 / 760 with fixed padding, 473 / 537 / 760 once padding
+was clamped, 553 / 617 / 760 at a 360px floor with the type still at 44. The client asked for
+the moderate end of that range.
 
 ## 6. Content
 
@@ -393,11 +391,15 @@ Verified with fontTools (2026-09-02):
 
 | Style | Cut | Size / leading | Tracking | Used for |
 |---|---|---|---|---|
-| `xl` | Hyper Medium | 44 / 44 | normal | Section titles |
+| `xl` | Hyper Medium | 40 / 40 at 1440 → 44 / 44 at 1920 | normal | Section titles |
 | `md` | Hyper Regular | 18 / 24 | 1% (`0.01em`) | Everything else |
 
 "Hyper" is the `wdth 87` width; "Medium" is `wght 500`, "Regular" is `wght 400`. In CSS:
-`font-stretch: 87%` plus the weight. Note `h1`/`h2` default to bold — the title weight must
+`font-stretch: 87%` plus the weight.
+
+`xl` scales with the screen — `clamp(40px, calc(28px + 0.8333vw), 44px)`, with the leading
+always equal to the size — so a laptop gets 40/40 and a 1920 screen keeps the full 44/44.
+`md` does not scale. Note `h1`/`h2` default to bold — the title weight must
 be forced back to 500.
 
 ### Control sizes (fixed by the client)

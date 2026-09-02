@@ -38,7 +38,11 @@
 
   /* Type — the whole site is two styles, both YFF Hyper
      (wdth 87 = "Hyper"). See CONTEXT.md §7. */
-  --fs-xl: 44px;  --lh-xl: 44px;  --weight-xl: 500;  /* Hyper Medium, titles */
+  /* Style xl scales with the screen: 40/40 at 1440, 44/44 at 1920, held flat outside
+     that range. Leading always equals the size. */
+  --fs-xl: clamp(40px, calc(28px + 0.8333vw), 44px);
+  --lh-xl: var(--fs-xl);
+  --weight-xl: 500;  /* Hyper Medium, titles */
   --fs-md: 18px;  --lh-md: 24px;  --weight-md: 400;  /* Hyper Regular, everything else */
   --tracking-md: 0.01em;
 
@@ -57,7 +61,7 @@
      text columns keep before the frame takes the rest. 360 puts the frame at 553 on a
      1440 screen; dropping to 300 would give it 673, which the client judged too much
      for a laptop. */
-  --col-min: 360px;
+  --col-min: 380px;
   --frame-w: min(
     760px,
     calc(100vw - 2 * var(--page-pad) - 2 * var(--col-gap) - 2 * var(--col-min))
