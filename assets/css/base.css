@@ -1,0 +1,239 @@
+/* Alpha Seller — desktop landing demo.
+   STRUCTURE ONLY. No visual design decisions here beyond the fixed brand colors.
+   Type scale, spacing rhythm, radii and motion are pending the client's decisions. */
+
+/* ---------- fonts ---------- */
+
+@font-face {
+  font-family: "YFF RARE";
+  src: url("../fonts/YFF-RARE-VF.woff2") format("woff2-variations");
+  font-weight: 100 900;
+  font-stretch: 50% 150%;
+  font-display: swap;
+}
+
+/* ---------- tokens ---------- */
+
+:root {
+  /* Brand palette — fixed, see CONTEXT.md §7. */
+  --c-white: #ffffff;
+  --c-smoke: #e9ebee;
+  --c-green: #a6ed00;
+  --c-black: #000000;
+  --c-graphite: #1a1817;  /* unused on this page */
+  --c-red: #dc200c;       /* unused on this page */
+
+  /* Layout — provisional, not a design decision. */
+  --page-max: 1728px;
+  --page-pad: 64px;
+  --header-h: 88px;      /* TODO: not specified by the client */
+
+  /* Type — the whole site is two styles, both YFF Hyper Medium
+     (wdth 87 = "Hyper", wght 500 = "Medium"). See CONTEXT.md §7. */
+  --fs-xl: 44px;  --lh-xl: 44px;  --weight-xl: 500;  /* Hyper Medium, titles */
+  --fs-md: 18px;  --lh-md: 24px;  --weight-md: 400;  /* Hyper Regular, everything else */
+  --tracking-md: 0.01em;
+
+  /* Control heights, fixed by the client. */
+  --logo-size: 52px;
+  --btn-h-nav: 52px;
+  --btn-h: 44px;
+  --radius-logo: 14px;   /* TODO: corner radius not specified by the client */
+}
+
+/* ---------- reset ---------- */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  /* Style md — the default everywhere except titles. */
+  font-family: "YFF RARE", system-ui, sans-serif;
+  font-stretch: 87%;
+  font-weight: var(--weight-md);
+  font-size: var(--fs-md);
+  line-height: var(--lh-md);
+  letter-spacing: var(--tracking-md);
+  background: var(--c-white);
+  color: var(--c-black);
+}
+
+h1, h2, p, ul { margin: 0; }
+ul { padding: 0; list-style: none; }
+img { display: block; max-width: 100%; height: auto; }
+
+/* ---------- ink: light vs dark ground ---------- */
+
+[data-ink="dark"]  { --ink: var(--c-black); --ink-invert: var(--c-white); }
+[data-ink="light"] { --ink: var(--c-white); --ink-invert: var(--c-black); }
+
+/* ---------- section grounds ---------- */
+
+[data-theme="white"] { background: var(--c-white); }
+[data-theme="smoke"] { background: var(--c-smoke); }
+[data-theme="green"] { background: var(--c-green); }
+[data-theme="black"] { background: var(--c-black); }
+
+/* ---------- header ---------- */
+
+.header {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 10;
+  height: var(--header-h);
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  padding: 0 var(--page-pad);
+  color: var(--ink);
+  /* The ink is switched per section at runtime — JS not wired yet. */
+}
+
+/* Mark only, no wordmark, inside a 52×52 rounded square.
+   TODO: the square's fill and the mark's size inside it are not specified. */
+.header__logo {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: var(--logo-size);
+  height: var(--logo-size);
+  background: var(--ink);
+  /* Fallback: a plain rounded square (Safari, Firefox). */
+  border-radius: var(--radius-logo);
+}
+
+/* Squircle where the browser has CSS corner shaping (Chrome 139+). */
+@supports (corner-shape: squircle) {
+  .header__logo { corner-shape: squircle; }
+}
+
+.header__logo img {
+  width: 24px;
+  height: auto;
+  /* The mark ships black; flip it on a dark square. */
+  filter: var(--mark-filter, none);
+}
+
+[data-ink="dark"] .header__logo img { --mark-filter: invert(1); }
+
+.header__nav {
+  display: flex;
+  gap: 28px;
+  margin-inline: auto;
+}
+
+.header__link {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* ---------- button ---------- */
+
+.btn {
+  font: inherit;
+  letter-spacing: inherit;
+  display: inline-flex;
+  align-items: center;
+  height: var(--btn-h);
+  padding: 0 24px;
+  color: var(--ink-invert);
+  background: var(--ink);
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.header__cta { height: var(--btn-h-nav); }
+
+/* ---------- section ---------- */
+
+.section {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding: var(--header-h) var(--page-pad) var(--page-pad);
+  color: var(--ink);
+}
+
+.section__inner {
+  width: 100%;
+  max-width: var(--page-max);
+  margin-inline: auto;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 48px;
+}
+
+/* Keep the 1fr columns from being blown out by long words in the title. */
+.section__inner > * { min-width: 0; }
+
+/* Style xl. */
+.section__title {
+  font-weight: var(--weight-xl);   /* h1/h2 default to bold — force Medium back */
+  font-size: var(--fs-xl);
+  line-height: var(--lh-xl);
+  letter-spacing: normal;
+}
+
+.section__aside {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+/* Style md — inherited from body, nothing to override. */
+
+/* The frame: ~4:3, centered, empty until the client supplies content. */
+.section__frame {
+  aspect-ratio: 4 / 3;
+  width: min(46vw, 760px);
+  border-radius: 24px;
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
+  outline: 1px dashed color-mix(in srgb, var(--ink) 25%, transparent);
+  outline-offset: -1px;
+}
+
+/* ---------- footer ---------- */
+
+.footer {
+  color: var(--ink);
+  padding: 96px var(--page-pad);
+}
+
+.footer__inner {
+  max-width: var(--page-max);
+  margin-inline: auto;
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr 1.2fr;
+  gap: 48px;
+  align-items: start;
+}
+
+.footer__col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.footer__link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.footer__socials {
+  display: flex;
+  gap: 12px;
+  margin-top: 32px;
+}
+
+.footer__social img {
+  width: 40px;
+  height: 40px;
+  /* Icons ship black; invert them on the black ground. */
+  filter: invert(1);
+}
