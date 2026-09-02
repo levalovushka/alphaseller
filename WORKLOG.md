@@ -1,5 +1,20 @@
 # Worklog
 
+## 2026-09-02 — no more white sections
+
+**What changed.** `index.html`: `data-theme="white"` → `"smoke"` on capabilities and
+audience. `CONTEXT.md`: section table, palette table and the colour-rhythm note.
+
+**Why.** Client wants no pure-white grounds.
+
+**How it was verified.** Walked the seven snap positions: the page now reads green → smoke →
+smoke → black → smoke → smoke → black, `rgb(233, 235, 238)` on all four light sections, ink
+flipping to white on the two black ones. No `data-theme="white"` left in the markup.
+
+**Worth noting.** Pure white is now only an ink colour, and four of the seven sections share
+one ground — the colour sequence is flatter than it was. Said out loud in case the board
+demo wanted more variety there; the client asked for it explicitly.
+
 ## 2026-09-02 — marketplaces subtitle rewritten
 
 **What changed.** `index.html`: the marketplaces subtitle is now "Даём аналитику

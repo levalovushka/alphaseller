@@ -68,15 +68,17 @@ Header + 7 sections + footer.
 | # | Section | Background |
 |---|---|---|
 | 1 | Hero | Green `#A6ED00` |
-| 2 | Key capabilities | White `#FFFFFF` |
+| 2 | Key capabilities | Smoky white `#E9EBEE` |
 | 3 | Speed | Smoky white `#E9EBEE` |
 | 4 | Customization | Black `#000000` |
 | 5 | Marketplaces | Smoky white `#E9EBEE` |
-| 6 | Audience | White `#FFFFFF` |
+| 6 | Audience | Smoky white `#E9EBEE` |
 | 7 | Closer + footer | Black `#000000` — one screen, see below |
 
-**Red is not used on this page at all** (for now). Both dark sections and the footer use
-pure `#000000`; `#1A1817` is unused for now.
+**Red is not used on this page at all** (for now). Both dark sections use pure `#000000`;
+`#1A1817` is unused. Pure white is no longer a section ground either — the four light
+sections are all smoky white, so the page reads green → smoke → smoke → black → smoke →
+smoke → black.
 
 ### Copy — v1, from the client, 2026-09-02
 
@@ -373,7 +375,7 @@ upward without asking.
 
 | Name (RU) | Name (EN) | HEX | Role |
 |---|---|---|---|
-| Чистый белый | Pure white | `#FFFFFF` | **Page ground.** Contrast, crisp compositions. |
+| Чистый белый | Pure white | `#FFFFFF` | Ink on the dark sections. **No longer used as a section ground** — the client replaced both white sections with smoky white. |
 | Дымчато-белый | Smoky white | `#E9EBEE` | Light airy panels, readability, palette balance. |
 | Ярко-зелёный | Bright green | `#A6ED00` | Brand accent: entrepreneurial freedom, growth. |
 | Чистый чёрный | Pure black | `#000000` | Base of the visual system. Sections 4, 7, footer. |

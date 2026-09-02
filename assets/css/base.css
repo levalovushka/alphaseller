@@ -362,9 +362,9 @@ img { display: block; max-width: 100%; height: auto; }
   opacity: var(--t, 0);
 }
 
-/* Every source so far is 1118×789 (1.42:1) against a 4:3 frame, so `cover` trims 33px off
-   each side at 1x; the client knows and is fine with it (CONTEXT §3). Figma nodes:
-   hero `196:53708`, capabilities `204:51472`. */
+/* Figma nodes: hero `196:53708`, capabilities `206:58220`. The capabilities screen is a
+   true 4:3 frame and fills exactly; the hero photograph is 1.42:1, so `cover` trims 33px
+   off each side at 1x — the client knows and is fine with it (CONTEXT §3). */
 .stage-frame__slide[data-for="hero"] {
   background-image: url("../images/hero.webp");
 }
