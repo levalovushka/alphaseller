@@ -164,7 +164,10 @@ img { display: block; max-width: 100%; height: auto; }
 @supports (corner-shape: squircle) {
   .header__logo,
   .btn,
-  .stage-frame { corner-shape: squircle; }
+  .stage-frame,
+  /* The slide clips its own image, so it needs the shape too — `border-radius: inherit`
+     carries the radius but not the corner shape. */
+  .stage-frame__slide { corner-shape: squircle; }
 }
 
 /* The mark is painted, not placed: a mask lets it take --ink-invert, so it stays the
@@ -333,17 +336,34 @@ img { display: block; max-width: 100%; height: auto; }
   outline-offset: -1px;
 }
 
-/* One slide per section, cross-faded as the section changes. Empty until the client
-   supplies screens, video and people. */
+/* One slide per section, cross-faded as the section changes. Still empty on the sections
+   the client has not supplied a screen, a video or a person for. */
 .stage-frame__slide {
   position: absolute;
   inset: 0;
   opacity: 0;
   border-radius: inherit;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
   transition: opacity var(--fade) ease-in-out;
 }
 
 .stage-frame__slide[data-active="true"] { opacity: 1; }
+
+/* Hero — Figma node 196:53708. The source is 1118×789 (1.42:1) against a 4:3 frame, so
+   `cover` trims the sides; the client knows and is fine with it. */
+.stage-frame__slide[data-for="hero"] {
+  background-image: url("../images/hero.webp");
+}
+
+/* A slide carrying its own image fills the frame edge to edge, so the empty-frame chrome
+   has nothing left to mark. The dashed outline would otherwise be drawn over the picture.
+   `--frame-outline` is the same custom property JS drives for the closer's call to action,
+   and JS sets it inline, so that state still wins. */
+.stage-frame:has(.stage-frame__slide[data-filled="true"][data-active="true"]) {
+  --frame-outline: transparent;
+}
 
 /* The label the frame carries once it has become the call to action. Its opacity is
    scrubbed with the rest of the transformation; it only takes clicks at the end. */
@@ -375,6 +395,9 @@ img { display: block; max-width: 100%; height: auto; }
    percentage height does not resolve against `min-height`. */
 .section--closer {
   display: grid;
+  /* The head needs air under the navbar that the other sections do not: their content
+     is centred in the screen, this one starts at the top. */
+  padding-top: calc(var(--header-h) + 32px);
   /* .section centres its single child; here the child must fill the screen instead. */
   align-items: stretch;
   justify-items: stretch;

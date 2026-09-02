@@ -1,5 +1,63 @@
 # Worklog
 
+## 2026-09-02 — closer spacing, and reveals that survive a jump
+
+**What changed.** `assets/css/base.css`: `.section--closer` gets
+`padding-top: calc(var(--header-h) + 32px)`. `assets/js/main.js`: the morph into the call to
+action now also interpolates the frame's `top`, from the content's optical centre to the
+screen's centre; and the reveal catch-up became a function that runs on load, on every
+ScrollTrigger refresh, and on each `section:change`.
+
+**Why.** Client: the closer's title needed more air under the navbar, and the button read as
+sitting below the middle of the screen. It did — the frame is aligned to the content's
+optical centre, which the 88px header pushes 20px below the screen's centre.
+
+**A bug found while measuring.** A scroll long enough to clear a whole section in one step
+left that section's title and subtitle at `opacity: 0` forever: ScrollTrigger does not fire
+`onEnter` for a trigger jumped over in a single update, and the reveals fire `once`.
+Reproduced by jumping 0 → 5400 → 900, which left `#capabilities` hidden with
+`transform: translateY(24px)`. The load-time catch-up added earlier only covered the first
+paint; it now also runs on refresh and on every section change.
+
+**How it was verified.** Live DOM. 1440×900: head at y=120 (was 88), frame 200×150 with its
+centre at 450 against a screen centre of 450, footer bottom at 852 inside the 900. Same at
+1512×830 (centre 415/415) and 1920×1080 (540/540), head at 120 and the frame at exactly
+200×150 in all three. After the 0 → 5400 → 900 jump, no title or subtitle is left below
+opacity 1, and on a normal section the frame's centre and the title's centre agree at 470.
+
+**Note for the client.** With the button on the screen's centre the air is not symmetrical —
+123px above it and 175px below at 1440 — because the head is shorter than the footer.
+
+## 2026-09-02 — the hero frame gets its photograph
+
+**What changed.** New `assets/images/hero.webp` — Figma node `196:53708`, exported at @2x
+(2236×1578) and converted with `cwebp -q 82 -metadata none`, 101 KB. `base.css`:
+`.stage-frame__slide` gains `center / cover / no-repeat`, a rule fills the hero slide with
+the image, `.stage-frame__slide` joins the `corner-shape: squircle` group (`border-radius:
+inherit` carries the radius but not the shape, so the slide would have clipped as a plain
+rounded rect inside a squircle frame), and a `:has()` rule drops the frame's dashed
+placeholder outline while a `data-filled` slide is active. `index.html`: the hero slide is
+marked `data-filled="true"`. `CONTEXT.md`: new §7 "Frame content" table, and node
+`196:53708` added to §10.
+
+**Why.** First real content in the frame. The dashed outline is a marker for an empty
+frame; over a photograph it reads as a defect.
+
+**How it was verified.** `localhost:4321` at 1440×900. Network: `assets/images/hero.webp`
+→ 200. Live DOM on the hero slide: `data-active true`, `background-image` resolved to the
+webp, `background-size cover`, `border-radius 32px`, `corner-shape squircle`, and opacity
+`1` once its transition is taken out of the way. Frame `outline-color rgba(0,0,0,0)` — the
+placeholder outline is gone. Decoded the file in the page: 2236×1578. Console has no new
+errors; the 404s still listed there are stale requests from loads before `assets/images/`
+existed.
+
+**Left undone.** No screenshot of the real page — the pane does not repaint. Instead I
+reproduced the crop offline with `sips` (centre crop to 4:3) and sent that PNG, so the
+framing is confirmed, but the rounding, the squircle and the cross-fade are confirmed by
+computed style only. Six raw source images sit behind that Figma node; I took the node
+export, which is the cropped composition as designed, not the raw plates. The other six
+slides are still empty.
+
 ## 2026-09-02 — the frame becomes the closing call to action
 
 **What changed.** `index.html`: the standalone green `.closer__cta` block is gone, replaced

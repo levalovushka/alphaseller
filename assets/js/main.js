@@ -150,10 +150,12 @@ const GREEN = rgb(GROUND.green);
 const closer = document.querySelector('#closer');
 const cta = frame.querySelector('.stage-frame__cta');
 let frameWidth = frame.getBoundingClientRect().width;
+let frameTop = 0;
 
 function morph(t) {
   if (t === 0) {
     frame.style.removeProperty('width');
+    frame.style.removeProperty('top');
     frame.style.removeProperty('--frame-bg');
     frame.style.removeProperty('--frame-outline');
     cta.style.opacity = '0';
@@ -164,6 +166,12 @@ function morph(t) {
   const ink = rgb(INK[closer.dataset.ink]);
   const fill = ink.map((v, i) => Math.round(v + (GREEN[i] - v) * t));
 
+  /* On every other section the frame sits on the content's optical centre, which the
+     header pushes below the middle of the screen. As the button, it belongs on the
+     screen's own centre — so the last thing the morph does is take that offset out. */
+  const centre = window.innerHeight / 2;
+
+  frame.style.top = `${frameTop + (centre - frameTop) * t}px`;
   frame.style.width = `${frameWidth + (CTA_WIDTH - frameWidth) * t}px`;
   frame.style.setProperty('--frame-bg', `rgba(${fill.join(', ')}, ${0.06 + 0.94 * t})`);
   frame.style.setProperty('--frame-outline', `rgba(${ink.join(', ')}, ${0.25 * (1 - t)})`);
@@ -179,7 +187,9 @@ ScrollTrigger.create({
      it comes from --frame-w, which is viewport-dependent. */
   onRefresh: () => {
     frame.style.removeProperty('width');
+    frame.style.removeProperty('top');
     frameWidth = frame.getBoundingClientRect().width;
+    frameTop = parseFloat(getComputedStyle(frame).top);
   },
   onUpdate: (self) => morph(self.progress),
 });
@@ -242,7 +252,20 @@ gsap.matchMedia().add('(prefers-reduced-motion: no-preference)', () => {
 ScrollTrigger.refresh();
 ScrollTrigger.update();
 
-reveals.forEach((tween) => {
-  const trigger = tween.scrollTrigger;
-  if (trigger && window.scrollY > trigger.start) tween.progress(1);
-});
+/* Any reveal the page is already past must render finished rather than sit at its
+   from-state. ScrollTrigger does not fire `onEnter` for a trigger that is jumped over in
+   one step — on load, on a deep link, or on a scroll long enough to clear a whole
+   section — and because these fire `once` they would never fire at all. Run the sweep
+   on load, on every refresh, and on each section change. */
+function catchUpReveals() {
+  reveals.forEach((tween) => {
+    const trigger = tween.scrollTrigger;
+    if (trigger && window.scrollY > trigger.start && tween.progress() === 0) {
+      tween.progress(1);
+    }
+  });
+}
+
+catchUpReveals();
+ScrollTrigger.addEventListener('refresh', catchUpReveals);
+document.addEventListener('section:change', catchUpReveals);

@@ -130,6 +130,12 @@ it completes exactly as that screen lands:
 | fill | 6% of the current ink | opaque `#A6ED00` |
 | outline | 25% dashed | transparent |
 | label | invisible | `Начать бесплатно`, and it starts taking clicks |
+| position | the content's optical centre | the **screen's** centre |
+
+That last row matters: on every other section the frame sits on the optical centre of the
+content, which the header pushes ~20px below the middle of the screen. As a button it reads
+as sitting low there, so the morph takes the offset out. The closer's head also gets 32px
+more air under the navbar than a normal section's top padding gives.
 
 The label lives in the frame's `closer` slide as a real `<a>`; the other six slides stay
 `aria-hidden`. `pointer-events` only open up at the end, on `.stage-frame[data-cta="true"]`.
@@ -336,6 +342,23 @@ no recolour for the icon to follow. Rendered at 40×40.
 Note the export you want is the **vector-layer** SVG, not the node export — the latter bakes
 Figma's own `#1E1E1E` canvas in as a full-bleed `<rect>`.
 
+### Frame content
+
+| Section | File | Figma node | Source |
+|---|---|---|---|
+| 1 — hero | `assets/images/hero.webp` | `196:53708` | 1118×789, exported @2x → 2236×1578, cwebp `-q 82`, 101 KB |
+
+Slides are filled with a CSS `background-image` on
+`.stage-frame__slide[data-for="…"]`, `center / cover`. The hero source is 1.42:1 against a
+4:3 frame, so `cover` trims about 66px off each side at @2x — measured, and the client is
+fine with it (§3 already notes the ratio mismatch).
+
+A slide that carries an image gets `data-filled="true"` in the markup, which drops the
+frame's dashed placeholder outline via `--frame-outline: transparent` — otherwise it is
+drawn over the picture. It switches instantly rather than fading; the change lands mid
+cross-fade, and giving the outline a transition of its own would fight the per-frame ink
+interpolation.
+
 ### Product screens
 
 Vendored in `assets/screens/` as flat PNGs. The client dislikes their current design and
@@ -448,6 +471,7 @@ Known nodes:
 | `196:46921` | Footer element inventory. |
 | `196:46923` | Product screens (4 frames, 1366×964 each). |
 | `201:56530` | Social icons — Telegram, Instagram, VK, mail. |
+| `196:53708` | Hero photograph — man on a chair, red gradient ground. |
 
 `get_metadata` on `1:49642` and on `196:46923` overflows the MCP transport. Read frame by
 frame; ask the client for direct links.
