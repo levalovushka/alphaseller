@@ -478,7 +478,7 @@ interpolation.
 Under the frame on section 2 sits a strip of three tabs — `Продвижение`, `Заказы`,
 `Логистика` — and the frame shows one pane per tab.
 
-They are pills on the buttons' own geometry — same 44px height, 20px side padding, radius
+They are pills on the buttons' own geometry — same `--btn-h` height, 20px side padding, radius
 32, squircle — so they are the site's existing control rather than a third one:
 
 | State | Look |
@@ -548,23 +548,24 @@ Verified with fontTools (2026-09-02):
 |---|---|---|---|---|
 | `xxl` | Hyper Medium | 56 / 56 at 1440 → 64 / 64 at 1920 | normal | The cases and closer headings |
 | `xl` | Hyper Medium | 36 / 36 at 1440 → 44 / 44 at 1920 | normal | Section titles |
-| `md` | Hyper Regular | 16 / 21.33 at 1440 → 18 / 24 at 1920 | 1% (`0.01em`) | Everything else |
+| `md` | Hyper Regular | 14 / 18 at 1440 → 18 / 24 at 1920 | 1% (`0.01em`) | Everything else |
 
 "Hyper" is the `wdth 87` width; "Medium" is `wght 500`, "Regular" is `wght 400`. In CSS:
 `font-stretch: 87%` plus the weight.
 
-**Both styles scale, on the same 1440–1920 window, and are held flat outside it.**
+**Every style scales, on the same 1440–1920 window, and is held flat outside it.**
 
-| Style | Clamp | 1440 | 1920 |
-|---|---|---|---|
-| `xl` | `clamp(36px, calc(12px + 1.6667vw), 44px)` | 36 / 36 | 44 / 44 |
-| `md` | `clamp(16px, calc(10px + 0.4167vw), 18px)` | 16 / 21.33 | 18 / 24 |
+| Style | Size clamp | Leading clamp | 1440 | 1920 |
+|---|---|---|---|---|
+| `xxl` | `clamp(56px, calc(32px + 1.6667vw), 64px)` | = size | 56 / 56 | 64 / 64 |
+| `xl` | `clamp(36px, calc(12px + 1.6667vw), 44px)` | = size | 36 / 36 | 44 / 44 |
+| `md` | `clamp(14px, calc(2px + 0.8333vw), 18px)` | `clamp(18px, 1.25vw, 24px)` | 14 / 18 | 18 / 24 |
 
-`xl`'s leading always equals the size. `md`'s keeps the designed 4:3 ratio to it
-(`calc(var(--fs-md) * 4 / 3)`), so it tightens with the size instead of holding 24 flat —
-client's call if he wants it flat instead. `md` is set once, on `body`, and inherited
-everywhere; tracking is in `em` so it follows on its own. Note `h1`/`h2` default to bold —
-the title weight must be forced back to 500.
+The two display sizes keep leading equal to the size. `md` needs a **second clamp** for its
+leading: the ratio is not constant across the window — 18/14 = 1.286 at 1440 against
+24/18 = 1.333 at 1920 — so one multiplier cannot hit both ends. `md` is set once, on `body`,
+and inherited everywhere; tracking is in `em` so it follows on its own. Note `h1`/`h2`
+default to bold — the title weight must be forced back to 500.
 
 ### Control sizes (fixed by the client)
 
@@ -572,7 +573,7 @@ the title weight must be forced back to 500.
 |---|---|
 | Logo — **mark only, no wordmark**, in a rounded square | 48×48 |
 | Header CTA button | 48 high |
-| Section CTA buttons (under the subtitle) | 44 high |
+| Section CTA buttons (under the subtitle) | 40 high — was 44 until 2026-09-02 |
 | Corner radius — buttons, logo square, frame | 32 (`--radius-btn`) |
 | Button side padding — both sizes | 20 (`--btn-pad-x`) |
 
@@ -644,6 +645,13 @@ Known nodes:
 
 `get_metadata` on `1:49642` and on `196:46923` overflows the MCP transport. Read frame by
 frame; ask the client for direct links.
+
+### The hero frame is empty
+
+The photograph that filled the hero slide was taken off the first screen by the client on
+2026-09-02. `assets/images/hero.webp` **stays in the repo** — he wants it again later, just
+not there. The slide is back to the dashed empty frame; putting it back is one
+`data-filled="true"` and one `background-image`.
 
 ## 11. Verifying in the browser
 

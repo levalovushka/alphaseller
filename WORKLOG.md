@@ -1,5 +1,18 @@
 # Worklog
 
+## 2026-09-02 — photograph off the hero
+
+**What changed.** `index.html`: `data-filled="true"` dropped from the hero slide.
+`assets/css/base.css`: the `background-image` rule for that slide removed, replaced by a
+comment saying why the file is still there. `CONTEXT.md` records it.
+`assets/images/hero.webp` is **kept** — the client wants it again later, just not on the
+first screen.
+
+**How it was verified.** With a freshly loaded stylesheet: the hero slide computes
+`background-image: none`, carries no `data-filled`, and `hero.webp` is not requested at all
+on a full page load. The frame is back to its dashed outline there. The capabilities panes
+are untouched — all three still resolve their own images and return 200.
+
 ## 2026-09-02 — third pane filled, all three tabs now carry a screen
 
 **What changed.** New `assets/images/capabilities-logistics.webp` — Figma node `223:37237`,
@@ -57,6 +70,25 @@ carousel on real elapsed time with `lagSmoothing(0)` and manual ticks — the pa
 
 **Left undone.** The `logistics` pane has no screen, so every third dwell shows an empty
 frame — waiting on the node. No screenshot: the browser pane does not repaint.
+
+## 2026-09-02 — md down to 14/18 at 1440, small buttons to 40
+
+**What changed.** `assets/css/base.css`: `--fs-md` → `clamp(14px, calc(2px + 0.8333vw), 18px)`,
+`--lh-md` → `clamp(18px, 1.25vw, 24px)`, `--btn-h` 44 → 40. `CONTEXT.md` §7: the type table,
+the clamp table (now with `xxl`), the control-sizes row, and the tabs' 44px reference.
+
+**Why.** Client wants the small text smaller on a laptop and the section buttons shorter.
+
+**How it was verified.** Measured in the browser at three widths — 1440 → 14/18, 1680 → 16/21,
+1920 → 18/24, one group for all 117 text elements at each. Boxes: section CTA and the three
+capabilities tabs 40 high at every width, header CTA still 48, header still 84. Hero
+screenshot at 1440 and 1920.
+
+**What is left undone.** The leading needed a second clamp — 18/14 = 1.286 against
+24/18 = 1.333, so one multiplier cannot hit both ends. `--btn-h` is flat 40 across the
+window, not scaled 40 → 44; say if it should scale with the type. Sections 2–7 were not
+looked at with eyes: the browser pane kept resetting `scrollY` to 0 and screenshots off the
+hero came back black.
 
 ## 2026-09-02 — re-pulled the promotion screen
 

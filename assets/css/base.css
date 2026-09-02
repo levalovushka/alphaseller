@@ -48,17 +48,18 @@
   --fs-xl: clamp(36px, calc(12px + 1.6667vw), 44px);
   --lh-xl: var(--fs-xl);
   --weight-xl: 500;  /* Hyper Medium, titles */
-  /* Style md scales on the same window: 16/21.33 at 1440, 18/24 at 1920, held flat
-     outside it. The leading keeps the designed 4:3 ratio to the size. */
-  --fs-md: clamp(16px, calc(10px + 0.4167vw), 18px);
-  --lh-md: calc(var(--fs-md) * 4 / 3);
+  /* Style md scales on the same window: 14/18 at 1440, 18/24 at 1920, held flat
+     outside it. Size and leading each get their own clamp — the ratio is not
+     constant across the window (1.286 at 1440, 1.333 at 1920). */
+  --fs-md: clamp(14px, calc(2px + 0.8333vw), 18px);
+  --lh-md: clamp(18px, 1.25vw, 24px);
   --weight-md: 400;  /* Hyper Regular, everything else */
   --tracking-md: 0.01em;
 
   /* Control heights, fixed by the client. */
   --logo-size: 48px;
   --btn-h-nav: 48px;
-  --btn-h: 44px;
+  --btn-h: 40px;
   --btn-pad-x: 20px;   /* both sizes, header and sections */
   /* The three-column stage. The text columns never go below --col-min; the frame
      takes what is left, capped at 760. Without the floor, a long word in a title
@@ -385,12 +386,9 @@ img { display: block; max-width: 100%; height: auto; }
   opacity: var(--t, 0);
 }
 
-/* Figma nodes: hero `196:53708`, capabilities `206:58220`. The capabilities screen is a
-   true 4:3 frame and fills exactly; the hero photograph is 1.42:1, so `cover` trims 33px
-   off each side at 1x — the client knows and is fine with it (CONTEXT §3). */
-.stage-frame__slide[data-for="hero"] {
-  background-image: url("../images/hero.webp");
-}
+/* The hero slide is deliberately empty: the client took the photograph off the first
+   screen. `assets/images/hero.webp` stays in the repo — it is wanted again later. Figma
+   node `196:53708`. */
 
 /* ---------- the capabilities tabs ----------
    Three panes behind one strip of tabs under the frame. The pane swap is a wall-clock
