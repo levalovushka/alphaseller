@@ -26,10 +26,14 @@
   /* Layout — provisional, not a design decision. */
   --page-max: 1728px;
   --page-pad: 64px;
-  --header-h: 88px;      /* TODO: not specified by the client */
 
-  /* Type — the whole site is two styles, both YFF Hyper Medium
-     (wdth 87 = "Hyper", wght 500 = "Medium"). See CONTEXT.md §7. */
+  /* Header: full-bleed, 20px inset. Its height follows from the inset plus the
+     52px controls — nothing fixes it. */
+  --header-pad: 20px;
+  --header-h: calc(var(--header-pad) * 2 + var(--btn-h-nav));
+
+  /* Type — the whole site is two styles, both YFF Hyper
+     (wdth 87 = "Hyper"). See CONTEXT.md §7. */
   --fs-xl: 44px;  --lh-xl: 44px;  --weight-xl: 500;  /* Hyper Medium, titles */
   --fs-md: 18px;  --lh-md: 24px;  --weight-md: 400;  /* Hyper Regular, everything else */
   --tracking-md: 0.01em;
@@ -82,11 +86,12 @@ img { display: block; max-width: 100%; height: auto; }
   position: fixed;
   inset: 0 0 auto 0;
   z-index: 10;
-  height: var(--header-h);
-  display: flex;
+  /* 1fr auto 1fr keeps the nav centred on the screen, not in the leftover space. */
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
   gap: 40px;
-  padding: 0 var(--page-pad);
+  padding: var(--header-pad);
   color: var(--ink);
   /* The ink is switched per section at runtime — JS not wired yet. */
 }
@@ -121,7 +126,7 @@ img { display: block; max-width: 100%; height: auto; }
 .header__nav {
   display: flex;
   gap: 28px;
-  margin-inline: auto;
+  justify-self: center;
 }
 
 .header__link {
@@ -145,7 +150,10 @@ img { display: block; max-width: 100%; height: auto; }
   cursor: pointer;
 }
 
-.header__cta { height: var(--btn-h-nav); }
+.header__cta {
+  height: var(--btn-h-nav);
+  justify-self: end;
+}
 
 /* ---------- section ---------- */
 

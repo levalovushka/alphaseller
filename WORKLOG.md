@@ -1,5 +1,29 @@
 # Worklog
 
+## 2026-09-02 — full-bleed header, centred nav, non-breaking spaces
+
+**What changed.** `assets/css/base.css`: the header is now full-bleed with a 20px inset on
+top and sides (`--header-pad`), its height derived from that inset plus the 52px controls
+rather than fixed; it became a `1fr auto 1fr` grid so the nav sits on the screen's centre
+instead of the centre of the leftover space. `index.html`: 23 `&nbsp;` inserted into the 7
+titles and 7 subtitles (delegated to a subagent).
+
+**Why.** Client decisions. The nav was visibly off-centre under flex `space-between`.
+
+**How it was verified.** Live DOM at 1440×900: header `x=0 w=1440 h=92`, logo at `x=20`,
+CTA right edge at `1420`, nav centre `720` against a viewport centre of `720`. For the
+copy: `index.html` with every `&nbsp;` replaced back by a space is byte-identical to the
+committed version, no literal U+00A0 in the file, no lines outside the title/subtitle
+elements changed, and the rendered DOM carries 23 U+00A0. No horizontal overflow.
+
+**Left undone.** Header height came out at 92px (20 + 52 + 20) — the client asked for a
+shorter bar and has not yet given a bottom padding. Still no JS: no navbar ink switching,
+no GSAP. Frames empty. Corner radius and the logo square's fill are still placeholders.
+
+**Gotcha.** `python3 -m http.server` plus the browser cache served a stale `index.html`
+after an edit; verification silently ran against the old file. Append a cache-buster query
+when re-checking.
+
 ## 2026-09-02 — md style to 18/24 Regular, squircle logo, first commit
 
 **What changed.** `assets/css/base.css`: style `md` is now Hyper Regular 18/24 (was Medium

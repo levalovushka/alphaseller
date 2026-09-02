@@ -105,6 +105,10 @@ period inside a subtitle (section 5) stays.
 - Logo (Alpha Seller only — no Alfa-Bank lockup).
 - Links: `продукты`, `тарифы`, `крупному бизнесу`, `примеры`, `блог`.
 - Button: `начать бесплатно`.
+- **Full-bleed**, not inside the page container: 20px inset from the top and both edges.
+  The height follows from that inset plus the 52px controls; nothing fixes it.
+- **The nav links sit on the screen's centre**, not in the middle of the space left over
+  between the logo and the button. Implemented as a `1fr auto 1fr` grid.
 - The ground is light but sections 1, 4 and 7 are green/black. **The navbar must recolor
   itself against the section currently under it** (or an equivalent solution). Real
   requirement — plan for it in the section markup.
