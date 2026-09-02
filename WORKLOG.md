@@ -1,5 +1,80 @@
 # Worklog
 
+## 2026-09-02 — colour interpolated against the scroll
+
+**What changed.** The colour system is now two live variables on `<html>`, `--ground` and
+`--ink`, lerped by JS against the scroll instead of switched at a line and transitioned.
+`assets/css/base.css`: the `[data-ink]` and `body[data-theme]` colour rules are gone,
+everything reads the two variables, and the transitions on body and header are removed so
+they cannot fight the scrub. `assets/js/main.js`: a ScrollTrigger per adjacent pair of
+grounds, `start: 'top bottom'` to `end: 'top top'`, interpolating both colours on
+`onUpdate`. `index.html`: the logo mark and the four social icons became masked spans.
+
+**Why.** The client saw the colour arriving late. It did: the switch could only fire once
+the section boundary had crossed the header, by which point the section had nearly landed,
+and the 0.9s fade then ran on after it. Now the transition zone is exactly the one gesture
+that moves one section, so the colour lands with the section.
+
+**Two dead ends, recorded so they are not retried.** Painting the colour on each section
+made it arrive as a hard edge sliding up the screen. Moving it to `<body>` with a CSS
+transition produced the lag above.
+
+**A trap worth remembering.** `url()` inside a custom property resolves against the
+stylesheet that *uses* the property, not the document. An inline `--icon:
+url('assets/icons/x.svg')` was fetched from `assets/css/assets/icons/x.svg` and 404'd; the
+urls now live in the stylesheet as modifier classes.
+
+**How it was verified.** Live DOM at 1440×900, network clean, no console errors.
+- With snapping temporarily off, sampling the hero→capabilities gesture at 0/225/450/675/900
+  gives `rgb(166,237,0)` → `(188,242,64)` → `(211,246,128)` → `(233,251,191)` →
+  `(255,255,255)`: a real interpolation, complete exactly at the snap point. The ink lerps
+  too — mid-way through the smoke→black gesture it reads `rgb(191,191,191)`.
+- Scrolling back up restores every colour: black → smoke → hero green.
+- All 8 snap positions carry the right body background, header colour and active slide; the
+  frame never moves from 512,306; 7 `section:change` events fire; no horizontal overflow.
+- Masks resolve: the mark is 24×16 painted with `--ground`, the icons are painted with
+  `--ink`, all five svg requests return 200.
+
+**Left undone.** Still verified by measurement — the browser pane here returns no usable
+screenshots. Open questions unchanged: the footer's height, and whether the frame should
+stay bigger than 416px on a 1440 screen.
+
+## 2026-09-02 — one button padding, matched radii, secondary button style
+
+**What changed.**
+- `assets/css/base.css`: `--btn-pad-x-nav` dropped, `--btn-pad-x` is 20px for both button
+  sizes. The logo square moved from `--radius` to `--radius-btn`, so it matches the buttons.
+  New `.btn--secondary`: no fill, 1px inset-shadow stroke in `var(--ink)`, fills with the
+  ink and inverts the label on hover/focus-visible over new `--hover: 0.2s`; no transition
+  under `prefers-reduced-motion`.
+- `index.html`: all 7 section CTAs are now `.btn .btn--secondary`. The header CTA stays
+  primary.
+- `CONTEXT.md` §7: control-size table rewritten for the single padding and the shared
+  radius, plus a new "Button styles" table.
+
+**Why.** Client items: 20px padding everywhere, the logo square and the buttons must be
+rounded the same, and the body of every section needs an outline button that fills on hover.
+
+**How it was verified.** `python3 -m http.server 4321`, Chrome at 1440×900. Computed styles:
+section button `padding-inline` 20/20, `border-radius` 32, `corner-shape` squircle,
+`background rgba(0,0,0,0)`, `box-shadow inset 0 0 0 1px`; header CTA 20/20 and radius 32;
+logo square 52×52, radius 32, squircle. Hover on `#hero` (green): `background rgb(0,0,0)` +
+`color rgb(255,255,255)`. Hover on `#customization` (black): `background rgb(255,255,255)` +
+`color rgb(0,0,0)`. Screenshot of the hero confirms the fill on hover.
+
+**Follow-up in the same session.** He confirmed the 1px stroke and asked for the frame to
+match too, so `.stage-frame` moved to `--radius-btn` as well: every rounded thing on the
+page is now 32. Verified — computed `border-radius` 32 and `corner-shape squircle` on the
+frame (416×312), the logo square, and both button sizes.
+
+**Left undone.** Hover duration (0.2s) is still my placeholder. Primary buttons have no
+hover state. `--radius: 16px` is now only the base of the `* 2` calc — nothing uses it
+directly; collapse it to a single token when the number is final. In Safari and Firefox the
+`border-radius` fallback clamps 32 on the 52×52 logo square to 26 and draws a full circle;
+Chrome's squircle does not. Note: GSAP
+reveals freeze mid-animation while the browser pane is hidden (rAF is throttled) — an
+artifact of the preview, not a page bug.
+
 ## 2026-09-02 — section-by-section snapping
 
 **What changed.** `assets/css/base.css` only: `scroll-snap-type: y mandatory` on `html`,

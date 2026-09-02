@@ -155,12 +155,27 @@ library, nothing pinned. `assets/js/main.js`, GSAP 3.15 + ScrollTrigger vendored
    The text columns scroll past it; it never moves. Each section keeps a
    `.section__frame-slot` that only holds the grid column open.
 2. The frame holds one `.stage-frame__slide` per section, cross-faded as the section under
-   the header changes. Slides are empty until the client supplies screens, video and people.
-3. **The ground colour lives on `<body>`, not on the sections.** JS copies the active
-   section's `data-theme` onto the body and CSS cross-fades `background-color` over
-   `--fade`. Sections are transparent — otherwise the colour arrives as a hard edge sliding
-   up the screen instead of a fade. The header ink, the frame's fill and the slide swap all
-   use the same `--fade` (0.9s, `ease-in-out`).
+   the header changes (`--fade`, 0.9s — the one cross-fade left that is not tied to the
+   scroll). Slides are empty until the client supplies screens, video and people.
+3. **Two live colours drive the page: `--ground` and `--ink`, interpolated against the
+   scroll.** Sections are transparent; `--ground` is what the page is painted with and
+   `--ink` is everything drawn on it — text, the logo square, the frame's tint, the footer
+   icons. JS lerps both between one section's pair and the next across the scroll from
+   "next section's top at the viewport bottom" to "next section's top at the viewport top",
+   which under snapping is exactly one gesture. The colour therefore finishes changing at
+   the instant the section lands.
+
+   Two earlier attempts were wrong and should not be retried: painting the colour on each
+   section made it arrive as a hard edge sliding up the screen; moving it to `<body>` with
+   a CSS `transition` read as lag, because the switch could only fire once the boundary had
+   passed the header — by then the section had nearly arrived, and the fade ran on after it
+   landed.
+
+   Consequence: the logo mark and the footer social icons are **masked spans**, not
+   `<img>`, so they can take `--ground` / `--ink` and stay in step. Their `url()`s live in
+   the stylesheet, never in an inline `--icon`: a `url()` inside a custom property resolves
+   against the sheet that *uses* it, so an inline one was fetched from
+   `assets/css/assets/icons/…` and 404'd.
 4. The frame fades out across the footer's entrance, scrubbed to the scroll.
 5. Each section's title, subtitle and CTA reveal once on entry (rise 24px + fade, 0.8s,
    staggered). The trigger is the **title**, not the section — sections are a viewport tall
@@ -294,18 +309,34 @@ be forced back to 500.
 | Logo — **mark only, no wordmark**, in a rounded square | 52×52 |
 | Header CTA button | 52 high |
 | Section CTA buttons (under the subtitle) | 44 high |
-| Corner radius — logo square, frame | 16 |
-| Corner radius — buttons | 32 (`--radius-btn`, twice the base) |
-| Button side padding — header | 20 |
-| Button side padding — sections | 22 |
+| Corner radius — buttons, logo square, frame | 32 (`--radius-btn`) |
+| Button side padding — both sizes | 20 (`--btn-pad-x`) |
 
-Two tokens: `--radius: 16px` for the logo square and the frame, `--radius-btn` at twice that
-for the buttons. 32 exceeds half of both button heights (44 and 52), so browsers clamp it —
-the buttons render fully rounded.
+**Everything rounded on the page carries the same radius, 32.** `--radius: 16px` survives
+only as the base `--radius-btn` is derived from; nothing uses it directly. 32 exceeds half
+of both button heights (44 and 52), so browsers clamp it and the buttons render fully
+rounded. On the 52×52 logo square the squircle corner shape absorbs the clamp and it still
+reads as a rounded square — but the `border-radius` fallback in Safari and Firefox clamps to
+26 and draws a full circle. Known divergence, raised with the client.
 
 The logo square is a **squircle with a fallback**: `border-radius` for Safari and Firefox,
 `corner-shape: squircle` inside `@supports` for Chrome 139+. It applies to **everything
 rounded** — the logo square, both buttons and the frame.
+
+### Button styles
+
+Two styles, one class each:
+
+| Style | Class | Idle | Hover |
+|---|---|---|---|
+| Primary | `.btn` | filled with the ink, label inverted | — |
+| Secondary | `.btn .btn--secondary` | no fill, 1px stroke in the ink colour | fills with the ink, label inverts |
+
+- **Primary is the header CTA only.** Every CTA in the body of a section is secondary.
+- The secondary stroke is an `inset` box-shadow, not a `border`, so the box geometry is
+  identical to the primary's — 20px of side padding either way.
+- The 1px stroke width is the client's. `--hover: 0.2s` is still a placeholder, and
+  primary has no hover state yet.
 
 Not specified yet, currently placeholders in CSS: the logo square's fill, the mark's size
 inside it (24px), and the header's bottom padding (20px).

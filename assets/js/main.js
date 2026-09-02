@@ -1,19 +1,77 @@
 /* Motion for the landing demo.
-   Native page scroll, no wheel hijacking and no smooth-scroll library. The effect
-   copied from cash.app is the one that matters: the frame in the middle stays put
-   while the two text columns scroll past it, and what the frame holds changes as
-   the section changes.
-     1. the page colour, the header and the frame take the ground underneath,
+   Native page scroll, snapped section by section in CSS. No wheel hijacking and no
+   smooth-scroll library. The effect copied from cash.app is the one that matters:
+   the frame in the middle stays put while the two text columns scroll past it, and
+   what the frame holds changes as the section changes.
+     1. the ground colour and the ink are interpolated against the scroll,
      2. the frame swaps its slide per section, and fades out over the footer,
      3. each section's text reveals once as it enters the viewport.
-   The header itself never hides. */
+   The header never hides. */
 
 gsap.registerPlugin(ScrollTrigger);
 
+const root = document.documentElement;
 const header = document.querySelector('.header');
 const frame = document.querySelector('.stage-frame');
 const slides = gsap.utils.toArray('.stage-frame__slide');
 const grounds = gsap.utils.toArray('.section, .footer');
+
+/* ---------- colour ---------- */
+
+const styles = getComputedStyle(root);
+const token = (name) => styles.getPropertyValue(name).trim();
+
+const GROUND = {
+  white: token('--c-white'),
+  smoke: token('--c-smoke'),
+  green: token('--c-green'),
+  black: token('--c-black'),
+};
+
+const INK = { dark: token('--c-black'), light: token('--c-white') };
+
+function rgb(hex) {
+  const n = parseInt(hex.slice(1), 16);
+  return [n >> 16, (n >> 8) & 255, n & 255];
+}
+
+function mix(from, to, t) {
+  const c = from.map((v, i) => Math.round(v + (to[i] - v) * t));
+  return `rgb(${c[0]}, ${c[1]}, ${c[2]})`;
+}
+
+function paint(ground, ink) {
+  root.style.setProperty('--ground', ground);
+  root.style.setProperty('--ink', ink);
+}
+
+function coloursOf(el) {
+  return { ground: rgb(GROUND[el.dataset.theme]), ink: rgb(INK[el.dataset.ink]) };
+}
+
+/* The colour is interpolated across the scroll from one ground to the next, not
+   switched at a line and then transitioned. A CSS transition read as lag: it could
+   only start once the boundary had passed the header, by which point the section had
+   almost arrived, and the fade then ran on after it landed. Here the page finishes
+   changing colour at the exact moment the next section reaches the top. */
+grounds.forEach((ground, i) => {
+  if (i === 0) return;
+
+  const from = coloursOf(grounds[i - 1]);
+  const to = coloursOf(ground);
+
+  ScrollTrigger.create({
+    trigger: ground,
+    start: 'top bottom',
+    end: 'top top',
+    onUpdate: (self) => {
+      const t = self.progress;
+      paint(mix(from.ground, to.ground, t), mix(from.ink, to.ink, t));
+    },
+  });
+});
+
+/* ---------- slides ---------- */
 
 function showSlide(id) {
   slides.forEach((slide) => {
@@ -21,54 +79,45 @@ function showSlide(id) {
   });
 }
 
-document.body.dataset.theme = grounds[0].dataset.theme;
-showSlide(grounds[0].id);
+const first = grounds[0];
+paint(mix(coloursOf(first).ground, coloursOf(first).ground, 0), INK[first.dataset.ink]);
+showSlide(first.id);
 
-/* 1 & 2. Whatever ground sits under the header drives the page colour, the ink and
-          the slide. The switch point is the header's own middle, so it lands as the
-          boundary passes the logo, and every colour cross-fades over --fade rather
-          than arriving as a hard edge.
+/* Whatever ground sits under the header owns the slide. The switch point is the
+   header's own middle, so it lands as the boundary passes the logo.
 
-          Each switch also fires a `section:change` event on `document`, so anything
-          else — swapping what a slide holds, starting a video, cueing a caption —
-          can hang off it without touching this file:
+   Each switch also fires a `section:change` event on `document`, so anything else —
+   filling a slide, starting a video, cueing a caption — can hang off it without
+   touching this file:
 
-            document.addEventListener('section:change', (e) => {
-              e.detail; // { id, theme, ink, isSection, ground }
-            }); */
-function activate(ground) {
-  const { ink, theme } = ground.dataset;
-  const isSection = ground.classList.contains('section');
-
-  document.body.dataset.theme = theme;
-  header.dataset.ink = ink;
-
-  if (isSection) {
-    frame.dataset.ink = ink;
-    showSlide(ground.id);
-  }
-
-  document.dispatchEvent(
-    new CustomEvent('section:change', {
-      detail: { id: ground.id || 'footer', theme, ink, isSection, ground },
-    })
-  );
-}
-
+     document.addEventListener('section:change', (e) => {
+       e.detail; // { id, theme, ink, isSection, ground }
+     }); */
 grounds.forEach((ground) => {
   ScrollTrigger.create({
     trigger: ground,
     start: () => `top top+=${header.offsetHeight / 2}`,
     end: () => `bottom top+=${header.offsetHeight / 2}`,
     onToggle: (self) => {
-      if (self.isActive) activate(ground);
+      if (!self.isActive) return;
+
+      const { theme, ink } = ground.dataset;
+      const isSection = ground.classList.contains('section');
+
+      if (isSection) showSlide(ground.id);
+
+      document.dispatchEvent(
+        new CustomEvent('section:change', {
+          detail: { id: ground.id || 'footer', theme, ink, isSection, ground },
+        })
+      );
     },
   });
 });
 
-/* The footer is shorter than a screen, so it never reaches the header line and
-   cannot drive the frame the way a section does. Fade the frame out across the
-   footer's own entrance instead — by the bottom of the page it is gone. */
+/* The footer is shorter than a screen, so it never reaches the header line and cannot
+   drive the frame the way a section does. Fade the frame out across the footer's own
+   entrance instead — by the bottom of the page it is gone. */
 gsap.to(frame, {
   opacity: 0,
   ease: 'none',
@@ -80,11 +129,11 @@ gsap.to(frame, {
   },
 });
 
-/* 3. Reveals. The trigger is the title, not the section: sections are a full
-      viewport tall with their content centred, so anything anchored to the section
-      fires while the content is still a screen below the fold and the animation is
-      over before it comes into view.
-      Skipped entirely when the visitor asked for less motion. */
+/* ---------- reveals ----------
+   The trigger is the title, not the section: sections are a full viewport tall with
+   their content centred, so anything anchored to the section fires while the content
+   is still a screen below the fold and the animation is over before it comes into
+   view. Skipped entirely when the visitor asked for less motion. */
 gsap.matchMedia().add('(prefers-reduced-motion: no-preference)', () => {
   gsap.utils.toArray('.section').forEach((section) => {
     const targets = section.querySelectorAll(

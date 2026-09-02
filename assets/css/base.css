@@ -59,10 +59,18 @@
   );
 
   /* How long a ground colour or an ink takes to cross-fade. */
+  /* The page's two live colours. JS overwrites them on <html> as you scroll;
+     these are the hero's, and the fallback when JS does not run. */
+  --ground: var(--c-green);
+  --ink: var(--c-black);
+
+  /* Discrete cross-fades that are not tied to the scroll: the frame's slides. */
   --fade: 0.9s;
 
-  /* One radius for everything that is rounded; buttons and the logo square take
-     twice that — at 52x52 the browser clamps it, so the square reads fully rounded. */
+  /* Everything rounded on the page — the buttons, the logo square, the frame — takes
+     the same radius. `--radius` is only the base it is derived from; nothing uses it
+     directly. On the 44 and 52 high buttons the browser clamps 32 down, so they render
+     fully rounded. */
   --radius: 16px;
   --radius-btn: calc(var(--radius) * 2);
 
@@ -93,29 +101,21 @@ body {
   font-size: var(--fs-md);
   line-height: var(--lh-md);
   letter-spacing: var(--tracking-md);
-  background: var(--c-white);
-  color: var(--c-black);
-  transition: background-color var(--fade) ease-in-out;
+  background: var(--ground);
+  color: var(--ink);
 }
 
 h1, h2, p, ul { margin: 0; }
 ul { padding: 0; list-style: none; }
 img { display: block; max-width: 100%; height: auto; }
 
-/* ---------- ink: light vs dark ground ---------- */
-
-[data-ink="dark"]  { --ink: var(--c-black); --ink-invert: var(--c-white); }
-[data-ink="light"] { --ink: var(--c-white); --ink-invert: var(--c-black); }
-
-/* ---------- grounds ----------
-   The colour lives on the page, not on the sections: sections are transparent and JS
-   copies the active one's data-theme onto <body>, so the change cross-fades instead of
-   arriving as a hard edge sliding up the screen. */
-
-body[data-theme="white"] { background: var(--c-white); }
-body[data-theme="smoke"] { background: var(--c-smoke); }
-body[data-theme="green"] { background: var(--c-green); }
-body[data-theme="black"] { background: var(--c-black); }
+/* ---------- ground and ink ----------
+   Two colours drive the whole page: --ground is what the page is painted with, --ink is
+   everything drawn on it. JS interpolates both against the scroll between one section and
+   the next, so the colour arrives exactly as the section does. A CSS transition was tried
+   first and read as lag: the switch could only fire once the boundary had already passed
+   the header, and the fade then ran on after the section had landed.
+   The values below are the hero's, and are what a visitor without JS keeps. */
 
 /* ---------- header ---------- */
 
@@ -129,16 +129,13 @@ body[data-theme="black"] { background: var(--c-black); }
   align-items: center;
   gap: 40px;
   padding: var(--header-pad-top) var(--header-pad-side) var(--header-pad-bottom);
-  /* The ink is set by JS from the section currently under the header. */
+  /* Ink is interpolated by JS against the scroll — no transition to fight it. */
   color: var(--ink);
   will-change: color;
-  transition: color var(--fade) ease-in-out;
 }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  body,
-  .header { transition: none; }
 }
 
 /* Mark only, no wordmark, inside a 52×52 rounded square.
@@ -162,14 +159,15 @@ body[data-theme="black"] { background: var(--c-black); }
   .stage-frame { corner-shape: squircle; }
 }
 
-.header__logo img {
+/* The mark is painted, not placed: a mask lets it take --ground, so it stays the
+   inverse of the square it sits in through the whole colour change. */
+.header__mark {
   width: 24px;
-  height: auto;
-  /* The mark ships black; flip it on a dark square. */
-  filter: var(--mark-filter, none);
+  height: 16px;
+  background: var(--ground);
+  mask: url("../logo/alphaseller-mark.svg") center / contain no-repeat;
+  -webkit-mask: url("../logo/alphaseller-mark.svg") center / contain no-repeat;
 }
-
-[data-ink="dark"] .header__logo img { --mark-filter: invert(1); }
 
 .header__nav {
   display: flex;
@@ -194,7 +192,7 @@ body[data-theme="black"] { background: var(--c-black); }
      1px below the geometric centre. With the height fixed and the label centred,
      asymmetric padding shifts it by half the top padding. */
   padding: 2px var(--btn-pad-x) 0;
-  color: var(--ink-invert);
+  color: var(--ground);
   background: var(--ink);
   border: 0;
   border-radius: var(--radius-btn);
@@ -214,7 +212,7 @@ body[data-theme="black"] { background: var(--c-black); }
 
 .btn--secondary:hover,
 .btn--secondary:focus-visible {
-  color: var(--ink-invert);
+  color: var(--ground);
   background: var(--ink);
 }
 
@@ -290,12 +288,12 @@ body[data-theme="black"] { background: var(--c-black); }
   width: var(--frame-w);
   aspect-ratio: 4 / 3;
   pointer-events: none;
-  border-radius: var(--radius);
+  /* Same radius as the buttons and the logo square. */
+  border-radius: var(--radius-btn);
   background: color-mix(in srgb, var(--ink) 6%, transparent);
   outline: 1px dashed color-mix(in srgb, var(--ink) 25%, transparent);
   outline-offset: -1px;
-  /* Opacity is scrubbed by the scroll over the footer, so it is not transitioned. */
-  transition: background var(--fade) ease-in-out, outline-color var(--fade) ease-in-out;
+  /* Fill and outline follow --ink, which is already interpolated against the scroll. */
 }
 
 /* One slide per section, cross-faded as the section changes. Empty until the client
@@ -353,9 +351,20 @@ body[data-theme="black"] { background: var(--c-black); }
   margin-top: 32px;
 }
 
-.footer__social img {
+/* Same trick as the logo mark: masked, so the icon follows the ink.
+   The urls live here, not in an inline style: a url() inside a custom property is
+   resolved against the stylesheet that *uses* it, so an inline `--icon` pointing at
+   `assets/icons/...` was being fetched from `assets/css/assets/icons/...`. */
+.footer__icon--telegram  { --icon: url("../icons/telegram.svg"); }
+.footer__icon--instagram { --icon: url("../icons/instagram.svg"); }
+.footer__icon--vk        { --icon: url("../icons/vk.svg"); }
+.footer__icon--mail      { --icon: url("../icons/mail.svg"); }
+
+.footer__icon {
+  display: block;
   width: 40px;
   height: 40px;
-  /* Icons ship black; invert them on the black ground. */
-  filter: invert(1);
+  background: var(--ink);
+  mask: var(--icon) center / contain no-repeat;
+  -webkit-mask: var(--icon) center / contain no-repeat;
 }
