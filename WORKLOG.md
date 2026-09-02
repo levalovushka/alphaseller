@@ -1,5 +1,24 @@
 # Worklog
 
+## 2026-09-02 — titles hyphenate, frame reaches 553 at 1440
+
+**What changed.** `assets/css/base.css` only: `.section__title` gets
+`hyphens: auto` with `overflow-wrap: break-word` as a fallback, and `--col-min` drops from
+400px to 360px. `CONTEXT.md` updated.
+
+**Why.** The client picked option C — clamped padding plus hyphenation — but asked not to
+free up space as aggressively as the full version would: a 300px floor puts the frame at
+673 on a 1440 screen, which he judged too big for a laptop. 360 was chosen as the middle,
+and he expects to tune the number later.
+
+**How it was verified.** Live DOM, three widths, collision sweep over all six frame-bearing
+sections comparing each title's text rect and each aside's box against the frame: 1440 →
+frame 553, 1512 → 617, 1920 → 760, no collisions and no horizontal overflow at any of them.
+Hyphenation is genuinely doing the work, not the `overflow-wrap` fallback: a probe clone of
+the marketplaces title at 360px wide measures `scrollWidth` 360 with `hyphens: auto` and 390
+with `hyphens: none`, and `document.documentElement.lang` is `ru`. That title now sets in
+four lines instead of three.
+
 ## 2026-09-02 — closer and footer merged into one screen; the frame gets wider
 
 **What changed.** `index.html`: the standalone `<footer>` is gone — its four columns now

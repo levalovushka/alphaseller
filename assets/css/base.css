@@ -51,10 +51,13 @@
      takes what is left, capped at 760. Without the floor, a long word in a title
      runs out of its column and collides with the frame on a narrower screen. */
   --col-gap: clamp(24px, 2.5vw, 48px);
-  /* 400 is not arbitrary: the longest unbreakable word in the copy is
-     "маркетплейсах", 391px wide at the xl style. A narrower column lets it run out
-     and hit the frame. Re-measure if a longer word ever lands in a title. */
-  --col-min: 400px;
+  /* Titles hyphenate (see .section__title), so this floor no longer has to clear the
+     longest word in the copy — "маркетплейсах" is 391px wide at the xl style and used
+     to force 400 here. It is now a composition choice: how much of the screen the two
+     text columns keep before the frame takes the rest. 360 puts the frame at 553 on a
+     1440 screen; dropping to 300 would give it 673, which the client judged too much
+     for a laptop. */
+  --col-min: 360px;
   --frame-w: min(
     760px,
     calc(100vw - 2 * var(--page-pad) - 2 * var(--col-gap) - 2 * var(--col-min))
@@ -257,8 +260,15 @@ img { display: block; max-width: 100%; height: auto; }
 /* Keep the 1fr columns from being blown out by long words in the title. */
 .section__inner > * { min-width: 0; }
 
-/* Style xl. */
+/* Style xl. Long Russian words are allowed to hyphenate — without it,
+   "маркетплейсах" is wider than its column and runs into the frame. `hyphens` needs the
+   document language, which <html lang="ru"> provides; `overflow-wrap` is the fallback
+   for a browser with no Russian patterns, breaking without a hyphen rather than
+   overflowing. */
 .section__title {
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  overflow-wrap: break-word;
   font-weight: var(--weight-xl);   /* h1/h2 default to bold — force Medium back */
   font-size: var(--fs-xl);
   line-height: var(--lh-xl);

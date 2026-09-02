@@ -254,17 +254,23 @@ ground's own data attributes, `isSection` is false only for the footer.
 
 `--page-pad` and `--col-gap` are themselves `clamp()`ed — `clamp(32px, 3.3vw, 64px)` and
 `clamp(24px, 2.5vw, 48px)` — so a narrower screen spends less on edges and gutters and the
-frame keeps a usable width. `--col-min` (400px) is a hard floor on the two text columns; the
-frame takes what is left, capped at 760px. **This floor is measured, not guessed:** the longest unbreakable word in
-the copy is `маркетплейсах` at 391px in the xl style, and at a 340px floor it ran out of its
-column and collided with the frame on a 14" MacBook. Re-measure if a longer word ever lands
-in a title. Resulting frame widths: **473px at 1440, 537px at 1512, 760px at 1920** (before the clamps:
-416 / 488 / 760).
+frame keeps a usable width. `--col-min` (360px) is a hard floor on the two text columns; the
+frame takes what is left, capped at 760px.
 
-To go materially wider than that, something has to give that is the client's call: either
-the title is allowed to hyphenate, which drops the 400px floor to about 300 and buys the
-frame ~140px more at 1440, or the xl size shrinks on narrow screens. Neither has been
-approved.
+**Titles hyphenate**, which is what makes that floor a composition choice rather than a
+constraint. It was 400px because `маркетплейсах` is 391px wide in the xl style and would
+otherwise run out of its column into the frame — it did exactly that on a 14" MacBook at a
+340px floor. With `hyphens: auto` on `.section__title` (plus `overflow-wrap: break-word` as
+the fallback for a browser with no Russian patterns) the word breaks instead. Verified in
+Chrome: at 360px the title fits with hyphenation on and overflows to 390px with it off, so
+Russian patterns really are applied. The cost is that this one title runs to four lines
+instead of three.
+
+Resulting frame widths: **553px at 1440, 617px at 1512, 760px at 1920**. The same page was
+416 / 488 / 760 before the clamped padding and 473 / 537 / 760 before hyphenation.
+
+A 300px floor would take the frame to 673 at 1440; the client judged that too big for a
+laptop and chose 360. The number is meant to be tuned — it is one token.
 
 ## 6. Content
 
