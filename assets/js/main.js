@@ -202,12 +202,24 @@ const cta = frame.querySelector('.stage-frame__cta');
 let frameWidth = frame.getBoundingClientRect().width;
 let frameTop = 0;
 
+/* One section has no frame: the cases grid fills the screen on its own. Rather than
+   fade the frame out there, it leaves the way everything else does — upward, at exactly
+   the speed of the section it belonged to, so it reads as part of that screen departing.
+   It is parked a full viewport above until the closer brings it back down as the button.
+
+   The two moves are adjacent ranges and share this parked position, so nothing jumps. */
+const frameless = document.querySelector('[data-frame="none"]');
+const parkedTop = () => frameTop - window.innerHeight;
+const setFrameTop = (px) => { frame.style.top = `${px}px`; };
+
 function morph(t) {
   if (t === 0) {
     frame.style.removeProperty('width');
-    frame.style.removeProperty('top');
     frame.style.removeProperty('--frame-bg');
     frame.style.removeProperty('--frame-outline');
+    /* Not `removeProperty`: at this end of the range the frame is parked above the
+       screen, where the cases section left it. */
+    setFrameTop(parkedTop());
     cta.style.opacity = '0';
     frame.dataset.cta = 'false';
     return;
@@ -220,8 +232,9 @@ function morph(t) {
      header pushes below the middle of the screen. As the button, it belongs on the
      screen's own centre — so the last thing the morph does is take that offset out. */
   const centre = window.innerHeight / 2;
+  const start = parkedTop();
 
-  frame.style.top = `${frameTop + (centre - frameTop) * t}px`;
+  setFrameTop(start + (centre - start) * t);
   frame.style.width = `${frameWidth + (CTA_WIDTH - frameWidth) * t}px`;
   frame.style.setProperty('--frame-bg', `rgba(${fill.join(', ')}, ${0.06 + 0.94 * t})`);
   frame.style.setProperty('--frame-outline', `rgba(${ink.join(', ')}, ${0.25 * (1 - t)})`);
@@ -229,12 +242,12 @@ function morph(t) {
   frame.dataset.cta = String(t > 0.99);
 }
 
-ScrollTrigger.create({
+const morphTrigger = ScrollTrigger.create({
   trigger: closer,
   start: 'top bottom',
   end: 'top top',
-  /* Re-measure the frame's natural width after a resize, with the inline one cleared —
-     it comes from --frame-w, which is viewport-dependent. */
+  /* Re-measure the frame's natural size and position after a resize, with the inline
+     ones cleared — both come from viewport-dependent custom properties. */
   onRefresh: () => {
     frame.style.removeProperty('width');
     frame.style.removeProperty('top');
@@ -242,7 +255,39 @@ ScrollTrigger.create({
     frameTop = parseFloat(getComputedStyle(frame).top);
   },
   onUpdate: (self) => morph(self.progress),
+  onLeave: () => morph(1),
+  onLeaveBack: () => morph(0),
 });
+
+/* The frame's exit, on the boundary into the section that has none. */
+const exitTrigger = ScrollTrigger.create({
+  trigger: frameless,
+  start: 'top bottom',
+  end: 'top top',
+  onRefresh: (self) => setFrameTop(frameTop - self.progress * window.innerHeight),
+  onUpdate: (self) => setFrameTop(frameTop - self.progress * window.innerHeight),
+  onLeave: () => setFrameTop(parkedTop()),
+  onLeaveBack: () => setFrameTop(frameTop),
+});
+
+/* Both of the frame's moves are scrubbed, so at rest between them nothing has run and a
+   jump can clear a whole range without firing anything — the same trap the slides have.
+   Settle it from the two triggers' own progress on load, on refresh, and on every section
+   change. Without this, scrolling from the closer back to the hero in one step left the
+   frame parked above the screen for good. */
+function settleFrame() {
+  if (morphTrigger.progress > 0) {
+    morph(morphTrigger.progress);
+    return;
+  }
+
+  morph(0);
+  setFrameTop(frameTop - exitTrigger.progress * window.innerHeight);
+}
+
+settleFrame();
+ScrollTrigger.addEventListener('refresh', settleFrame);
+document.addEventListener('section:change', settleFrame);
 
 /* The photograph drifts against the scroll — slower than the text, so it feels set
    further back and dissolves rather than leaves. Motion only, so it goes with the rest
@@ -274,7 +319,7 @@ const reveals = [];
 gsap.matchMedia().add('(prefers-reduced-motion: no-preference)', () => {
   gsap.utils.toArray('.section').forEach((section) => {
     const targets = section.querySelectorAll(
-      '.section__title, .section__subtitle, .btn'
+      '.section__title, .section__subtitle, .btn, .case'
     );
 
     reveals.push(

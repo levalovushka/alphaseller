@@ -1,5 +1,56 @@
 # Worklog
 
+## 2026-09-02 — cases grid, and the frame learns to leave
+
+**What changed.** `index.html`: section 6 rebuilt as `.section--cases` — black ground,
+title "С нами работают самые смелые" and a `Все кейсы` button top left, four cards along the
+bottom; it carries `data-frame="none"`. `assets/css/base.css`: the cases layout, cards on
+`--c-graphite` at `--radius-btn` with a squircle, empty logo slots.
+`assets/js/main.js`: the frame's exit, a `settleFrame()` pass, and cards joined the reveal
+stagger. `CONTEXT.md` updated.
+
+**The frame's exit is the substantial part.** On the boundary into the cases section the
+frame's `top` is scrubbed by exactly one viewport, so it rises at the same rate as the
+section it belonged to and reads as part of that screen leaving rather than as a thing that
+faded. It is parked a viewport above until the closer's morph brings it back down as the
+green button — the two ranges are adjacent and share that parked position, so nothing jumps
+between them.
+
+**A trap that bit again.** Both of the frame's moves are scrubbed, so a jump that clears a
+whole range fires nothing: scrolling from the closer to the hero in one step left the frame
+parked above the screen permanently. `settleFrame()` now recomputes it from the two
+triggers' own progress on load, on refresh and on every section change — the same shape as
+`settleSlides()` and the reveal catch-up.
+
+**How it was verified.** Live DOM at 1440×900 unless noted. Frame across the passage, with
+snapping off: 283 at marketplaces → 58 → −167 → −392 → **−617 at the cases, off screen** →
+back down −369 → −121 → 127 → **375 at the closer**, shrinking 456 → 392 → 328 → 264 → 200.
+At rest and after arbitrary jumps (hero → customization → cases → closer → hero → cases →
+capabilities) the frame is right every time: 283 with the full width on the frame sections,
+−617 and off screen on the cases, 375 at 200px wide on the closer. Cases layout: head at
+y=116, four cards 299×256 bottom-aligned with 76px to the screen edge, the whole screen
+fitting 900; at 1920 the cards are 390×334 and it still fits. Card ground computes to
+`rgb(26, 24, 23)`. Title, button and cards all settle at opacity 1. No horizontal overflow.
+
+**Waiting on the client.** The card logos — the slots are empty rectangles. The card copy is
+one sentence repeated four times, from his screenshot. And the section's old subtitle now has
+nowhere to sit.
+
+## 2026-09-02 — md type scales too
+
+**What changed.** `assets/css/base.css`: `--fs-md` is now
+`clamp(16px, calc(10px + 0.4167vw), 18px)` and `--lh-md` is `calc(var(--fs-md) * 4 / 3)`.
+`CONTEXT.md` §7: both clamps now in one table.
+
+**Why.** Client wants the small text to follow the screen the way the titles do — 18 at
+1920 as before, 16 at 1440.
+
+**How it was verified.** Measured in the browser at both widths: 1440 → 16.0005 / 21.334,
+1920 → 18 / 24, `xl` unchanged at 36 / 36 and 44 / 44. Hero screenshot at both.
+
+**What is left undone.** The leading tightens with the size (21.33 at 1440) rather than holding 24
+flat — my choice, not specified; ask if he wants it flat.
+
 ## 2026-09-02 — no more white sections
 
 **What changed.** `index.html`: `data-theme="white"` → `"smoke"` on capabilities and
@@ -55,6 +106,25 @@ overflow, no mid-word break in any of the seven titles.
 **Worth the client's eye.** The new non-breaking space is what puts `Управляй` alone on the
 first line: with `своим бизнесом` welded together, balance has nowhere else to put the break.
 Dropping that one nbsp gives "Управляй своим / бизнесом / на маркетплейсах" instead.
+
+## 2026-09-02 — capabilities screen swapped for the 4:3 cut
+
+**What changed.** `assets/images/capabilities.webp` replaced: Figma node `206:58220`
+instead of `204:51472` — the same dashboard laid out at 1118×838.5 rather than 1118×789.
+Exported @2x to 2236×1677, `cwebp -lossless`, 206 KB (lossless again beat `-q 90`: 210,674
+against 212,852). The comment above the slide fills in `base.css` and the §7 table in
+`CONTEXT.md` updated; §10 records that `206:58220` supersedes `204:51472`.
+
+**Why.** The client supplied a source already in the frame's ratio, which removes the crop
+question raised in the entry below.
+
+**How it was verified.** `localhost:4321` at 1440×900, snap off, y=900 with
+`ScrollTrigger.update()`. Decoded 2236×1677, image ratio **1.3333**; frame 456×342, ratio
+**1.3333** — identical, so `cover` crops nothing. Slide `--t` 1, opacity 1. Snap restored.
+
+**Left undone.** The hero photograph is still 1.42:1 and `cover` still takes 33px off each
+side there; if a 4:3 cut of it exists, it would remove that too — not asked for. Still no
+screenshot of the real page: the pane does not repaint.
 
 ## 2026-09-02 — the capabilities frame gets the dashboard screen
 

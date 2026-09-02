@@ -45,7 +45,11 @@
   --fs-xl: clamp(36px, calc(12px + 1.6667vw), 44px);
   --lh-xl: var(--fs-xl);
   --weight-xl: 500;  /* Hyper Medium, titles */
-  --fs-md: 18px;  --lh-md: 24px;  --weight-md: 400;  /* Hyper Regular, everything else */
+  /* Style md scales on the same window: 16/21.33 at 1440, 18/24 at 1920, held flat
+     outside it. The leading keeps the designed 4:3 ratio to the size. */
+  --fs-md: clamp(16px, calc(10px + 0.4167vw), 18px);
+  --lh-md: calc(var(--fs-md) * 4 / 3);
+  --weight-md: 400;  /* Hyper Regular, everything else */
   --tracking-md: 0.01em;
 
   /* Control heights, fixed by the client. */
@@ -399,6 +403,71 @@ img { display: block; max-width: 100%; height: auto; }
 @media (prefers-reduced-motion: reduce) {
   .stage-frame,
   .stage-frame__slide { transition: none; }
+}
+
+/* ---------- cases ----------
+   The card grid, after cash.app's stats block: heading and a link at the top, a row of
+   equal cards below. The one section the frame does not appear on — it leaves upward with
+   the section before it, which is handled in main.js. */
+
+.section--cases {
+  display: grid;
+  align-items: stretch;
+  justify-items: stretch;
+  padding-top: calc(var(--header-h) + 32px);
+  padding-bottom: var(--page-pad);
+}
+
+.cases {
+  width: 100%;
+  max-width: var(--page-max);
+  margin-inline: auto;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 40px;
+}
+
+.cases__head {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 32px;
+}
+
+.cases__head .section__title { max-width: var(--col-min); }
+
+/* Four equal cards along the bottom of the screen. Their width comes from the grid and
+   their height from the ratio, capped by whatever the row actually has. */
+.cases__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--col-gap);
+  align-content: end;
+}
+
+.case {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 32px;
+  aspect-ratio: 7 / 6;
+  max-height: 100%;
+  padding: 28px;
+  border-radius: var(--radius-btn);
+  /* The warm dark from the palette, which nothing else on the page uses yet. */
+  background: var(--c-graphite);
+}
+
+@supports (corner-shape: squircle) {
+  .case { corner-shape: squircle; }
+}
+
+/* Empty until the client supplies the logos. */
+.case__logo {
+  width: 100%;
+  height: 40px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--ink) 8%, transparent);
 }
 
 /* ---------- closer + footer ----------

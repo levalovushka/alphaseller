@@ -72,7 +72,7 @@ Header + 7 sections + footer.
 | 3 | Speed | Smoky white `#E9EBEE` |
 | 4 | Customization | Black `#000000` |
 | 5 | Marketplaces | Smoky white `#E9EBEE` |
-| 6 | Audience | Smoky white `#E9EBEE` |
+| 6 | Cases | Black `#000000` — card grid, see below |
 | 7 | Closer + footer | Black `#000000` — one screen, see below |
 
 **Red is not used on this page at all** (for now). Both dark sections use pure `#000000`;
@@ -92,7 +92,7 @@ Every section carries exactly three strings: title, subtitle, CTA label.
 | 3 | Свои каналы продаж за один день | Онлайн-витрины без подрядчиков, с привязкой к Telegram и Max — рабочие, красивые и с твоей наценкой | Сделать сайт |
 | 4 | Стиль магазина уникальный, как ты сам | Выбирай из стильных шаблонов и докручивай, пока не будет идеально подходить под твой вкус | Посмотреть шаблоны |
 | 5 | Управляй своим бизнесом на маркетплейсах | Даём аналитику по заказам, остаткам, логистике и помогаем выбрать лучшие карточки товаров | Подключить |
-| 6 | Смелые уже с нами | Огромные корпорации и небольшие бизнесы уже вернули контроль в свои руки с нашей платформой | Все кейсы |
+| 6 | С нами работают самые смелые | *(unused — the cases layout has no subtitle column)* | Все кейсы |
 | 7 | Продавай по своим правилам | Верни контроль над бизнесом и заставь его работать на твою мечту | Начать бесплатно |
 
 - Sections 1 and 7 share the CTA `Начать бесплатно`, and the header carries it too. **This
@@ -113,6 +113,22 @@ Every section carries exactly three strings: title, subtitle, CTA label.
 - The ground is light but sections 1, 4 and 7 are green/black. **The navbar must recolor
   itself against the section currently under it** (or an equivalent solution). Real
   requirement — plan for it in the section markup.
+
+### Cases
+
+Section 6 is a card grid, after cash.app's stats block: the title and a `Все кейсы` button
+at the top left, four equal cards along the bottom. Black ground, cards in
+`--c-graphite` — the one place the warm dark from the palette is used. No subtitle column,
+so the subtitle that section used to have is currently unused.
+
+**The frame does not appear here.** The section carries `data-frame="none"`, and instead of
+fading out the frame *leaves* — upward, one viewport, at exactly the speed of the section it
+belonged to, so it reads as part of that screen departing. It is parked a viewport above
+until the closer brings it back down as the button, which is why the two moves share a
+"parked" position and nothing jumps between them.
+
+Placeholders waiting on the client: the four card logos (empty slots at the moment) and the
+card copy, which is one sentence repeated four times.
 
 ### Closer + footer — one screen
 
@@ -418,15 +434,17 @@ Figma's own `#1E1E1E` canvas in as a full-bleed `<rect>`.
 | Section | File | Figma node | Source |
 |---|---|---|---|
 | 1 — hero | `assets/images/hero.webp` | `196:53708` | 1118×789, exported @2x → 2236×1578, cwebp `-q 82`, 101 KB |
-| 2 — capabilities | `assets/images/capabilities.webp` | `204:51472` | same size and export, cwebp **`-lossless`**, 205 KB |
+| 2 — capabilities | `assets/images/capabilities.webp` | `206:58220` | 1118×838.5 — **a true 4:3**, exported @2x → 2236×1677, cwebp **`-lossless`**, 206 KB |
 
 Slides are filled with a CSS `background-image` on
-`.stage-frame__slide[data-for="…"]`, `center / cover`. Every source so far is 1.42:1 against
-a 4:3 frame, so `cover` trims 33px off each side at 1x — measured, and the client is fine
-with it (§3 already notes the ratio mismatch). On the capabilities screen that crop is more
-visible than on a photograph: it clips the user avatar at the right edge and takes the
-logo's left margin. `contain` would show the whole screen at the cost of ~12px of frame tint
-above and below. Raised, not decided.
+`.stage-frame__slide[data-for="…"]`, `center / cover`.
+
+**Prefer a source that is already 4:3 — ask for one.** The first capabilities export
+(`204:51472`) was 1.42:1 and `cover` clipped the user avatar and the logo's left margin; the
+client then supplied `206:58220`, the same screen laid out at 1118×838.5, and it fills the
+frame with nothing cropped (measured: image ratio 1.3333 against frame ratio 1.3333). The
+hero photograph is still 1.42:1 and does lose 33px off each side at 1x — §3 notes the
+mismatch and the client is fine with it there.
 
 **A UI screen is encoded lossless, a photograph is not.** On the capabilities screen
 `-lossless` came out both smaller and sharper than `-q 90` (205 KB against 207 KB), and
@@ -473,15 +491,23 @@ Verified with fontTools (2026-09-02):
 | Style | Cut | Size / leading | Tracking | Used for |
 |---|---|---|---|---|
 | `xl` | Hyper Medium | 36 / 36 at 1440 → 44 / 44 at 1920 | normal | Section titles |
-| `md` | Hyper Regular | 18 / 24 | 1% (`0.01em`) | Everything else |
+| `md` | Hyper Regular | 16 / 21.33 at 1440 → 18 / 24 at 1920 | 1% (`0.01em`) | Everything else |
 
 "Hyper" is the `wdth 87` width; "Medium" is `wght 500`, "Regular" is `wght 400`. In CSS:
 `font-stretch: 87%` plus the weight.
 
-`xl` scales with the screen — `clamp(36px, calc(12px + 1.6667vw), 44px)`, with the leading
-always equal to the size — so a laptop gets 36/36 and a 1920 screen keeps the full 44/44.
-`md` does not scale. Note `h1`/`h2` default to bold — the title weight must
-be forced back to 500.
+**Both styles scale, on the same 1440–1920 window, and are held flat outside it.**
+
+| Style | Clamp | 1440 | 1920 |
+|---|---|---|---|
+| `xl` | `clamp(36px, calc(12px + 1.6667vw), 44px)` | 36 / 36 | 44 / 44 |
+| `md` | `clamp(16px, calc(10px + 0.4167vw), 18px)` | 16 / 21.33 | 18 / 24 |
+
+`xl`'s leading always equals the size. `md`'s keeps the designed 4:3 ratio to it
+(`calc(var(--fs-md) * 4 / 3)`), so it tightens with the size instead of holding 24 flat —
+client's call if he wants it flat instead. `md` is set once, on `body`, and inherited
+everywhere; tracking is in `em` so it follows on its own. Note `h1`/`h2` default to bold —
+the title weight must be forced back to 500.
 
 ### Control sizes (fixed by the client)
 
@@ -555,6 +581,7 @@ Known nodes:
 | `196:46923` | Product screens (4 frames, 1366×964 each). |
 | `201:56530` | Social icons — Telegram, Instagram, VK, mail. |
 | `196:53708` | Hero photograph — man on a chair, red gradient ground. |
+| `206:58220` | Dashboard screen, laid out 4:3 — the capabilities frame. Supersedes `204:51472`, the 1.42:1 cut of the same screen. |
 
 `get_metadata` on `1:49642` and on `196:46923` overflows the MCP transport. Read frame by
 frame; ask the client for direct links.
