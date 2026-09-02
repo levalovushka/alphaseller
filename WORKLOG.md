@@ -1,5 +1,29 @@
 # Worklog
 
+## 2026-09-02 — section-by-section snapping
+
+**What changed.** `assets/css/base.css` only: `scroll-snap-type: y mandatory` on `html`,
+`scroll-snap-align: start` + `scroll-snap-stop: always` on `.section`, and
+`scroll-snap-align: end` on `.footer`. `CONTEXT.md` records it and why Lenis was rejected.
+
+**Why.** The client wants the scroll to be section-by-section with no resting position
+between sections. He asked to check Lenis first: `lenis/snap` exists and supports
+`proximity | mandatory | lock`, but Lenis replaces native scrolling and its own docs say it
+does not coexist with CSS scroll snapping. Native snapping does the job in three
+declarations with no dependency.
+
+**How it was verified.** Live DOM at 1440×900. Snap positions are the section tops
+0/900/1800/2700/3600/4500/5400 plus the footer at 5744 (the maximum scroll). Ten scrolls to
+deliberately-between positions all landed on a snap point: 120→0, 450→0, 1200→900,
+1700→1800, 2500→2700, 3300→3600, 4200→4500, 5100→5400, 5600→5744. At all eight resting
+positions the theme, header ink, active slide and frame opacity are correct — green/white/
+smoke/black/smoke/white/black, ink flipping to `light` on the two black sections, and the
+frame faded to 0 at the footer stop.
+
+**Note.** The footer snaps by its bottom edge because it is shorter than a screen; a `start`
+alignment would place its snap point past the maximum scroll. This is a workaround for the
+still-open question of the footer's height.
+
 ## 2026-09-02 — colour cross-fade, section events, column floor, button padding
 
 **What changed.**

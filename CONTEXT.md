@@ -170,6 +170,26 @@ library, nothing pinned. `assets/js/main.js`, GSAP 3.15 + ScrollTrigger vendored
 **The header does not hide on scroll** — tried, dropped at the client's request. It stays
 put; only its ink changes. No custom cursor, no magnetic buttons.
 
+### Section-by-section scrolling
+
+The page snaps: it can never come to rest between two sections, and one gesture moves one
+section. Three CSS declarations, no library:
+
+```css
+html    { scroll-snap-type: y mandatory; }
+.section { scroll-snap-align: start; scroll-snap-stop: always; }
+.footer  { scroll-snap-align: end; }
+```
+
+The footer aligns by its **bottom** edge: it is shorter than a screen, so a `start` snap
+point would sit past the maximum scroll and be unreachable.
+
+**Lenis was considered and rejected.** Its `lenis/snap` addon does exist
+(`type: proximity | mandatory | lock`), but Lenis replaces native scrolling wholesale and
+by its own docs does not coexist with CSS scroll snapping. Not worth the dependency for
+what native snapping does in three declarations. Do not re-litigate this without a new
+reason.
+
 ### The `section:change` event
 
 Every switch fires a `CustomEvent` on `document`, so anything later — filling a slide,

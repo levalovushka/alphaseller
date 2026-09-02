@@ -44,8 +44,7 @@
   --logo-size: 52px;
   --btn-h-nav: 52px;
   --btn-h: 44px;
-  --btn-pad-x: 22px;
-  --btn-pad-x-nav: 20px;
+  --btn-pad-x: 20px;   /* both sizes, header and sections */
   /* The three-column stage. The text columns never go below --col-min; the frame
      takes what is left, capped at 760. Without the floor, a long word in a title
      runs out of its column and collides with the frame on a narrower screen. */
@@ -62,16 +61,28 @@
   /* How long a ground colour or an ink takes to cross-fade. */
   --fade: 0.9s;
 
-  /* One radius for everything that is rounded; buttons take twice that. */
+  /* One radius for everything that is rounded; buttons and the logo square take
+     twice that — at 52x52 the browser clamps it, so the square reads fully rounded. */
   --radius: 16px;
   --radius-btn: calc(var(--radius) * 2);
+
+  /* How long a button takes to fill in on hover. TODO: not specified by the client. */
+  --hover: 0.2s;
 }
 
 /* ---------- reset ---------- */
 
 *, *::before, *::after { box-sizing: border-box; }
 
-html { scroll-behavior: smooth; }
+/* Section-by-section scrolling. Native CSS snapping rather than a smooth-scroll
+   library: the page can never come to rest between two sections, and one gesture
+   moves one section (`scroll-snap-stop: always`). Lenis has a snap addon, but it
+   replaces native scrolling wholesale and does not coexist with CSS snapping —
+   not worth the dependency for what this does in three declarations. */
+html {
+  scroll-behavior: smooth;
+  scroll-snap-type: y mandatory;
+}
 
 body {
   margin: 0;
@@ -139,8 +150,8 @@ body[data-theme="black"] { background: var(--c-black); }
   width: var(--logo-size);
   height: var(--logo-size);
   background: var(--ink);
-  /* Fallback: a plain rounded square (Safari, Firefox). */
-  border-radius: var(--radius);
+  /* Same radius as the buttons. Fallback: a plain rounded square (Safari, Firefox). */
+  border-radius: var(--radius-btn);
 }
 
 /* Squircle wherever a corner is rounded. `border-radius` above is the fallback for
@@ -190,9 +201,29 @@ body[data-theme="black"] { background: var(--c-black); }
   cursor: pointer;
 }
 
+/* Secondary — the style used in the body of the sections: no fill, a stroke in the
+   ink colour. On hover it fills with the ink and the label inverts. The stroke is an
+   inset shadow, not a border, so the box geometry stays identical to the primary.
+   TODO: the 1px stroke width is not specified by the client. */
+.btn--secondary {
+  color: var(--ink);
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--ink);
+  transition: color var(--hover) ease-out, background-color var(--hover) ease-out;
+}
+
+.btn--secondary:hover,
+.btn--secondary:focus-visible {
+  color: var(--ink-invert);
+  background: var(--ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn--secondary { transition: none; }
+}
+
 .header__cta {
   height: var(--btn-h-nav);
-  padding-inline: var(--btn-pad-x-nav);
   justify-self: end;
 }
 
@@ -200,6 +231,8 @@ body[data-theme="black"] { background: var(--c-black); }
 
 .section {
   min-height: 100vh;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
   display: flex;
   align-items: center;
   padding: var(--header-h) var(--page-pad) var(--page-pad);
@@ -284,9 +317,13 @@ body[data-theme="black"] { background: var(--c-black); }
 
 /* ---------- footer ---------- */
 
+/* The footer is shorter than a screen, so it snaps by its bottom edge — that
+   position is the end of the page and therefore reachable. Aligning it to the
+   top would put its snap point past the maximum scroll. */
 .footer {
   color: var(--ink);
   padding: 96px var(--page-pad);
+  scroll-snap-align: end;
 }
 
 .footer__inner {
