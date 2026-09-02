@@ -1,5 +1,25 @@
 # Worklog
 
+## 2026-09-02 — CTA casing and optical centring in buttons
+
+**What changed.** `index.html`: the header CTA is `Начать бесплатно`, capitalised like the
+other two. `assets/css/base.css`: `.btn` padding is now `4px 24px 0` — the label sits 2px
+below the geometric centre, because YFF rides high in its line box.
+
+**Why.** Client decisions. Note the arithmetic: the buttons had no vertical padding to
+start with (they are height-driven with the label flex-centred), so +1/-1 was not available
+and would only have moved the label 1px anyway — with the height fixed, a shift of N needs
+`padding-top: 2N`.
+
+**How it was verified.** Live DOM at 1440×900. All three CTAs read `Начать бесплатно`. Text
+box (Range rect) vs button box: header button top 16 height 52 → centre 42, text centre
+43.75; hero button top 512 height 44 → centre 534, text centre 535.75. Both +1.75px, and
+exactly +2.00px against the same measurement before the change (the residual −0.25 is the
+font's own metric asymmetry).
+
+**Left undone.** Motion approach still undecided — cash.app turns out not to pin sections
+at all, options are with the client. No JS yet.
+
 ## 2026-09-02 — one radius, header top padding, typography audit
 
 **What changed.** `assets/css/base.css`: a single `--radius: 16px` now drives everything
