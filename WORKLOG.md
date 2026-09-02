@@ -1,5 +1,34 @@
 # Worklog
 
+## 2026-09-02 — button labels and the logo mark take the counter-ink, not the ground
+
+**What changed.** `assets/js/main.js`: new `COUNTER = { dark: INK.light, light: INK.dark }`,
+`coloursOf` returns it, `paint()` takes a third argument and writes `--ink-invert` on
+`<html>`, and both the scroll interpolation and the initial paint pass it. `base.css`:
+`--ink-invert: var(--c-white)` joins `--ground` and `--ink` as a declared fallback, and
+`.btn`, `.btn--secondary:hover` and `.header__mark` read it instead of `var(--ground)`.
+`CONTEXT.md` §4: new "The three live colours" table with the reason.
+
+**Why.** Client saw it and rejected it: with the label set to `--ground`, the hero's black
+pill carried a *green* label and the logo mark inside its black square was green too. What
+is drawn on the ink is the opposite ink, not the page colour. On the two black sections the
+ink is white, so the counter is black — a white pill with a black label; "always white"
+cannot be literal there.
+
+**How it was verified.** `localhost:4321` at 1440×900, live DOM. Green state (`--ink` black,
+`--ink-invert` white): header CTA `background rgb(0,0,0)` + label `rgb(255,255,255)`, logo
+square black + `.header__mark` fill `rgb(255,255,255)`, and a real `:hover` on the hero's
+secondary button gives `background rgb(0,0,0)` + label `rgb(255,255,255)` — green before,
+white now. Black state (`--ink` white, `--ink-invert` black): header CTA white pill with a
+`rgb(0,0,0)` label; secondary idle white label and white stroke. Console clean; the eight
+404s seen earlier were stale `assets/images/` requests from a load before that directory
+existed, and the current load is all 200/304.
+
+**Left undone.** Still no screenshot — the pane is hidden and does not repaint. Reading a
+transitioned property mid-flight is also unreliable there: the animation clock is frozen, so
+`.btn--secondary`'s colour reads as its start value. Both live readings above were taken
+with `transition: none` forced on the element, or on a fresh probe element.
+
 ## 2026-09-02 — photographic ground for the customization section (experiment)
 
 **What changed.** New `assets/images/customization.webp` (from Figma node `201:56528`,

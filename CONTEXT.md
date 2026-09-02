@@ -126,6 +126,23 @@ styling**. No red panel, no pills: black background, continuous with the closer.
 - Column 4: `Публичная оферта`, `Политика конфиденциальности`,
   `Согласие на обработку персональных данных`.
 
+### The three live colours
+
+JS keeps three custom properties on `<html>`, all interpolated against the scroll:
+
+| Property | What it is |
+|---|---|
+| `--ground` | what the page is painted with — the section's own colour |
+| `--ink` | everything drawn on the ground: text, the filled button, the logo square |
+| `--ink-invert` | what is drawn **on the ink**: a filled button's label, the logo mark |
+
+`--ink-invert` is the **opposite ink**, never the ground. It was the ground briefly and the
+client rejected it on sight: on the green hero it made the label inside the black pill green
+and the logo mark green inside its black square. It is white on the light and green
+sections, black on the two black ones, and it cross-fades on the same scroll as the other
+two. Secondary buttons take `--ink` for the label and the stroke, and swap to
+`--ink-invert` on `--ink` when they fill on hover.
+
 **Every link on the page is sentence case — capital first letter, lowercase rest.** That
 covers the header nav and all four footer columns; the client asked for it on 2026-09-02
 because the lowercase nav and the capitalised legal column read as two different systems.

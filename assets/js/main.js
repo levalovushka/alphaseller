@@ -31,6 +31,11 @@ const GROUND = {
 
 const INK = { dark: token('--c-black'), light: token('--c-white') };
 
+/* The counter-ink: what is drawn *on* the ink — a filled button's label, the logo mark
+   inside its square. It is the opposite ink, not the ground: on the green hero the ground
+   is green, and a green label inside a black pill reads as a mistake. Client call. */
+const COUNTER = { dark: INK.light, light: INK.dark };
+
 function rgb(hex) {
   const n = parseInt(hex.slice(1), 16);
   return [n >> 16, (n >> 8) & 255, n & 255];
@@ -41,15 +46,17 @@ function mix(from, to, t) {
   return `rgb(${c[0]}, ${c[1]}, ${c[2]})`;
 }
 
-function paint(ground, ink) {
+function paint(ground, ink, counter) {
   root.style.setProperty('--ground', ground);
   root.style.setProperty('--ink', ink);
+  root.style.setProperty('--ink-invert', counter);
 }
 
 function coloursOf(el) {
   return {
     ground: rgb(GROUND[el.dataset.theme]),
     ink: rgb(INK[el.dataset.ink]),
+    counter: rgb(COUNTER[el.dataset.ink]),
     /* 1 on the one section that is backed by a photograph, 0 everywhere else — it
        cross-fades on the same scroll as the colours. */
     photo: el.dataset.photo === 'true' ? 1 : 0,
@@ -73,7 +80,11 @@ grounds.forEach((ground, i) => {
     end: 'top top',
     onUpdate: (self) => {
       const t = self.progress;
-      paint(mix(from.ground, to.ground, t), mix(from.ink, to.ink, t));
+      paint(
+        mix(from.ground, to.ground, t),
+        mix(from.ink, to.ink, t),
+        mix(from.counter, to.counter, t)
+      );
       photo.style.opacity = String(from.photo + (to.photo - from.photo) * t);
     },
   });
@@ -88,7 +99,11 @@ function showSlide(id) {
 }
 
 const first = grounds[0];
-paint(mix(coloursOf(first).ground, coloursOf(first).ground, 0), INK[first.dataset.ink]);
+paint(
+  mix(coloursOf(first).ground, coloursOf(first).ground, 0),
+  INK[first.dataset.ink],
+  COUNTER[first.dataset.ink]
+);
 showSlide(first.id);
 
 /* Whatever ground sits under the header owns the slide. The switch point is the

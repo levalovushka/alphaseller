@@ -59,10 +59,13 @@
   );
 
   /* How long a ground colour or an ink takes to cross-fade. */
-  /* The page's two live colours. JS overwrites them on <html> as you scroll;
-     these are the hero's, and the fallback when JS does not run. */
+  /* The page's three live colours. JS overwrites them on <html> as you scroll; these
+     are the hero's, and the fallback when JS does not run. --ink-invert is what is drawn
+     on top of the ink — a filled button's label, the logo mark — and it is the opposite
+     ink, not the ground: a green label inside a black pill reads as a mistake. */
   --ground: var(--c-green);
   --ink: var(--c-black);
+  --ink-invert: var(--c-white);
 
   /* Discrete cross-fades that are not tied to the scroll: the frame's slides. */
   --fade: 0.9s;
@@ -159,12 +162,12 @@ img { display: block; max-width: 100%; height: auto; }
   .stage-frame { corner-shape: squircle; }
 }
 
-/* The mark is painted, not placed: a mask lets it take --ground, so it stays the
+/* The mark is painted, not placed: a mask lets it take --ink-invert, so it stays the
    inverse of the square it sits in through the whole colour change. */
 .header__mark {
   width: 24px;
   height: 16px;
-  background: var(--ground);
+  background: var(--ink-invert);
   mask: url("../logo/alphaseller-mark.svg") center / contain no-repeat;
   -webkit-mask: url("../logo/alphaseller-mark.svg") center / contain no-repeat;
 }
@@ -192,7 +195,7 @@ img { display: block; max-width: 100%; height: auto; }
      1px below the geometric centre. With the height fixed and the label centred,
      asymmetric padding shifts it by half the top padding. */
   padding: 2px var(--btn-pad-x) 0;
-  color: var(--ground);
+  color: var(--ink-invert);
   background: var(--ink);
   border: 0;
   border-radius: var(--radius-btn);
@@ -212,7 +215,7 @@ img { display: block; max-width: 100%; height: auto; }
 
 .btn--secondary:hover,
 .btn--secondary:focus-visible {
-  color: var(--ground);
+  color: var(--ink-invert);
   background: var(--ink);
 }
 
