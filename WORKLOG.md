@@ -1,5 +1,21 @@
 # Worklog
 
+## 2026-09-02 — marketplaces subtitle rewritten
+
+**What changed.** `index.html`: the marketplaces subtitle is now "Даём аналитику
+по заказам, остаткам, логистике и помогаем выбрать лучшие карточки товаров", with
+non-breaking spaces after `по` and `и`. `CONTEXT.md`: copy table updated, and the note about
+a period inside that subtitle dropped — the new text has none.
+
+**Why.** Client's rewrite.
+
+**How it was verified.** Rendered text at 1440×900: two U+00A0, no trailing period, three
+lines — "Даём аналитику по заказам, остаткам, / логистике и помогаем выбрать лучшие /
+карточки товаров". 36px clear of the frame, no horizontal overflow.
+
+**One liberty taken.** The client wrote it starting lowercase; it is capitalised here, like
+every other subtitle on the page. Say the word and it goes back.
+
 ## 2026-09-02 — balanced titles, two more copy tweaks
 
 **What changed.** `index.html`: a non-breaking space between `своим` and `бизнесом`, and the
