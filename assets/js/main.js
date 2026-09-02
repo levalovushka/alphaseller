@@ -13,11 +13,9 @@ const grounds = gsap.utils.toArray('.section, .footer');
 /* 1. Ink follows the ground under the header. The switch point is the header's
       own middle, so the change lands as the boundary passes the logo. */
 grounds.forEach((ground) => {
-  const line = () => `top top+=${header.offsetHeight / 2}`;
-
   ScrollTrigger.create({
     trigger: ground,
-    start: line,
+    start: () => `top top+=${header.offsetHeight / 2}`,
     end: () => `bottom top+=${header.offsetHeight / 2}`,
     onToggle: (self) => {
       if (self.isActive) header.dataset.ink = ground.dataset.ink;
@@ -25,17 +23,48 @@ grounds.forEach((ground) => {
   });
 });
 
-/* 2. Hide on the way down, show on the way up. Always visible at the very top. */
+/* 2. Hide on the way down, show on the way up.
+      The direction is only trusted after DIRECTION_THRESHOLD pixels in one
+      direction — a raw reading flips on every stray pixel of trackpad drift and
+      makes the bar flicker. */
+const DIRECTION_THRESHOLD = 24;
+let anchor = window.scrollY;
+
 ScrollTrigger.create({
   start: 0,
   end: 'max',
   onUpdate: (self) => {
-    const atTop = self.scroll() < header.offsetHeight;
-    header.dataset.hidden = String(!atTop && self.direction === 1);
+    const y = self.scroll();
+
+    /* Always visible near the top. */
+    if (y < header.offsetHeight) {
+      header.dataset.hidden = 'false';
+      anchor = y;
+      return;
+    }
+
+    const travelled = y - anchor;
+
+    /* Still inside the dead zone, or reversing — keep the anchor at the extreme
+       so the threshold is measured from the turning point, not from the last
+       event. */
+    if (Math.abs(travelled) < DIRECTION_THRESHOLD) {
+      const goingDown = header.dataset.hidden === 'true';
+      if ((goingDown && travelled < 0) || (!goingDown && travelled > 0)) return;
+      anchor = y;
+      return;
+    }
+
+    header.dataset.hidden = String(travelled > 0);
+    anchor = y;
   },
 });
 
-/* 3. Reveals. Skipped entirely when the visitor asked for less motion. */
+/* 3. Reveals. The trigger is the title, not the section and not the content block:
+      sections are a full viewport tall with their content centred, so anything
+      anchored to the section fires while the content is still a screen below the
+      fold — the animation would be over before it came into view.
+      Skipped entirely when the visitor asked for less motion. */
 gsap.matchMedia().add('(prefers-reduced-motion: no-preference)', () => {
   gsap.utils.toArray('.section').forEach((section) => {
     const targets = section.querySelectorAll(
@@ -49,8 +78,8 @@ gsap.matchMedia().add('(prefers-reduced-motion: no-preference)', () => {
       ease: 'power2.out',
       stagger: 0.08,
       scrollTrigger: {
-        trigger: section,
-        start: 'top 75%',
+        trigger: section.querySelector('.section__title'),
+        start: 'top 90%',
         once: true,
       },
     });

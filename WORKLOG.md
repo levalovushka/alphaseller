@@ -1,5 +1,26 @@
 # Worklog
 
+## 2026-09-02 — fix invisible reveals and header flicker
+
+**What changed.** `assets/js/main.js`. Reveals now trigger on the section title
+(`start: 'top 90%'`) instead of the section itself. The header's show/hide only trusts a
+direction after 24px of travel in it, and the anchor resets at the turning point.
+
+**Why.** Two real bugs the client hit. Sections are a full viewport tall with their content
+centred, so a section-anchored trigger fired while the content was still a full screen below
+the fold — every reveal played out of sight, and only the hero (which animates on load)
+looked alive. And the raw `self.direction` flipped on a single pixel of trackpad drift, so
+the bar flickered.
+
+**How it was verified.** Live DOM at 1440×900, viewport 900px. Before: at each trigger's
+start the title sat at 103–108% of the viewport, i.e. off screen, for all 7 sections. After:
+all 7 fire with the title at 90% and the frame at 67–75% — both on screen. Header: from
+`hidden=true`, ten alternating ±6px jitters left it `true` throughout; a deliberate 30px
+reverse set it `false`; near the top it is always `false`.
+
+**Left undone.** Still verified by measurement only — the browser pane in this harness will
+not return usable screenshots. Needs a look on a real machine.
+
 ## 2026-09-02 — button optical shift back to 1px
 
 **What changed.** `assets/css/base.css`: `.btn` padding `4px 24px 0` -> `2px 24px 0`, so the
