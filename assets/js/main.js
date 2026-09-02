@@ -3,7 +3,7 @@
    copied from cash.app is the one that matters: the frame in the middle stays put
    while the two text columns scroll past it, and what the frame holds changes as
    the section changes.
-     1. the header and the frame take the ink of the section underneath,
+     1. the page colour, the header and the frame take the ground underneath,
      2. the frame swaps its slide per section, and fades out over the footer,
      3. each section's text reveals once as it enters the viewport.
    The header itself never hides. */
@@ -21,25 +21,47 @@ function showSlide(id) {
   });
 }
 
+document.body.dataset.theme = grounds[0].dataset.theme;
 showSlide(grounds[0].id);
 
-/* 1 & 2. Whatever ground sits under the header drives the ink and the slide. The
-          switch point is the header's own middle, so it lands as the boundary
-          passes the logo. */
+/* 1 & 2. Whatever ground sits under the header drives the page colour, the ink and
+          the slide. The switch point is the header's own middle, so it lands as the
+          boundary passes the logo, and every colour cross-fades over --fade rather
+          than arriving as a hard edge.
+
+          Each switch also fires a `section:change` event on `document`, so anything
+          else — swapping what a slide holds, starting a video, cueing a caption —
+          can hang off it without touching this file:
+
+            document.addEventListener('section:change', (e) => {
+              e.detail; // { id, theme, ink, isSection, ground }
+            }); */
+function activate(ground) {
+  const { ink, theme } = ground.dataset;
+  const isSection = ground.classList.contains('section');
+
+  document.body.dataset.theme = theme;
+  header.dataset.ink = ink;
+
+  if (isSection) {
+    frame.dataset.ink = ink;
+    showSlide(ground.id);
+  }
+
+  document.dispatchEvent(
+    new CustomEvent('section:change', {
+      detail: { id: ground.id || 'footer', theme, ink, isSection, ground },
+    })
+  );
+}
+
 grounds.forEach((ground) => {
   ScrollTrigger.create({
     trigger: ground,
     start: () => `top top+=${header.offsetHeight / 2}`,
     end: () => `bottom top+=${header.offsetHeight / 2}`,
     onToggle: (self) => {
-      if (!self.isActive) return;
-
-      header.dataset.ink = ground.dataset.ink;
-
-      if (ground.classList.contains('section')) {
-        frame.dataset.ink = ground.dataset.ink;
-        showSlide(ground.id);
-      }
+      if (self.isActive) activate(ground);
     },
   });
 });

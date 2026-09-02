@@ -1,5 +1,44 @@
 # Worklog
 
+## 2026-09-02 — colour cross-fade, section events, column floor, button padding
+
+**What changed.**
+- `assets/css/base.css`: the ground colour moved from the sections to `<body>` and
+  cross-fades (`background-color var(--fade) ease-in-out`); sections are transparent now.
+  New `--fade: 0.9s` drives the body colour, the header ink, the frame fill and the slide
+  swap. New `--col-gap`, `--col-min` and a `--frame-w` that derives from them. Button side
+  padding split into `--btn-pad-x: 22px` and `--btn-pad-x-nav: 20px`.
+- `assets/js/main.js`: `activate(ground)` sets `body[data-theme]`, the header ink, the frame
+  ink and the slide, and dispatches a `section:change` CustomEvent on `document`.
+- `CONTEXT.md`: records the body-colour mechanism, the event contract, the column floor and
+  the button paddings.
+
+**Why.** Four client items: button padding per size, a real cross-fade between section
+colours, a slower header recolour, and an event to hang slide swaps on. Plus a bug he hit on
+a 14" MacBook — text running into the frame.
+
+**The overlap bug.** Measured, not guessed: the longest unbreakable word in the copy is
+`маркетплейсах`, 391px wide in the xl style. At 1512×830 the text columns were 340px, so the
+word ran 2px past the frame's left edge. `--col-min` is now 400px and the frame takes what is
+left. Re-measure the floor if a longer word ever lands in a title.
+
+**How it was verified.** Live DOM, no console errors.
+- Walked all 7 sections: `body[data-theme]` goes green → white → smoke → black → smoke →
+  white → black, header ink flips `dark`/`light` to match, and 7 `section:change` events
+  fired with the right `id/theme/ink`.
+- `getComputedStyle(body).transition` is `background-color 0.9s ease-in-out`.
+- Button padding: header `2px 20px 0px`, section `2px 22px 0px`.
+- `corner-shape` computes to `squircle` on the logo square, the buttons and the frame.
+- Collision sweep across all 7 sections comparing the title's text rect and the aside's box
+  against the frame: 1512×830 none (frame 488), 1440×900 none (frame 416), 1920×1080 none
+  (frame 760), no horizontal overflow.
+
+**Left undone / for the client.** The frame is only 416px wide at 1440 now — the column floor
+and the frame compete for the same space. If the frame should stay bigger on small laptops,
+either the 64px page padding shrinks there or long words in titles need to break. Also still
+open: the footer is too short for the closer section to centre itself. Verified by
+measurement only — the browser pane here returns no usable screenshots.
+
 ## 2026-09-02 — the frame stays, the text scrolls past it
 
 **What changed.** `index.html`: the seven per-section frames became

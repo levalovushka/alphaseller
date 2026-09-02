@@ -154,11 +154,13 @@ library, nothing pinned. `assets/js/main.js`, GSAP 3.15 + ScrollTrigger vendored
 1. **One frame for the whole page**, `position: fixed`, aligned with the middle grid column.
    The text columns scroll past it; it never moves. Each section keeps a
    `.section__frame-slot` that only holds the grid column open.
-2. The frame holds one `.stage-frame__slide` per section, cross-faded over 0.6s as the
-   section under the header changes. Slides are empty until the client supplies screens,
-   video and people.
-3. The header and the frame take the `data-ink` of the section under the header; the switch
-   fires as the boundary crosses the header's middle, colour transitions over 0.6s.
+2. The frame holds one `.stage-frame__slide` per section, cross-faded as the section under
+   the header changes. Slides are empty until the client supplies screens, video and people.
+3. **The ground colour lives on `<body>`, not on the sections.** JS copies the active
+   section's `data-theme` onto the body and CSS cross-fades `background-color` over
+   `--fade`. Sections are transparent — otherwise the colour arrives as a hard edge sliding
+   up the screen instead of a fade. The header ink, the frame's fill and the slide swap all
+   use the same `--fade` (0.9s, `ease-in-out`).
 4. The frame fades out across the footer's entrance, scrubbed to the scroll.
 5. Each section's title, subtitle and CTA reveal once on entry (rise 24px + fade, 0.8s,
    staggered). The trigger is the **title**, not the section — sections are a viewport tall
@@ -167,6 +169,28 @@ library, nothing pinned. `assets/js/main.js`, GSAP 3.15 + ScrollTrigger vendored
 
 **The header does not hide on scroll** — tried, dropped at the client's request. It stays
 put; only its ink changes. No custom cursor, no magnetic buttons.
+
+### The `section:change` event
+
+Every switch fires a `CustomEvent` on `document`, so anything later — filling a slide,
+starting a video, cueing a caption — hooks on without touching `main.js`:
+
+```js
+document.addEventListener('section:change', (e) => {
+  e.detail; // { id, theme, ink, isSection, ground }
+});
+```
+
+`id` is the section's element id (`'footer'` for the footer), `theme` and `ink` are the
+ground's own data attributes, `isSection` is false only for the footer.
+
+### The three-column stage
+
+`--col-min` (400px) is a hard floor on the two text columns; the frame takes what is left,
+capped at 760px. **This floor is measured, not guessed:** the longest unbreakable word in
+the copy is `маркетплейсах` at 391px in the xl style, and at a 340px floor it ran out of its
+column and collided with the frame on a 14" MacBook. Re-measure if a longer word ever lands
+in a title. Resulting frame widths: 416px at 1440, 488px at 1512, 760px at 1920.
 
 ## 6. Content
 
@@ -252,6 +276,8 @@ be forced back to 500.
 | Section CTA buttons (under the subtitle) | 44 high |
 | Corner radius — logo square, frame | 16 |
 | Corner radius — buttons | 32 (`--radius-btn`, twice the base) |
+| Button side padding — header | 20 |
+| Button side padding — sections | 22 |
 
 Two tokens: `--radius: 16px` for the logo square and the frame, `--radius-btn` at twice that
 for the buttons. 32 exceeds half of both button heights (44 and 52), so browsers clamp it —
