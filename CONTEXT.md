@@ -73,8 +73,7 @@ Header + 7 sections + footer.
 | 4 | Customization | Black `#000000` |
 | 5 | Marketplaces | Smoky white `#E9EBEE` |
 | 6 | Audience | White `#FFFFFF` |
-| 7 | Closer | Black `#000000` |
-| — | Footer | Black `#000000` — reads as a continuation of the closer |
+| 7 | Closer + footer | Black `#000000` — one screen, see below |
 
 **Red is not used on this page at all** (for now). Both dark sections and the footer use
 pure `#000000`; `#1A1817` is unused for now.
@@ -114,10 +113,23 @@ period inside a subtitle (section 5) stays.
   itself against the section currently under it** (or an equivalent solution). Real
   requirement — plan for it in the section markup.
 
-### Footer
+### Closer + footer — one screen
 
-Element inventory taken from Figma node `196:46921` — **inventory only, ignore its
-styling**. No red panel, no pills: black background, continuous with the closer.
+The last section and the footer are a single 100vh block, not two. Title top-left under the
+header, subtitle top-right, the footer's four columns along the bottom, and in the middle —
+where the frame stands on every other section — a **green call to action** carrying
+`Начать бесплатно`. The section CTA button that used to sit under the closer's subtitle is
+gone; the green block replaces it.
+
+The shared fixed frame hands over: it fades out across the approach to the closer and is at
+zero by the time that screen lands.
+
+This also removed a standing problem. The old footer was ~344px tall, so it could never
+hold a snap point of its own and the closer could never centre itself before the page ran
+out of scroll. Now the page is exactly 7 × 100vh and the closer is the last snap.
+
+Footer element inventory, from Figma node `196:46921` — **inventory only, ignore its
+styling**. No red panel, no pills.
 
 - Column 1: `support@alfasell.com`, `© Альфа-Селлер, 2026`, plus social icons
   (Telegram, Instagram, VK, email).
@@ -125,30 +137,6 @@ styling**. No red panel, no pills: black background, continuous with the closer.
 - Column 3: `Блог`, `База знаний`, `Реферальная программа`, `О компании`.
 - Column 4: `Публичная оферта`, `Политика конфиденциальности`,
   `Согласие на обработку персональных данных`.
-
-### The three live colours
-
-JS keeps three custom properties on `<html>`, all interpolated against the scroll:
-
-| Property | What it is |
-|---|---|
-| `--ground` | what the page is painted with — the section's own colour |
-| `--ink` | everything drawn on the ground: text, the filled button, the logo square |
-| `--ink-invert` | what is drawn **on the ink**: a filled button's label, the logo mark |
-
-`--ink-invert` is the **opposite ink**, never the ground. It was the ground briefly and the
-client rejected it on sight: on the green hero it made the label inside the black pill green
-and the logo mark green inside its black square. It is white on the light and green
-sections, black on the two black ones, and it cross-fades on the same scroll as the other
-two. Secondary buttons take `--ink` for the label and the stroke, and swap to
-`--ink-invert` on `--ink` when they fill on hover.
-
-**Every link on the page is sentence case — capital first letter, lowercase rest.** That
-covers the header nav and all four footer columns; the client asked for it on 2026-09-02
-because the lowercase nav and the capitalised legal column read as two different systems.
-Only `support@alfasell.com` stays as it is — it is an address, not a label. Done in the
-markup, not with `text-transform`: `capitalize` would upper-case every word and give
-"Крупному Бизнесу".
 
 ## 5. Motion
 
@@ -215,13 +203,13 @@ The page snaps: it can never come to rest between two sections, and one gesture 
 section. Three CSS declarations, no library:
 
 ```css
-html    { scroll-snap-type: y mandatory; }
+html     { scroll-snap-type: y mandatory; }
 .section { scroll-snap-align: start; scroll-snap-stop: always; }
-.footer  { scroll-snap-align: end; }
 ```
 
-The footer aligns by its **bottom** edge: it is shorter than a screen, so a `start` snap
-point would sit past the maximum scroll and be unreachable.
+Every snap point is a section top, and the page is exactly 7 × 100vh, so the last section
+is the last snap. (The footer used to need a bottom-edge snap of its own because it was
+shorter than a screen; merging it into the closer removed that.)
 
 **Lenis was considered and rejected.** Its `lenis/snap` addon does exist
 (`type: proximity | mandatory | lock`), but Lenis replaces native scrolling wholesale and
@@ -264,11 +252,19 @@ ground's own data attributes, `isSection` is false only for the footer.
 
 ### The three-column stage
 
-`--col-min` (400px) is a hard floor on the two text columns; the frame takes what is left,
-capped at 760px. **This floor is measured, not guessed:** the longest unbreakable word in
+`--page-pad` and `--col-gap` are themselves `clamp()`ed — `clamp(32px, 3.3vw, 64px)` and
+`clamp(24px, 2.5vw, 48px)` — so a narrower screen spends less on edges and gutters and the
+frame keeps a usable width. `--col-min` (400px) is a hard floor on the two text columns; the
+frame takes what is left, capped at 760px. **This floor is measured, not guessed:** the longest unbreakable word in
 the copy is `маркетплейсах` at 391px in the xl style, and at a 340px floor it ran out of its
 column and collided with the frame on a 14" MacBook. Re-measure if a longer word ever lands
-in a title. Resulting frame widths: 416px at 1440, 488px at 1512, 760px at 1920.
+in a title. Resulting frame widths: **473px at 1440, 537px at 1512, 760px at 1920** (before the clamps:
+416 / 488 / 760).
+
+To go materially wider than that, something has to give that is the client's call: either
+the title is allowed to hyphenate, which drops the 400px floor to about 300 and buys the
+frame ~140px more at 1440, or the xl size shrinks on narrow screens. Neither has been
+approved.
 
 ## 6. Content
 

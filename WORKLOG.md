@@ -1,5 +1,44 @@
 # Worklog
 
+## 2026-09-02 — closer and footer merged into one screen; the frame gets wider
+
+**What changed.** `index.html`: the standalone `<footer>` is gone — its four columns now
+live inside the closer section, which became `.section--closer` holding a `.closer__head`
+(title left, subtitle right), a green `.closer__cta` in the middle and `.closer__footer`
+along the bottom. The closer's old CTA button under the subtitle was removed; the green
+block is the call to action. `assets/css/base.css`: layout for all of that, plus
+`--page-pad` and `--col-gap` are now clamped so a narrower screen spends less on edges and
+gutters. `assets/js/main.js`: the grounds list is `.section` only, and the fixed frame now
+fades out across the approach to the closer instead of over the footer. `CONTEXT.md`
+updated on all three points.
+
+**Why.** Client's design for the last screen, and his call that the frame is too small at
+1440.
+
+**Two problems this fixed for free.** The page is now exactly 7 × 100vh, so the closer is
+the last snap point and centres itself properly — the old footer was ~344px tall and could
+not hold a snap point, which left the closer half-scrolled at the end of the page.
+
+**How it was verified.** Live DOM, no failed resources on load.
+- 1440×900: head at y=88 under the header, green CTA 473×400 centred horizontally, footer at
+  y=700 with the 48px bottom padding — 900 exactly, no overlap between the three rows.
+- Frame widths went 416 → **473** at 1440, 488 → **537** at 1512, 760 → 760 at 1920. The
+  collision sweep over all six other sections is still clean at 1512×830, and there is no
+  horizontal overflow at any of the three widths.
+- Scroll: maximum is 5400, snap points are the seven section tops, seven test jumps to
+  in-between positions all landed on one (300→0, 1300→900, 2200→1800, 3100→2700, 4000→3600,
+  4900→4500, 5399→5400). Ground colour and active slide correct at each; the frame is at
+  opacity 0 on the closer.
+- 1512 and 1920: the closer fits the screen at both, CTA 437×328 and 760×609.
+
+**Note for the client.** The CTA is not exactly 4:3 — the middle row's height binds first,
+so at 1440 it is 473×400 (1.18:1). Ratio or size, whichever should win, is his call.
+
+**Process note.** The previous three commits of mine had swept in a parallel session's
+work-in-progress via `git add -A`. That session's finished change (the `--ink-invert`
+counter-ink) was committed on its own as `01a3242` before this work started, and this commit
+stages only the files this session touched.
+
 ## 2026-09-02 — button labels and the logo mark take the counter-ink, not the ground
 
 **What changed.** `assets/js/main.js`: new `COUNTER = { dark: INK.light, light: INK.dark }`,

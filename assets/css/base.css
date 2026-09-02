@@ -25,7 +25,9 @@
 
   /* Layout — provisional, not a design decision. */
   --page-max: 1728px;
-  --page-pad: 64px;
+  /* Room at the page edges and between the three columns. Both shrink on a narrower
+     screen so the frame keeps a usable width there — see --frame-w. */
+  --page-pad: clamp(32px, 3.3vw, 64px);
 
   /* Header: full-bleed. Its height follows from the padding plus the 52px
      controls — nothing fixes it. */
@@ -48,7 +50,7 @@
   /* The three-column stage. The text columns never go below --col-min; the frame
      takes what is left, capped at 760. Without the floor, a long word in a title
      runs out of its column and collides with the frame on a narrower screen. */
-  --col-gap: 48px;
+  --col-gap: clamp(24px, 2.5vw, 48px);
   /* 400 is not arbitrary: the longest unbreakable word in the copy is
      "маркетплейсах", 391px wide at the xl style. A narrower column lets it run out
      and hit the frame. Re-measure if a longer word ever lands in a title. */
@@ -336,22 +338,68 @@ img { display: block; max-width: 100%; height: auto; }
   .stage-frame__slide { transition: none; }
 }
 
-/* ---------- footer ---------- */
+/* ---------- closer + footer ----------
+   The last screen is one section, not two: the closer's title and text sit at the top
+   under the header, the green call to action takes the middle where the frame sits on
+   every other section, and the footer runs along the bottom. Merging them also removed
+   the old problem of a footer too short to hold a snap point of its own. */
 
-/* The footer is shorter than a screen, so it snaps by its bottom edge — that
-   position is the end of the page and therefore reachable. Aligning it to the
-   top would put its snap point past the maximum scroll. */
-.footer {
-  position: relative;
-  z-index: 1;
-  color: var(--ink);
-  padding: 96px var(--page-pad);
-  scroll-snap-align: end;
+/* A grid, not a block: the inner layout needs a definite height to divide, and a
+   percentage height does not resolve against `min-height`. */
+.section--closer {
+  display: grid;
+  /* .section centres its single child; here the child must fill the screen instead. */
+  align-items: stretch;
+  justify-items: stretch;
+  padding-bottom: var(--page-pad);
 }
 
-.footer__inner {
+.closer {
+  width: 100%;
   max-width: var(--page-max);
   margin-inline: auto;
+  display: grid;
+  /* The middle row takes what the head and the footer leave; the call to action sizes
+     itself from that height, so this screen never overflows. */
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 40px;
+}
+
+/* Title and text keep the columns they occupy on every other section. */
+.closer__head {
+  display: grid;
+  grid-template-columns: 1fr var(--frame-w) 1fr;
+  gap: var(--col-gap);
+  align-items: start;
+}
+
+.closer__head > * { min-width: 0; }
+.closer__head .section__subtitle { grid-column: 3; }
+
+/* The call to action stands where the frame stands, in the brand green. */
+.closer__cta {
+  align-self: center;
+  justify-self: center;
+  display: grid;
+  place-items: center;
+  height: 100%;
+  aspect-ratio: 4 / 3;
+  max-width: var(--frame-w);
+  border-radius: var(--radius);
+  background: var(--c-green);
+  color: var(--c-black);
+  text-decoration: none;
+  transition: filter 0.2s ease-out;
+}
+
+@supports (corner-shape: squircle) {
+  .closer__cta { corner-shape: squircle; }
+}
+
+.closer__cta:hover,
+.closer__cta:focus-visible { filter: brightness(1.08); }
+
+.closer__footer {
   display: grid;
   grid-template-columns: 1.2fr 1fr 1fr 1.2fr;
   gap: 48px;

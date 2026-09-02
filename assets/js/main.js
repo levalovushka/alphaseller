@@ -4,7 +4,7 @@
    the frame in the middle stays put while the two text columns scroll past it, and
    what the frame holds changes as the section changes.
      1. the ground colour and the ink are interpolated against the scroll,
-     2. the frame swaps its slide per section, and fades out over the footer,
+     2. the frame swaps its slide per section, and hands over to the closer's own,
      3. each section's text reveals once as it enters the viewport.
    The header never hides. */
 
@@ -15,7 +15,7 @@ const header = document.querySelector('.header');
 const frame = document.querySelector('.stage-frame');
 const photo = document.querySelector('.stage-photo');
 const slides = gsap.utils.toArray('.stage-frame__slide');
-const grounds = gsap.utils.toArray('.section, .footer');
+const grounds = gsap.utils.toArray('.section');
 
 /* ---------- colour ---------- */
 
@@ -138,16 +138,16 @@ grounds.forEach((ground) => {
   });
 });
 
-/* The footer is shorter than a screen, so it never reaches the header line and cannot
-   drive the frame the way a section does. Fade the frame out across the footer's own
-   entrance instead — by the bottom of the page it is gone. */
+/* The last section carries its own green call to action where the frame would stand,
+   so the frame hands over: it fades out across the approach to the closer and is gone
+   by the time that screen lands. */
 gsap.to(frame, {
   opacity: 0,
   ease: 'none',
   scrollTrigger: {
-    trigger: document.querySelector('.footer'),
+    trigger: document.querySelector('#closer'),
     start: 'top bottom',
-    end: 'bottom bottom',
+    end: 'top top',
     scrub: true,
   },
 });

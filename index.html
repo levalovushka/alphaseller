@@ -121,57 +121,56 @@
     </div>
   </section>
 
-  <section class="section" id="closer" data-theme="black" data-ink="light">
-    <div class="section__inner">
-      <div class="section__lead">
+  <!-- The closer and the footer are one screen: title and text at the top under the
+       header, the green call to action in the middle where the frame sits on every other
+       section, the footer along the bottom. -->
+  <section class="section section--closer" id="closer" data-theme="black" data-ink="light">
+    <div class="closer">
+
+      <div class="closer__head">
         <h2 class="section__title">Продавай по&nbsp;своим правилам</h2>
-      </div>
-      <div class="section__frame-slot" aria-hidden="true"></div>
-      <div class="section__aside">
         <p class="section__subtitle">Верни контроль над&nbsp;бизнесом и&nbsp;заставь его&nbsp;работать на&nbsp;твою мечту</p>
-        <button class="btn btn--secondary" type="button">Начать бесплатно</button>
       </div>
-    </div>
-  </section>
 
-</main>
+      <a class="closer__cta" href="#">Начать бесплатно</a>
 
-<footer class="footer" data-theme="black" data-ink="light">
-  <div class="footer__inner">
-
-    <div class="footer__col footer__col--contacts">
-      <a class="footer__link" href="#">support@alfasell.com</a>
-      <p class="footer__copy">© Альфа-Селлер, 2026</p>
-      <ul class="footer__socials">
+      <div class="closer__footer">
+        <div class="footer__col footer__col--contacts">
+        <a class="footer__link" href="#">support@alfasell.com</a>
+        <p class="footer__copy">© Альфа-Селлер, 2026</p>
+        <ul class="footer__socials">
         <li><a class="footer__social" href="#" aria-label="Telegram"><img class="footer__icon" src="assets/icons/telegram.svg" alt="" width="53" height="53"></a></li>
         <li><a class="footer__social" href="#" aria-label="Instagram"><img class="footer__icon" src="assets/icons/instagram.svg" alt="" width="53" height="53"></a></li>
         <li><a class="footer__social" href="#" aria-label="ВКонтакте"><img class="footer__icon" src="assets/icons/vk.svg" alt="" width="53" height="53"></a></li>
         <li><a class="footer__social" href="#" aria-label="Почта"><img class="footer__icon" src="assets/icons/mail.svg" alt="" width="53" height="53"></a></li>
-      </ul>
+        </ul>
+        </div>
+
+        <nav class="footer__col" aria-label="Продукт">
+        <a class="footer__link" href="#">Продукты</a>
+        <a class="footer__link" href="#">Тарифы</a>
+        <a class="footer__link" href="#">Крупному бизнесу</a>
+        <a class="footer__link" href="#">Примеры</a>
+        </nav>
+
+        <nav class="footer__col" aria-label="Компания">
+        <a class="footer__link" href="#">Блог</a>
+        <a class="footer__link" href="#">База знаний</a>
+        <a class="footer__link" href="#">Реферальная программа</a>
+        <a class="footer__link" href="#">О компании</a>
+        </nav>
+
+        <nav class="footer__col" aria-label="Документы">
+        <a class="footer__link" href="#">Публичная оферта</a>
+        <a class="footer__link" href="#">Политика конфиденциальности</a>
+        <a class="footer__link" href="#">Согласие на обработку персональных данных</a>
+        </nav>
+      </div>
+
     </div>
+  </section>
 
-    <nav class="footer__col" aria-label="Продукт">
-      <a class="footer__link" href="#">Продукты</a>
-      <a class="footer__link" href="#">Тарифы</a>
-      <a class="footer__link" href="#">Крупному бизнесу</a>
-      <a class="footer__link" href="#">Примеры</a>
-    </nav>
-
-    <nav class="footer__col" aria-label="Компания">
-      <a class="footer__link" href="#">Блог</a>
-      <a class="footer__link" href="#">База знаний</a>
-      <a class="footer__link" href="#">Реферальная программа</a>
-      <a class="footer__link" href="#">О компании</a>
-    </nav>
-
-    <nav class="footer__col" aria-label="Документы">
-      <a class="footer__link" href="#">Публичная оферта</a>
-      <a class="footer__link" href="#">Политика конфиденциальности</a>
-      <a class="footer__link" href="#">Согласие на обработку персональных данных</a>
-    </nav>
-
-  </div>
-</footer>
+</main>
 
 <script src="assets/vendor/gsap.min.js"></script>
 <script src="assets/vendor/ScrollTrigger.min.js"></script>
