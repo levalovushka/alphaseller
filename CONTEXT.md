@@ -105,8 +105,9 @@ period inside a subtitle (section 5) stays.
 - Logo (Alpha Seller only — no Alfa-Bank lockup).
 - Links: `продукты`, `тарифы`, `крупному бизнесу`, `примеры`, `блог`.
 - Button: `начать бесплатно`.
-- **Full-bleed**, not inside the page container: 20px inset from the top and both edges.
-  The height follows from that inset plus the 52px controls; nothing fixes it.
+- **Full-bleed**, not inside the page container: 16px from the top, 20px from both edges.
+  The height follows from the padding plus the 52px controls; nothing fixes it — it lands
+  at 88px. The bottom padding (20px) is still a placeholder.
 - **The nav links sit on the screen's centre**, not in the middle of the space left over
   between the logo and the button. Implemented as a `1fr auto 1fr` grid.
 - The ground is light but sections 1, 4 and 7 are green/black. **The navbar must recolor
@@ -214,13 +215,17 @@ be forced back to 500.
 | Logo — **mark only, no wordmark**, in a rounded square | 52×52 |
 | Header CTA button | 52 high |
 | Section CTA buttons (under the subtitle) | 44 high |
+| Corner radius — **everything that is rounded** | 16 |
+
+One radius, one token (`--radius: 16px`): the logo square, both button sizes and the frame.
+Buttons are therefore rounded rectangles, not pills.
 
 The logo square is a **squircle with a fallback**: `border-radius` for Safari and Firefox,
-`corner-shape: squircle` inside `@supports` for Chrome 139+.
+`corner-shape: squircle` inside `@supports` for Chrome 139+. Only the logo square is a
+squircle so far — whether the buttons and the frame should be too is not decided.
 
-Not specified yet, currently placeholders in CSS: the corner radius itself
-(`--radius-logo: 14px`), the square's fill, the mark's size inside it (24px), and the
-header height (`--header-h: 88px`).
+Not specified yet, currently placeholders in CSS: the logo square's fill, the mark's size
+inside it (24px), and the header's bottom padding (20px).
 
 > **Licensing flag:** these are TRIAL/TEST files. Fine for an internal board demo,
 > **not** licensable for a public launch. A commercial license must be bought before the

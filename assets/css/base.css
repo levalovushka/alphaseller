@@ -1,6 +1,6 @@
 /* Alpha Seller — desktop landing demo.
-   STRUCTURE ONLY. No visual design decisions here beyond the fixed brand colors.
-   Type scale, spacing rhythm, radii and motion are pending the client's decisions. */
+   No visual design decisions here — only what the client has fixed.
+   Spacing rhythm and motion are still pending. */
 
 /* ---------- fonts ---------- */
 
@@ -27,10 +27,12 @@
   --page-max: 1728px;
   --page-pad: 64px;
 
-  /* Header: full-bleed, 20px inset. Its height follows from the inset plus the
-     52px controls — nothing fixes it. */
-  --header-pad: 20px;
-  --header-h: calc(var(--header-pad) * 2 + var(--btn-h-nav));
+  /* Header: full-bleed. Its height follows from the padding plus the 52px
+     controls — nothing fixes it. */
+  --header-pad-top: 16px;
+  --header-pad-side: 20px;
+  --header-pad-bottom: 20px;   /* TODO: not specified by the client */
+  --header-h: calc(var(--header-pad-top) + var(--btn-h-nav) + var(--header-pad-bottom));
 
   /* Type — the whole site is two styles, both YFF Hyper
      (wdth 87 = "Hyper"). See CONTEXT.md §7. */
@@ -42,7 +44,8 @@
   --logo-size: 52px;
   --btn-h-nav: 52px;
   --btn-h: 44px;
-  --radius-logo: 14px;   /* TODO: corner radius not specified by the client */
+  /* One radius for everything that is rounded. */
+  --radius: 16px;
 }
 
 /* ---------- reset ---------- */
@@ -91,7 +94,7 @@ img { display: block; max-width: 100%; height: auto; }
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   gap: 40px;
-  padding: var(--header-pad);
+  padding: var(--header-pad-top) var(--header-pad-side) var(--header-pad-bottom);
   color: var(--ink);
   /* The ink is switched per section at runtime — JS not wired yet. */
 }
@@ -106,7 +109,7 @@ img { display: block; max-width: 100%; height: auto; }
   height: var(--logo-size);
   background: var(--ink);
   /* Fallback: a plain rounded square (Safari, Firefox). */
-  border-radius: var(--radius-logo);
+  border-radius: var(--radius);
 }
 
 /* Squircle where the browser has CSS corner shaping (Chrome 139+). */
@@ -146,7 +149,7 @@ img { display: block; max-width: 100%; height: auto; }
   color: var(--ink-invert);
   background: var(--ink);
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--radius);
   cursor: pointer;
 }
 
@@ -199,7 +202,7 @@ img { display: block; max-width: 100%; height: auto; }
 .section__frame {
   aspect-ratio: 4 / 3;
   width: min(46vw, 760px);
-  border-radius: 24px;
+  border-radius: var(--radius);
   background: color-mix(in srgb, var(--ink) 6%, transparent);
   outline: 1px dashed color-mix(in srgb, var(--ink) 25%, transparent);
   outline-offset: -1px;

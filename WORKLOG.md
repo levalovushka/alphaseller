@@ -1,5 +1,44 @@
 # Worklog
 
+## 2026-09-02 — one radius, header top padding, typography audit
+
+**What changed.** `assets/css/base.css`: a single `--radius: 16px` now drives everything
+rounded — the logo square, both buttons and the frame; buttons stopped being pills
+(they were `999px`). Header top padding down to 16px (sides stay 20px, bottom 20px is still
+a placeholder), so the bar is 88px. Header padding split into three tokens. Stale comments
+fixed. `CONTEXT.md` updated.
+
+**Why.** Client decisions.
+
+**How it was verified.** Live DOM at 1440×900 (with a cache-buster — see the gotcha below).
+Every one of `.header__logo`, `.btn`, `.section__frame` computes `border-radius: 16px`;
+header height 88. Typography audit across title, subtitle, nav link, header CTA, section
+CTA, footer link and footer copy: all seven compute `YFF RARE | 87%` and are either
+`500 / 44px / 44px` (title) or `400 / 18px / 24px / 0.18px` (the other six) — no third
+style anywhere.
+
+**Left undone.** Squircle is still only on the logo square; whether buttons and the frame
+should get `corner-shape` too is undecided. No JS yet: no navbar ink switching, no motion.
+
+## 2026-09-02 — non-breaking spaces, second pass
+
+**What changed.** `index.html`: 6 more `&nbsp;` in the 7 titles / 7 subtitles, total 23 -> 29.
+Glued `для`, `без`, `как`, `под`, `над`, `его` to the following word on lines 37, 63, 72, 76,
+115. Nothing else touched.
+
+**Why.** Client wanted glue after one-, two- and three-letter function words, not just the
+classic short prepositions. Six is all the agreed word list allows: `и Max&nbsp;—` and
+`красивые и с&nbsp;твоей` were left alone because gluing there would weld a short word on
+both sides (three-word unbreakable run).
+
+**How it was verified.** `verify.py` in scratchpad: 14 elements found; each string with
+`&nbsp;` mapped back to a space is byte-identical to `git show HEAD:index.html`; 0 literal
+U+00A0; no unbreakable run of 3+ words. `git diff -U0 -- index.html` touches only lines
+37/63/72/76/115, all `section__title` / `section__subtitle`. Not rendered in a browser.
+
+**Left undone.** Not committed. `assets/css/base.css` carries unrelated uncommitted work
+from another session — left alone.
+
 ## 2026-09-02 — full-bleed header, centred nav, non-breaking spaces
 
 **What changed.** `assets/css/base.css`: the header is now full-bleed with a 20px inset on
