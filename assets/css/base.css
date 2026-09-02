@@ -281,7 +281,7 @@ img { display: block; max-width: 100%; height: auto; }
    sits above the page's painted ground and below everything else, its opacity is
    interpolated by the same scroll that mixes the colours, and it drifts vertically a
    little slower than the content. Taller than the viewport so the drift never exposes
-   an edge. Experimental — the client may roll this back. */
+   an edge. */
 .stage-photo {
   position: fixed;
   inset: -12vh 0;

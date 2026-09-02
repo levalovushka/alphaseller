@@ -212,7 +212,7 @@ by its own docs does not coexist with CSS scroll snapping. Not worth the depende
 what native snapping does in three declarations. Do not re-litigate this without a new
 reason.
 
-### The photographic ground (experimental)
+### The photographic ground
 
 The customization section is backed by a photograph instead of a flat colour —
 `assets/images/customization.webp`, from Figma node `201:56528`, 1858×2000, 75 KB.
@@ -226,8 +226,10 @@ Layering is explicit — photo on `z-index: 0`, sections and footer on `1`, fram
 header on `10`. A negative z-index would also work, but only by relying on the body's
 background propagating to the canvas; too subtle to rest the page on.
 
-**The client called this a test and may roll it back.** It is one `<div>`, one CSS block,
-one `data-photo="true"` attribute and about ten lines of JS.
+**Kept.** Proposed as a test, approved by the client on 2026-09-02 after seeing it. The
+mechanism is generic: any section can take a photographic ground by getting
+`data-photo="true"` and its own image — nothing in the JS is specific to this one section
+beyond the single image url in the CSS.
 
 ### The `section:change` event
 
