@@ -1,5 +1,30 @@
 # Worklog
 
+## 2026-09-02 — motion, squircle everywhere
+
+**What changed.** New `assets/js/main.js` and vendored GSAP 3.15 + ScrollTrigger in
+`assets/vendor/` (no CDN, the demo must run off a laptop). Three behaviours: the header
+takes the ink of the ground under it, the header hides on scroll down and returns on scroll
+up, and each section reveals its content once on entry — the reveals skipped under
+`prefers-reduced-motion`. `assets/css/base.css`: header colour/opacity/transform transitions
+and the `[data-hidden]` state; `corner-shape: squircle` extended from the logo square to the
+buttons and the frame. `CONTEXT.md` records the decision and the cash.app findings.
+
+**Why.** The client picked option A after the teardown showed cash.app does not pin
+sections at all. He also clarified that squircle was meant for every rounded corner.
+
+**How it was verified.** Live DOM at 1440×900, GSAP 3.15.0 loaded, 16 ScrollTriggers, no
+console errors. Walked all 8 grounds: hero/capabilities/speed/marketplaces/audience →
+`dark`, customization/closer/footer → `light`, every one matching the section's own
+`data-ink`. Header `data-hidden` goes true scrolling down, false scrolling up, false at the
+top. A below-fold title's reveal fires on entry (opacity 1 → 0 → animating in).
+`corner-shape` computes to `squircle` on the logo, the buttons and the frame.
+
+**Left undone.** No screenshot: the browser pane in this harness keeps going hidden, which
+throttles rAF (ScrollTrigger needed a manual `ScrollTrigger.update()` in tests) and returns
+blank or mis-scaled captures. Everything above was verified by measurement, not by eye — the
+motion needs a look on a real machine. No parallax on the frame; not discussed.
+
 ## 2026-09-02 — CTA casing and optical centring in buttons
 
 **What changed.** `index.html`: the header CTA is `Начать бесплатно`, capitalised like the

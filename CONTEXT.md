@@ -128,10 +128,29 @@ styling**. No red panel, no pills: black background, continuous with the closer.
 
 ## 5. Motion
 
-- **Per-section scroll animation, like cash.app** — sections take over the scroll as you
-  pass through them, all the way down to the closer.
+**Decided: do what cash.app actually does — native scroll, nothing pinned.**
+
+Reading cash.app's live homepage on 2026-09-02 settled a misconception: they do **not**
+scroll-jack and they do not pin sections. Verified there: no `gsap` / `ScrollTrigger` /
+`Lenis` / `LocomotiveScroll` globals (it is a Next.js bundle); `position: sticky` appears in
+9 CSS rules, all of them the nav header, table headers and the cookie banner — never a
+content section; and `animation-timeline` / `view-timeline` / `scroll-timeline` appear
+nowhere in 675 KB of CSS. What they do have: a sticky header that hides on scroll down and
+returns on scroll up (`transition: opacity .6s, transform .6s`, classes toggled by JS),
+`will-change: color; transition: color .6s` on section text so colours cross-fade rather
+than snap, a `mask-image` on the hero driven by a `--mask-scale` variable, and a
+`prefers-reduced-motion` block.
+
+Ours, in `assets/js/main.js` (GSAP 3.15 + ScrollTrigger, vendored in `assets/vendor/`):
+
+1. The header takes the `data-ink` of the ground under it; the switch fires as the boundary
+   crosses the header's own middle, and the colour transitions over 0.6s.
+2. The header hides on scroll down, returns on scroll up, always visible at the top.
+3. Each section's title, frame, subtitle and CTA reveal once on entry (rise 24px + fade,
+   0.8s, staggered), the whole set skipped under `prefers-reduced-motion: reduce`.
+
+- No pinning, no scroll-jacking, no smooth-scroll library.
 - No custom cursor, no magnetic buttons.
-- GSAP + ScrollTrigger.
 
 ## 6. Content
 
@@ -221,8 +240,8 @@ One radius, one token (`--radius: 16px`): the logo square, both button sizes and
 Buttons are therefore rounded rectangles, not pills.
 
 The logo square is a **squircle with a fallback**: `border-radius` for Safari and Firefox,
-`corner-shape: squircle` inside `@supports` for Chrome 139+. Only the logo square is a
-squircle so far — whether the buttons and the frame should be too is not decided.
+`corner-shape: squircle` inside `@supports` for Chrome 139+. It applies to **everything
+rounded** — the logo square, both buttons and the frame.
 
 Not specified yet, currently placeholders in CSS: the logo square's fill, the mark's size
 inside it (24px), and the header's bottom padding (20px).

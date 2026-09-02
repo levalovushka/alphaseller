@@ -95,8 +95,22 @@ img { display: block; max-width: 100%; height: auto; }
   align-items: center;
   gap: 40px;
   padding: var(--header-pad-top) var(--header-pad-side) var(--header-pad-bottom);
+  /* The ink is set by JS from the section currently under the header. */
   color: var(--ink);
-  /* The ink is switched per section at runtime — JS not wired yet. */
+  will-change: color, opacity, transform;
+  transition: color 0.6s, opacity 0.6s, transform 0.6s;
+}
+
+/* Hidden while scrolling down, back on the way up. */
+.header[data-hidden="true"] {
+  opacity: 0;
+  transform: translateY(-100%);
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .header { transition: none; }
 }
 
 /* Mark only, no wordmark, inside a 52×52 rounded square.
@@ -112,9 +126,12 @@ img { display: block; max-width: 100%; height: auto; }
   border-radius: var(--radius);
 }
 
-/* Squircle where the browser has CSS corner shaping (Chrome 139+). */
+/* Squircle wherever a corner is rounded. `border-radius` above is the fallback for
+   browsers without CSS corner shaping (Safari, Firefox); Chromium takes this. */
 @supports (corner-shape: squircle) {
-  .header__logo { corner-shape: squircle; }
+  .header__logo,
+  .btn,
+  .section__frame { corner-shape: squircle; }
 }
 
 .header__logo img {
