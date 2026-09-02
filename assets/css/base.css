@@ -410,10 +410,18 @@ img { display: block; max-width: 100%; height: auto; }
 
 .frame-pane[data-active="true"] { opacity: 1; }
 
-/* TODO: only `promotion` has a screen — Figma `206:58220`. The client owes two more nodes;
-   until then those two panes are empty and the frame's own tint shows through. */
+/* One file per pane, named after it. Figma: promotion `206:62480`, orders `209:35586`,
+   logistics `223:37237`. */
 .frame-pane[data-pane="promotion"] {
-  background-image: url("../images/capabilities.webp");
+  background-image: url("../images/capabilities-promotion.webp");
+}
+
+.frame-pane[data-pane="orders"] {
+  background-image: url("../images/capabilities-orders.webp");
+}
+
+.frame-pane[data-pane="logistics"] {
+  background-image: url("../images/capabilities-logistics.webp");
 }
 
 /* Under the frame, not inside it: the slide does not clip its children. The strip takes

@@ -436,7 +436,19 @@ Figma's own `#1E1E1E` canvas in as a full-bleed `<rect>`.
 | Section | File | Figma node | Source |
 |---|---|---|---|
 | 1 — hero | `assets/images/hero.webp` | `196:53708` | 1118×789, exported @2x → 2236×1578, cwebp `-q 82`, 101 KB |
-| 2 — capabilities | `assets/images/capabilities.webp` | `206:58220` | 1118×838.5 — **a true 4:3**, exported @2x → 2236×1677, cwebp **`-lossless`**, 206 KB |
+| 2 — capabilities, `promotion` pane | `assets/images/capabilities-promotion.webp` | `206:62480` | node is named "Продвижение — 4×3 / content". 1118×838.5, @2x → 2236×1677, cwebp **`-lossless`**, 172 KB |
+| 2 — `orders` pane | `assets/images/capabilities-orders.webp` | `209:35586` | same size and export, 188 KB. Re-pulled once after the client edited the node — the file name stays, so a re-pull is a byte swap and nothing else |
+| 2 — `logistics` pane | `assets/images/capabilities-logistics.webp` | `223:37237` | same size and export, but **`-q 90`**, 167 KB |
+
+`209:35586` was on the `promotion` pane first; the client then said that screen is
+**Заказы** and supplied `206:62480` for Продвижение, so the file was renamed, not
+re-exported.
+
+**Note on the logistics screen:** its own title is «Товары и остатки», not logistics. The
+client assigned it to that tab anyway. Flagged — the tab may want renaming.
+
+One file per pane, named after it. `206:58220` was the previous cut of the same screen and
+is superseded; `204:51472` before that was the 1.42:1 one.
 
 Slides are filled with a CSS `background-image` on
 `.stage-frame__slide[data-for="…"]`, `center / cover`.
@@ -448,9 +460,12 @@ frame with nothing cropped (measured: image ratio 1.3333 against frame ratio 1.3
 hero photograph is still 1.42:1 and does lose 33px off each side at 1x — §3 notes the
 mismatch and the client is fine with it there.
 
-**A UI screen is encoded lossless, a photograph is not.** On the capabilities screen
-`-lossless` came out both smaller and sharper than `-q 90` (205 KB against 207 KB), and
-lossy encoding softens small type.
+**Encode both ways and keep the smaller file.** Flat UI compresses better lossless — on the
+promotion screen `-lossless` was 175,616 bytes against 190,262 for `-q 90` — but a screen
+with photographs in it flips that: the logistics screen is 196,206 lossless against
+**170,734** at `-q 90`. Lossy is safe here because the frame renders these at about a fifth
+of their pixel size, so `-q 90` artefacts do not survive the downscale. The hero
+photograph is `-q 82`.
 
 A slide that carries an image gets `data-filled="true"` in the markup, which drops the
 frame's dashed placeholder outline via `--frame-outline: transparent` — otherwise it is
@@ -490,8 +505,7 @@ They are pills on the buttons' own geometry — same 44px height, 20px side padd
   not clipped. It is the first user of that.
 - `prefers-reduced-motion: reduce` starts in manual mode: no carousel, no fill.
 
-**Only `Продвижение` has a screen** (`206:58220`). The other two panes are empty until the
-client supplies nodes.
+All three panes have screens.
 
 Mine, not the client's — `--tab-fade: 0.4s`, `--tab-gap: 12px`, `--tab-drop: 32px`,
 `--tab-elapsed` at 78% ink over the ground (`#333435` on a light section), and reusing the
@@ -624,7 +638,9 @@ Known nodes:
 | `196:46923` | Product screens (4 frames, 1366×964 each). |
 | `201:56530` | Social icons — Telegram, Instagram, VK, mail. |
 | `196:53708` | Hero photograph — man on a chair, red gradient ground. |
-| `206:58220` | Dashboard screen, laid out 4:3 — the capabilities frame. Supersedes `204:51472`, the 1.42:1 cut of the same screen. |
+| `209:35586` | Dashboard screen, 4:3 — the capabilities frame's **`orders`** pane. Supersedes `206:58220`, which superseded `204:51472` (the 1.42:1 cut). |
+| `206:62480` | "Продвижение — 4×3 / content" — the capabilities frame's `promotion` pane. |
+| `223:37237` | «Товары и остатки» screen, 4:3 — the capabilities frame's `logistics` pane. |
 
 `get_metadata` on `1:49642` and on `196:46923` overflows the MCP transport. Read frame by
 frame; ask the client for direct links.

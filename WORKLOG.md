@@ -1,5 +1,104 @@
 # Worklog
 
+## 2026-09-02 — third pane filled, all three tabs now carry a screen
+
+**What changed.** New `assets/images/capabilities-logistics.webp` — Figma node `223:37237`,
+exported @2x to 2236×1677, **`cwebp -q 90`**, 167 KB. `base.css` fills the `logistics`
+pane and its comment now lists all three nodes; the TODO is gone. `CONTEXT.md` §7 gains the
+row and a rewritten encoding rule, §10 the node.
+
+**Why.** Client supplied the last of the three. The tabs no longer show an empty frame on
+any dwell.
+
+**Lossy here, lossless on the other two.** This screen has product photographs in it, which
+inverts the earlier finding: 196,206 bytes lossless against **170,734** at `-q 90`, so the
+rule in §7 is now "encode both ways, keep the smaller". Safe because the frame renders these
+at roughly a fifth of their pixel size — `-q 90` artefacts do not survive that downscale.
+
+**How it was verified.** `localhost:4321` at 1440×900, capabilities on stage. All three
+panes resolve to their own file: `capabilities-promotion.webp`, `capabilities-orders.webp`,
+`capabilities-logistics.webp`. The new file decodes to 2236×1677, ratio **1.3333** against
+the frame's **1.3333**. Ran the carousel on real elapsed time with `lagSmoothing(0)` and
+manual ticks, four samples across three dwells:
+
+```
+promotion  → capabilities-promotion.webp
+orders     → capabilities-orders.webp
+logistics  → capabilities-logistics.webp
+promotion  → capabilities-promotion.webp
+```
+
+Full cycle, wrapping correctly, no empty frame.
+
+**Left undone.** The screen assigned to `Логистика` is titled «Товары и остатки» — the
+client's assignment, flagged for him in case the tab wants renaming. No screenshot: the
+browser pane does not repaint.
+
+## 2026-09-02 — promotion screen arrives, the old one becomes orders
+
+**What changed.** `assets/images/capabilities-promotion.webp` → renamed to
+`capabilities-orders.webp` (same bytes — the client said that dashboard is Заказы, not
+Продвижение, so it was a rename and not a re-export). New
+`assets/images/capabilities-promotion.webp` from Figma node `206:62480`, named
+"Продвижение — 4×3 / content": @2x → 2236×1677, `cwebp -lossless`, **172 KB** — here
+lossless beats `-q 90` by a wide margin (175,616 against 190,262). `base.css` gains the
+`orders` pane rule and its comment now lists both nodes. `CONTEXT.md` §7 and §10 updated.
+
+**Why.** Client supplied the real Продвижение screen and reassigned the one already in the
+repo.
+
+**How it was verified.** `localhost:4321` at 1440×900, capabilities on stage. Panes:
+`promotion` → `capabilities-promotion.webp`, `orders` → `capabilities-orders.webp`, both
+`background-size cover`; `logistics` → `background-image none`. Both files decode to
+2236×1677, ratio **1.3333** against the frame's **1.3333**, so neither is cropped. Ran the
+carousel on real elapsed time with `lagSmoothing(0)` and manual ticks — the pane that is
+`data-active` walks `promotion → orders → logistics`, and its background follows:
+`capabilities-promotion.webp` → `capabilities-orders.webp` → `none`.
+
+**Left undone.** The `logistics` pane has no screen, so every third dwell shows an empty
+frame — waiting on the node. No screenshot: the browser pane does not repaint.
+
+## 2026-09-02 — re-pulled the promotion screen
+
+**What changed.** `assets/images/capabilities-promotion.webp` re-exported from the same
+Figma node `209:35586` after the client edited it: 193,192 → **192,266 bytes**. Nothing else
+— same node, same file name, same `cwebp -lossless`, so no CSS or markup touched.
+`CONTEXT.md` §7 notes the re-pull.
+
+**Why.** Client edited the node and asked for a refresh. The export did change: the PNG
+differs from the previous pull byte for byte (`cmp` says so), and the content sits about
+30px lower — the header block above "Доброе утро!" grew.
+
+**How it was verified.** `localhost:4321` at 1440×900, capabilities on stage. Server serves
+the new file: `status 200`, `content-length 192266` — matching the file on disk. Decoded in
+the page at 2236×1677, ratio **1.3333** against the frame's **1.3333**. Pane
+`data-active true`, opacity 1, `background-image` still resolving to the same path.
+
+**Left undone.** `orders` and `logistics` panes still have no image. No screenshot: the
+browser pane does not repaint.
+
+## 2026-09-02 — new cut of the promotion screen, one file per pane
+
+**What changed.** `assets/images/capabilities-promotion.webp` — Figma node `209:35586`,
+exported @2x to 2236×1677, `cwebp -lossless`, 189 KB (lossless beat `-q 90` again: 193,192
+against 194,462). `assets/images/capabilities.webp` deleted: it was the previous cut of the
+same screen, added by me earlier today, and nothing referenced it once the CSS moved.
+`base.css` points the `promotion` pane at the new file. `CONTEXT.md` §7 and §10 updated with
+the supersession chain and a row for the two panes still to come.
+
+**Why.** Client supplied a cleaner cut of the same dashboard. Renamed per pane now rather
+than later — two more files are coming for `orders` and `logistics`, and `capabilities.webp`
+would have been the odd one out.
+
+**How it was verified.** `localhost:4321` at 1440×900, capabilities on stage:
+`background-image` resolves to `capabilities-promotion.webp`, pane `data-active true`,
+opacity 1, `background-size cover`. Decoded 2236×1677 — image ratio **1.3333** against frame
+ratio **1.3333**, so nothing is cropped. Old path `assets/images/capabilities.webp` now
+returns **404** and no rule asks for it.
+
+**Left undone.** `orders` and `logistics` panes still have no image — the client is bringing
+the nodes. No screenshot: the browser pane does not repaint.
+
 ## 2026-09-02 — speed title rewritten, and a caching trap found
 
 **What changed.** `index.html`: the speed title is now "Твоё приложение<br>и интернет
