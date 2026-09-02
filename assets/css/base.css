@@ -44,8 +44,9 @@
   --logo-size: 52px;
   --btn-h-nav: 52px;
   --btn-h: 44px;
-  /* One radius for everything that is rounded. */
+  /* One radius for everything that is rounded; buttons take twice that. */
   --radius: 16px;
+  --radius-btn: calc(var(--radius) * 2);
 }
 
 /* ---------- reset ---------- */
@@ -97,15 +98,8 @@ img { display: block; max-width: 100%; height: auto; }
   padding: var(--header-pad-top) var(--header-pad-side) var(--header-pad-bottom);
   /* The ink is set by JS from the section currently under the header. */
   color: var(--ink);
-  will-change: color, opacity, transform;
-  transition: color 0.6s, opacity 0.6s, transform 0.6s;
-}
-
-/* Hidden while scrolling down, back on the way up. */
-.header[data-hidden="true"] {
-  opacity: 0;
-  transform: translateY(-100%);
-  pointer-events: none;
+  will-change: color;
+  transition: color 0.6s;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -169,7 +163,7 @@ img { display: block; max-width: 100%; height: auto; }
   color: var(--ink-invert);
   background: var(--ink);
   border: 0;
-  border-radius: var(--radius);
+  border-radius: var(--radius-btn);
   cursor: pointer;
 }
 

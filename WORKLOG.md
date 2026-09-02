@@ -1,5 +1,25 @@
 # Worklog
 
+## 2026-09-02 — drop the header hiding, double the button radius
+
+**What changed.** `assets/js/main.js`: the scroll-direction ScrollTrigger and all show/hide
+logic removed — the header now only recolours. `assets/css/base.css`: the `[data-hidden]`
+rule and the opacity/transform transitions gone (only `color 0.6s` left); new
+`--radius-btn: calc(var(--radius) * 2)` = 32px on `.btn`, while the logo square and the
+frame stay at 16. `index.html`: the `data-hidden` attribute removed. `CONTEXT.md` updated.
+
+**Why.** Client decisions.
+
+**How it was verified.** Live DOM at 1440×900, no console errors: 15 ScrollTriggers left
+(8 grounds + 7 reveals), no `data-hidden` attribute anywhere, header transition is
+`color 0.6s` only, and after scrolling to 2500 and jittering back to 2400 the header holds
+`opacity: 1` / `transform: none`. Radii: buttons 32px, logo square 16px, frame 16px.
+
+**Note for the client.** 32px is more than half of either button height (44 and 52), so the
+browser clamps it and both buttons render fully rounded — a squircle capsule rather than the
+distinct 32px corner. Anything at or below 22px would keep a visible flat side on the 44px
+button.
+
 ## 2026-09-02 — fix invisible reveals and header flicker
 
 **What changed.** `assets/js/main.js`. Reveals now trigger on the section title

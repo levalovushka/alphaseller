@@ -1,9 +1,9 @@
 /* Motion for the landing demo.
    The approach mirrors what cash.app actually does: native scroll, nothing pinned,
-   no scroll-jacking. Three behaviours only —
+   no scroll-jacking. Two behaviours only —
      1. the header takes the ink of the section underneath it,
-     2. the header hides on scroll down and comes back on scroll up,
-     3. each section's content reveals once as it enters the viewport. */
+     2. each section's content reveals once as it enters the viewport.
+   The header stays put: no hiding on scroll. */
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -23,44 +23,7 @@ grounds.forEach((ground) => {
   });
 });
 
-/* 2. Hide on the way down, show on the way up.
-      The direction is only trusted after DIRECTION_THRESHOLD pixels in one
-      direction — a raw reading flips on every stray pixel of trackpad drift and
-      makes the bar flicker. */
-const DIRECTION_THRESHOLD = 24;
-let anchor = window.scrollY;
-
-ScrollTrigger.create({
-  start: 0,
-  end: 'max',
-  onUpdate: (self) => {
-    const y = self.scroll();
-
-    /* Always visible near the top. */
-    if (y < header.offsetHeight) {
-      header.dataset.hidden = 'false';
-      anchor = y;
-      return;
-    }
-
-    const travelled = y - anchor;
-
-    /* Still inside the dead zone, or reversing — keep the anchor at the extreme
-       so the threshold is measured from the turning point, not from the last
-       event. */
-    if (Math.abs(travelled) < DIRECTION_THRESHOLD) {
-      const goingDown = header.dataset.hidden === 'true';
-      if ((goingDown && travelled < 0) || (!goingDown && travelled > 0)) return;
-      anchor = y;
-      return;
-    }
-
-    header.dataset.hidden = String(travelled > 0);
-    anchor = y;
-  },
-});
-
-/* 3. Reveals. The trigger is the title, not the section and not the content block:
+/* 2. Reveals. The trigger is the title, not the section and not the content block:
       sections are a full viewport tall with their content centred, so anything
       anchored to the section fires while the content is still a screen below the
       fold — the animation would be over before it came into view.

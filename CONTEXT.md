@@ -145,9 +145,14 @@ Ours, in `assets/js/main.js` (GSAP 3.15 + ScrollTrigger, vendored in `assets/ven
 
 1. The header takes the `data-ink` of the ground under it; the switch fires as the boundary
    crosses the header's own middle, and the colour transitions over 0.6s.
-2. The header hides on scroll down, returns on scroll up, always visible at the top.
-3. Each section's title, frame, subtitle and CTA reveal once on entry (rise 24px + fade,
+2. Each section's title, frame, subtitle and CTA reveal once on entry (rise 24px + fade,
    0.8s, staggered), the whole set skipped under `prefers-reduced-motion: reduce`.
+   The trigger is the **title**, not the section: sections are a viewport tall with centred
+   content, so a section-anchored trigger fires a full screen too early and the animation is
+   over before anyone sees it.
+
+**The header does not hide on scroll** — tried, dropped at the client's request. It stays
+put; only its ink changes.
 
 - No pinning, no scroll-jacking, no smooth-scroll library.
 - No custom cursor, no magnetic buttons.
@@ -234,10 +239,12 @@ be forced back to 500.
 | Logo — **mark only, no wordmark**, in a rounded square | 52×52 |
 | Header CTA button | 52 high |
 | Section CTA buttons (under the subtitle) | 44 high |
-| Corner radius — **everything that is rounded** | 16 |
+| Corner radius — logo square, frame | 16 |
+| Corner radius — buttons | 32 (`--radius-btn`, twice the base) |
 
-One radius, one token (`--radius: 16px`): the logo square, both button sizes and the frame.
-Buttons are therefore rounded rectangles, not pills.
+Two tokens: `--radius: 16px` for the logo square and the frame, `--radius-btn` at twice that
+for the buttons. 32 exceeds half of both button heights (44 and 52), so browsers clamp it —
+the buttons render fully rounded.
 
 The logo square is a **squircle with a fallback**: `border-radius` for Safari and Firefox,
 `corner-shape: squircle` inside `@supports` for Chrome 139+. It applies to **everything
