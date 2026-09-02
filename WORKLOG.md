@@ -1,5 +1,50 @@
 # Worklog
 
+## 2026-09-02 — two titles with hand-set breaks
+
+**What changed.** `index.html`: "Весь цикл продаж в одном кабинете" → "Весь цикл<br>в одном
+кабинете", and "Свои каналы продаж за один день" → "Свой сайт,<br>и приложение<br>за один
+день". `CONTEXT.md` copy table updated, with ⏎ marking a hard break.
+
+**Why.** Client's copy, and he set these two breaks by hand rather than leaving them to
+`text-wrap: balance`.
+
+**How it was verified.** Rendered line breaks read off the DOM, identical at 1440 and 1920:
+"Весь цикл / в одном кабинете" and "Свой сайт, / и приложение / за один день". No collision
+with the frame, no horizontal overflow.
+
+## 2026-09-02 — tabs redrawn as pills, timer as a dark grey sweep
+
+**What changed.** `assets/css/base.css`: `.frame-tab` is a pill on the buttons' geometry —
+`--btn-h`, `--btn-pad-x`, `--radius-btn`, squircle, and the same 2px optical lift. Idle is
+the secondary button (no fill, 1px ink stroke, ink label); `[aria-selected="true"]` is an
+ink pill with an `--ink-invert` label, and its background is a two-stop gradient whose stop
+is `--p`: `--tab-elapsed` (new token, 78% ink over the ground) to the left, plain ink to the
+right. `background-clip: text` and the green are gone; `--tab-gap` 28px → 12px.
+`assets/js/main.js`: `show()` now sets `--p` to 0% on every tab, because 0% *is* the resting
+active state — manual mode needs no special case. Comments and `CONTEXT.md` §7 rewritten.
+
+**Why.** Client's spec, after rejecting the green-through-the-letters version: idle pills
+with a black stroke and black text, active a black pill with white text, the timer shown as
+a dark grey fill moving left to right across the active pill. His rejection was sound — with
+`--p` at 0% at the start of each dwell, all three labels read as the same grey and nothing
+marked the active tab.
+
+**How it was verified.** `localhost:4321` at 1440×900, capabilities on stage. Computed
+style — idle: `background-image none`, `color rgb(0, 0, 0)`, `box-shadow inset 0 0 0 1px
+rgb(0, 0, 0)`, height 44, padding 20/20, radius 32, `corner-shape squircle`. Active:
+`color rgb(255, 255, 255)`, gradient `color(srgb 0.201 0.203 0.205)` → `rgb(0, 0, 0)` —
+`#333435` on black. Sweep, driven by real elapsed time with `lagSmoothing(0)` and manual
+ticks: the stop moved to **79.98%** and the pane advanced on completion. Real pointer click
+on `Логистика` at (474, 377): pane `logistics`, `aria-selected` moved, `--p` 0% on all three
+— a clean ink pill — and +3.5s later still no advance. Strip 389px wide. `node --check`
+clean, snap restored.
+
+**Left undone.** Still only `Продвижение` has a screen; the client owes nodes for the other
+two. `--tab-fade`, `--tab-gap`, `--tab-drop` and `--tab-elapsed` are my numbers. The active
+pill keeps the idle stroke underneath — ink on ink, invisible, left in place rather than
+zeroed. No screenshot: the browser pane does not repaint.
+
 ## 2026-09-02 — the closer heading takes xxl too
 
 **What changed.** `index.html`: `section__title--xxl` on "Продавай по своим правилам".

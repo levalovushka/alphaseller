@@ -90,13 +90,14 @@
      wall-clock fade would go. */
   --fade: 0.9s;
 
-  /* The capabilities tabs. --tab-dwell must match DWELL in main.js: the green fill is the
-     progress bar for it. TODO: --tab-fade, --tab-gap and --tab-drop are mine, not the
-     client's; 5s is his. */
+  /* The capabilities tabs. --tab-dwell must match DWELL in main.js: the sweep across the
+     active pill is the progress bar for it. TODO: --tab-fade, --tab-gap, --tab-drop and
+     --tab-elapsed are mine, not the client's; 5s and the colours are his. */
   --tab-dwell: 5s;
   --tab-fade: 0.4s;
-  --tab-gap: 28px;
+  --tab-gap: 12px;
   --tab-drop: 32px;
+  --tab-elapsed: color-mix(in srgb, var(--ink) 78%, var(--ground));
 
   /* Everything rounded on the page — the buttons, the logo square, the frame — takes
      the same radius. `--radius` is only the base it is derived from; nothing uses it
@@ -191,7 +192,8 @@ img { display: block; max-width: 100%; height: auto; }
   /* A slide and a pane each clip their own image, so they need the shape too —
      `border-radius: inherit` carries the radius but not the corner shape. */
   .stage-frame__slide,
-  .frame-pane { corner-shape: squircle; }
+  .frame-pane,
+  .frame-tab { corner-shape: squircle; }
 }
 
 /* The mark is painted, not placed: a mask lets it take --ink-invert, so it stays the
@@ -425,24 +427,36 @@ img { display: block; max-width: 100%; height: auto; }
   pointer-events: auto;
 }
 
-/* The green fill is a progress bar drawn through the letters: a two-stop gradient clipped
-   to the text, with JS moving --p from 0% to 100% across --tab-dwell. Clicking freezes it
-   at 100% on the chosen tab and the timer never runs again. */
+/* Pills, on the same geometry as the buttons — same height, side padding and radius, so
+   they are the site's own control and not a third one. Idle is the secondary button: no
+   fill, a 1px stroke in the ink, ink label. */
 .frame-tab {
   font: inherit;
   letter-spacing: inherit;
-  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  height: var(--btn-h);
+  /* Same optical 2px lift as .btn — YFF sits high in its line box. */
+  padding: 2px var(--btn-pad-x) 0;
   border: 0;
+  border-radius: var(--radius-btn);
   cursor: pointer;
+  color: var(--ink);
   background-color: transparent;
+  box-shadow: inset 0 0 0 1px var(--ink);
+}
+
+/* Active: an ink pill with an inverted label. The timer is a dark grey sweep across it —
+   the elapsed part of --tab-dwell is --tab-elapsed, the rest is plain ink. JS moves --p
+   from 0% to 100%. In manual mode --p stays at 0%, so the pill is simply ink: no timer,
+   no sweep. */
+.frame-tab[aria-selected="true"] {
+  color: var(--ink-invert);
   background-image: linear-gradient(
     to right,
-    var(--c-green) 0 var(--p, 0%),
-    color-mix(in srgb, var(--ink) 25%, var(--ground)) var(--p, 0%) 100%
+    var(--tab-elapsed) 0 var(--p, 0%),
+    var(--ink) var(--p, 0%) 100%
   );
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
 }
 
 @media (prefers-reduced-motion: reduce) {

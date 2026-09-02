@@ -83,13 +83,15 @@ smoke → black.
 ### Copy — v1, from the client, 2026-09-02
 
 Every section carries exactly three strings: title, subtitle, CTA label.
-**Neither titles nor subtitles carry a trailing period** — the client removed them.
+**Neither titles nor subtitles carry a trailing period** — the client removed them. A ⏎ in
+the table is a hard `<br>` in the markup: the client sets those two titles' line breaks by
+hand rather than leaving them to `text-wrap: balance`.
 
 | # | Title | Subtitle | CTA |
 |---|---|---|---|
 | 1 | Одна платформа на всю онлайн-торговлю | Продавай больше, управляй с легкостью, расширяй аудиторию с единой платформой для управления электронной коммерцией | Начать бесплатно |
-| 2 | Весь цикл продаж в одном кабинете | Свой сайт, приложение, аналитика, управление рекламой и логистикой, деньги, остатки и отзывы | О платформе |
-| 3 | Свои каналы продаж за один день | Онлайн-витрины без подрядчиков, с привязкой к Telegram и Max — рабочие, красивые и с твоей наценкой | Сделать сайт |
+| 2 | Весь цикл ⏎ в одном кабинете | Свой сайт, приложение, аналитика, управление рекламой и логистикой, деньги, остатки и отзывы | О платформе |
+| 3 | Свой сайт, ⏎ и приложение ⏎ за один день | Онлайн-витрины без подрядчиков, с привязкой к Telegram и Max — рабочие, красивые и с твоей наценкой | Сделать сайт |
 | 4 | Стиль магазина уникальный, как ты сам | Выбирай из стильных шаблонов и докручивай, пока не будет идеально подходить под твой вкус | Посмотреть шаблоны |
 | 5 | Управляй своим бизнесом на маркетплейсах | Даём аналитику по заказам, остаткам, логистике и помогаем выбрать лучшие карточки товаров | Подключить |
 | 6 | С нами работают самые смелые | *(unused — the cases layout has no subtitle column)* | Все кейсы |
@@ -458,12 +460,23 @@ interpolation.
 Under the frame on section 2 sits a strip of three tabs — `Продвижение`, `Заказы`,
 `Логистика` — and the frame shows one pane per tab.
 
-- The active label **fills with green from left to right over 5s**, and that fill *is* the
-  timer: one GSAP tween moves `--p` and, on completion, advances to the next pane, so the
-  bar and the switch cannot drift. It wraps around.
+They are pills on the buttons' own geometry — same 44px height, 20px side padding, radius
+32, squircle — so they are the site's existing control rather than a third one:
+
+| State | Look |
+|---|---|
+| Idle | no fill, 1px stroke in the ink, ink label — the secondary button |
+| Active | ink pill, `--ink-invert` label |
+| Active, timer running | a **dark grey sweep left to right** across the pill: the elapsed part of the 5s is `--tab-elapsed`, the rest is plain ink |
+
+- The sweep *is* the timer: one GSAP tween moves `--p` and, on completion, advances to the
+  next pane, so the bar and the switch cannot drift. It wraps around.
 - **Click and it goes manual for the rest of the page's life** — the client's "до
-  перезагрузки". The timer never runs again; the chosen tab stays fully green. Leaving the
-  section and coming back does not restart it.
+  перезагрузки". The timer never runs again, and `--p` stays at 0%, so the active pill is
+  simply ink with no sweep. Leaving the section and coming back does not restart it.
+- Green is deliberately **not** used here. The first cut filled the label itself with green
+  and the client rejected it: with `--p` at 0% at the start of every dwell all three labels
+  read as the same grey, so nothing marked the active tab.
 - Nothing runs while the slide is off stage, and the strip is `inert` there — a slide at
   `opacity: 0` still takes clicks and focus. The gate hangs off the slide's own `--t`
   (> 0.99), not off `section:change`: `--t` is written on every path — crossing, jump, deep
@@ -477,10 +490,10 @@ Under the frame on section 2 sits a strip of three tabs — `Продвижен�
 **Only `Продвижение` has a screen** (`206:58220`). The other two panes are empty until the
 client supplies nodes.
 
-Mine, not the client's — `--tab-fade: 0.4s`, `--tab-gap: 28px` (the header's nav gap),
-`--tab-drop: 32px`, the idle grey at 25% ink over the ground, and the `md` type style. The
-5s dwell and the labels are his. Also his call to settle: on click the chosen tab stays
-**fully green**; "заливка выключается" could instead mean it drops to ink.
+Mine, not the client's — `--tab-fade: 0.4s`, `--tab-gap: 12px`, `--tab-drop: 32px`,
+`--tab-elapsed` at 78% ink over the ground (`#333435` on a light section), and reusing the
+button geometry. The 5s dwell, the labels and all three states are his. Idle pills have no
+hover state: a tab is not a call to action, so it does not fill like `.btn--secondary`.
 
 ### Product screens
 

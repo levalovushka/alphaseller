@@ -204,11 +204,13 @@ grounds.forEach((ground) => {
 
 /* ---------- the capabilities tabs ----------
    Three panes in the capabilities slide, one strip of tabs under the frame. The tab label
-   fills with green over DWELL seconds — the fill *is* the progress bar for the timer, so
-   the two cannot drift: the same tween moves `--p` and, on completion, advances the pane.
+   pill takes a dark grey sweep over DWELL seconds — the sweep *is* the progress bar for the
+   timer, so the two cannot drift: the same tween moves `--p` and, on completion, advances
+   the pane.
 
-   Click and it goes manual for the rest of the page's life: the timer never runs again and
-   the chosen tab stays fully green. The client asked for exactly that — "до перезагрузки".
+   Click and it goes manual for the rest of the page's life: the timer never runs again, so
+   the chosen pill just sits there as plain ink. The client asked for exactly that — "до
+   перезагрузки".
 
    Nothing runs while the slide is off stage. The strip is also made `inert` there, because
    the slide's opacity of 0 still hit-tests. */
@@ -222,7 +224,7 @@ if (tabStrip) {
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   let index = 0;
-  /* A visitor who asked for less motion starts in manual mode: no carousel, no fill. */
+  /* A visitor who asked for less motion starts in manual mode: no carousel, no sweep. */
   let manual = reduced;
   let timer = null;
 
@@ -237,11 +239,10 @@ if (tabStrip) {
       pane.dataset.active = String(n === index);
     });
     tabs.forEach((tab, n) => {
-      const on = n === index;
-      tab.setAttribute('aria-selected', String(on));
-      /* Idle tabs sit at 0%. The active one is full green when the timer is not running,
-         and swept from 0 to 100% by the tween when it is. */
-      tab.style.setProperty('--p', on && manual ? '100%' : '0%');
+      tab.setAttribute('aria-selected', String(n === index));
+      /* --p is the timer's own position and nothing else: 0% leaves the active pill plain
+         ink, which is exactly the resting state in manual mode. */
+      tab.style.setProperty('--p', '0%');
     });
   }
 
