@@ -27,14 +27,16 @@
 
 <!-- The frame stays put while the text columns scroll past it. One slide per section;
      the active one is swapped as the section under the header changes. -->
-<div class="stage-frame" data-ink="dark" aria-hidden="true">
-  <div class="stage-frame__slide" data-for="hero"></div>
-  <div class="stage-frame__slide" data-for="capabilities"></div>
-  <div class="stage-frame__slide" data-for="speed"></div>
-  <div class="stage-frame__slide" data-for="customization"></div>
-  <div class="stage-frame__slide" data-for="marketplaces"></div>
-  <div class="stage-frame__slide" data-for="audience"></div>
-  <div class="stage-frame__slide" data-for="closer"></div>
+<div class="stage-frame" data-ink="dark">
+  <div class="stage-frame__slide" data-for="hero" aria-hidden="true"></div>
+  <div class="stage-frame__slide" data-for="capabilities" aria-hidden="true"></div>
+  <div class="stage-frame__slide" data-for="speed" aria-hidden="true"></div>
+  <div class="stage-frame__slide" data-for="customization" aria-hidden="true"></div>
+  <div class="stage-frame__slide" data-for="marketplaces" aria-hidden="true"></div>
+  <div class="stage-frame__slide" data-for="audience" aria-hidden="true"></div>
+  <div class="stage-frame__slide" data-for="closer">
+    <a class="stage-frame__cta" href="#">Начать бесплатно</a>
+  </div>
 </div>
 
 <!-- A photographic ground for one section. Fades in and out with the section change
@@ -132,7 +134,7 @@
         <p class="section__subtitle">Верни контроль над&nbsp;бизнесом и&nbsp;заставь его&nbsp;работать на&nbsp;твою мечту</p>
       </div>
 
-      <a class="closer__cta" href="#">Начать бесплатно</a>
+      <div class="closer__gap" aria-hidden="true"></div>
 
       <div class="closer__footer">
         <div class="footer__col footer__col--contacts">

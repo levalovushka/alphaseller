@@ -325,10 +325,12 @@ img { display: block; max-width: 100%; height: auto; }
   pointer-events: none;
   /* Same radius as the buttons and the logo square. */
   border-radius: var(--radius-btn);
-  background: color-mix(in srgb, var(--ink) 6%, transparent);
-  outline: 1px dashed color-mix(in srgb, var(--ink) 25%, transparent);
+  /* Fill and outline follow --ink, which is already interpolated against the scroll —
+     until the closer, where JS takes both over: the frame shrinks, turns green and
+     becomes the call to action. */
+  background: var(--frame-bg, color-mix(in srgb, var(--ink) 6%, transparent));
+  outline: 1px dashed var(--frame-outline, color-mix(in srgb, var(--ink) 25%, transparent));
   outline-offset: -1px;
-  /* Fill and outline follow --ink, which is already interpolated against the scroll. */
 }
 
 /* One slide per section, cross-faded as the section changes. Empty until the client
@@ -342,6 +344,21 @@ img { display: block; max-width: 100%; height: auto; }
 }
 
 .stage-frame__slide[data-active="true"] { opacity: 1; }
+
+/* The label the frame carries once it has become the call to action. Its opacity is
+   scrubbed with the rest of the transformation; it only takes clicks at the end. */
+.stage-frame__cta {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  color: var(--c-black);
+  text-decoration: none;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.stage-frame[data-cta="true"] .stage-frame__cta { pointer-events: auto; }
 
 @media (prefers-reduced-motion: reduce) {
   .stage-frame,
@@ -386,28 +403,8 @@ img { display: block; max-width: 100%; height: auto; }
 .closer__head > * { min-width: 0; }
 .closer__head .section__subtitle { grid-column: 3; }
 
-/* The call to action stands where the frame stands, in the brand green. */
-.closer__cta {
-  align-self: center;
-  justify-self: center;
-  display: grid;
-  place-items: center;
-  height: 100%;
-  aspect-ratio: 4 / 3;
-  max-width: var(--frame-w);
-  border-radius: var(--radius);
-  background: var(--c-green);
-  color: var(--c-black);
-  text-decoration: none;
-  transition: filter 0.2s ease-out;
-}
-
-@supports (corner-shape: squircle) {
-  .closer__cta { corner-shape: squircle; }
-}
-
-.closer__cta:hover,
-.closer__cta:focus-visible { filter: brightness(1.08); }
+/* Nothing lives in the middle row: the frame itself comes to rest there, shrunk and
+   green. The row only holds the head and the footer apart. */
 
 .closer__footer {
   display: grid;

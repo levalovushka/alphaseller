@@ -4,7 +4,7 @@
    the frame in the middle stays put while the two text columns scroll past it, and
    what the frame holds changes as the section changes.
      1. the ground colour and the ink are interpolated against the scroll,
-     2. the frame swaps its slide per section, and hands over to the closer's own,
+     2. the frame swaps its slide per section, and becomes the closing call to action,
      3. each section's text reveals once as it enters the viewport.
    The header never hides. */
 
@@ -138,18 +138,50 @@ grounds.forEach((ground) => {
   });
 });
 
-/* The last section carries its own green call to action where the frame would stand,
-   so the frame hands over: it fades out across the approach to the closer and is gone
-   by the time that screen lands. */
-gsap.to(frame, {
-  opacity: 0,
-  ease: 'none',
-  scrollTrigger: {
-    trigger: document.querySelector('#closer'),
-    start: 'top bottom',
-    end: 'top top',
-    scrub: true,
+/* On the way into the closer the frame becomes the call to action: it shrinks to
+   200×150 — the same 4:3, just smaller — fills with the brand green, drops its dashed
+   outline and brings up its label. All of it scrubbed to the scroll, so it is complete
+   exactly when that screen lands.
+
+   The fill is interpolated by hand rather than left to a CSS transition, because it
+   starts from the live tint (6% of the current ink) and ends on an opaque green. */
+const CTA_WIDTH = 200;
+const GREEN = rgb(GROUND.green);
+const closer = document.querySelector('#closer');
+const cta = frame.querySelector('.stage-frame__cta');
+let frameWidth = frame.getBoundingClientRect().width;
+
+function morph(t) {
+  if (t === 0) {
+    frame.style.removeProperty('width');
+    frame.style.removeProperty('--frame-bg');
+    frame.style.removeProperty('--frame-outline');
+    cta.style.opacity = '0';
+    frame.dataset.cta = 'false';
+    return;
+  }
+
+  const ink = rgb(INK[closer.dataset.ink]);
+  const fill = ink.map((v, i) => Math.round(v + (GREEN[i] - v) * t));
+
+  frame.style.width = `${frameWidth + (CTA_WIDTH - frameWidth) * t}px`;
+  frame.style.setProperty('--frame-bg', `rgba(${fill.join(', ')}, ${0.06 + 0.94 * t})`);
+  frame.style.setProperty('--frame-outline', `rgba(${ink.join(', ')}, ${0.25 * (1 - t)})`);
+  cta.style.opacity = String(t);
+  frame.dataset.cta = String(t > 0.99);
+}
+
+ScrollTrigger.create({
+  trigger: closer,
+  start: 'top bottom',
+  end: 'top top',
+  /* Re-measure the frame's natural width after a resize, with the inline one cleared —
+     it comes from --frame-w, which is viewport-dependent. */
+  onRefresh: () => {
+    frame.style.removeProperty('width');
+    frameWidth = frame.getBoundingClientRect().width;
   },
+  onUpdate: (self) => morph(self.progress),
 });
 
 /* The photograph drifts against the scroll — slower than the text, so it feels set

@@ -1,5 +1,26 @@
 # Worklog
 
+## 2026-09-02 — the frame becomes the closing call to action
+
+**What changed.** `index.html`: the standalone green `.closer__cta` block is gone, replaced
+by an empty spacer row; the frame's `closer` slide now holds a real `<a class="stage-frame__cta">`
+and the other six slides are marked `aria-hidden`. `assets/css/base.css`: the frame's fill
+and outline read `--frame-bg` / `--frame-outline` so JS can take them over, styles for the
+label, and `pointer-events` gated on `[data-cta="true"]`. `assets/js/main.js`: a ScrollTrigger
+over the approach to the closer that scrubs the frame's width, fill, outline and label.
+
+**Why.** The previous version faded the frame out and showed a separate green block. The
+client wanted the frame itself to shrink to 200×150, turn green and take the label.
+
+**How it was verified.** Live DOM at 1440×900, no failed resources. Sampling the approach
+with snapping temporarily off: 553×415 tinted at 6% → 465×349 → 376×282 → 288×216 →
+**200×150 opaque `rgb(166, 237, 0)`**, the label's opacity tracking 0 → 0.25 → 0.50 → 0.75 →
+1.00 and `data-cta` flipping to `true` only at the end. Scrolling back to the hero restores
+553×415 and the 6% tint. Closer layout at rest: head 88–220, frame 395–545 centred
+horizontally, footer 700–852 with the 48px bottom padding — 175px of air above the frame and
+155 below. Re-checked at 1512×830 (139/119) and 1920×1080; the frame lands at exactly
+200×150 and the screen fits at all three.
+
 ## 2026-09-02 — titles hyphenate, frame reaches 553 at 1440
 
 **What changed.** `assets/css/base.css` only: `.section__title` gets

@@ -117,12 +117,26 @@ period inside a subtitle (section 5) stays.
 
 The last section and the footer are a single 100vh block, not two. Title top-left under the
 header, subtitle top-right, the footer's four columns along the bottom, and in the middle —
-where the frame stands on every other section — a **green call to action** carrying
-`Начать бесплатно`. The section CTA button that used to sit under the closer's subtitle is
-gone; the green block replaces it.
+where the frame stands on every other section — the call to action.
 
-The shared fixed frame hands over: it fades out across the approach to the closer and is at
-zero by the time that screen lands.
+**The call to action is the frame itself.** It does not fade out and hand over to a separate
+green block (that was the first attempt, and it was not what the client wanted). Across the
+approach to the closer the frame *becomes* the button, everything scrubbed to the scroll so
+it completes exactly as that screen lands:
+
+| | from | to |
+|---|---|---|
+| size | `--frame-w` (553 at 1440) | **200×150** — same 4:3, smaller |
+| fill | 6% of the current ink | opaque `#A6ED00` |
+| outline | 25% dashed | transparent |
+| label | invisible | `Начать бесплатно`, and it starts taking clicks |
+
+The label lives in the frame's `closer` slide as a real `<a>`; the other six slides stay
+`aria-hidden`. `pointer-events` only open up at the end, on `.stage-frame[data-cta="true"]`.
+The closer's middle grid row is an empty spacer — the frame is fixed and comes to rest in it.
+
+The fill is interpolated in JS rather than by a CSS transition because it starts from a live
+value: 6% of `--ink`, which is itself moving.
 
 This also removed a standing problem. The old footer was ~344px tall, so it could never
 hold a snap point of its own and the closer could never centre itself before the page ran
