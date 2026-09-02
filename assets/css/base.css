@@ -276,6 +276,9 @@ img { display: block; max-width: 100%; height: auto; }
    next line. `overflow-wrap` stays: it only fires for a word too long for the column at
    all, which no current title has. */
 .section__title {
+  /* Even out the rag instead of filling each line to the edge. It does not break words,
+     so it composes with the non-breaking spaces rather than fighting them. */
+  text-wrap: balance;
   overflow-wrap: break-word;
   font-weight: var(--weight-xl);   /* h1/h2 default to bold — force Medium back */
   font-size: var(--fs-xl);
@@ -359,10 +362,15 @@ img { display: block; max-width: 100%; height: auto; }
   opacity: var(--t, 0);
 }
 
-/* Hero — Figma node 196:53708. The source is 1118×789 (1.42:1) against a 4:3 frame, so
-   `cover` trims the sides; the client knows and is fine with it. */
+/* Every source so far is 1118×789 (1.42:1) against a 4:3 frame, so `cover` trims 33px off
+   each side at 1x; the client knows and is fine with it (CONTEXT §3). Figma nodes:
+   hero `196:53708`, capabilities `204:51472`. */
 .stage-frame__slide[data-for="hero"] {
   background-image: url("../images/hero.webp");
+}
+
+.stage-frame__slide[data-for="capabilities"] {
+  background-image: url("../images/capabilities.webp");
 }
 
 /* A slide carrying its own image fills the frame edge to edge, so the empty-frame chrome

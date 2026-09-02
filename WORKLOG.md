@@ -1,5 +1,58 @@
 # Worklog
 
+## 2026-09-02 — balanced titles, two more copy tweaks
+
+**What changed.** `index.html`: a non-breaking space between `своим` and `бизнесом`, and the
+customization title became "Стиль магазина уникальный, как ты сам".
+`assets/css/base.css`: `text-wrap: balance` on `.section__title`. `CONTEXT.md` updated.
+
+**Why.** Client's copy edits, and his suggestion that balancing the lines may be simpler than
+placing every break by hand.
+
+**How it was verified.** Line breaks read off the rendered text at 1440, 1512 and 1920 —
+identical at all three:
+
+```
+Управляй                 Стиль магазина
+своим бизнесом           уникальный,
+на маркетплейсах         как ты сам
+```
+
+`text-wrap` computes to `balance`. No collision with the frame at any width, no horizontal
+overflow, no mid-word break in any of the seven titles.
+
+**Worth the client's eye.** The new non-breaking space is what puts `Управляй` alone on the
+first line: with `своим бизнесом` welded together, balance has nowhere else to put the break.
+Dropping that one nbsp gives "Управляй своим / бизнесом / на маркетплейсах" instead.
+
+## 2026-09-02 — the capabilities frame gets the dashboard screen
+
+**What changed.** New `assets/images/capabilities.webp` — Figma node `204:51472` ("main",
+the dashboard screen), exported @2x to 2236×1578 and encoded `cwebp -lossless -metadata
+none`, 205 KB. `base.css`: a rule fills the capabilities slide with it, and the comment above
+the slide fills now covers both nodes. `index.html`: that slide is marked
+`data-filled="true"` so the frame's dashed placeholder outline stays off. `CONTEXT.md` §7:
+frame-content table gains the row, plus the encoding rule and the crop note.
+
+**Why.** Second piece of real frame content, asked for as an image — §7 already says the
+product screens stay images rather than being rebuilt in code.
+
+**Lossless, not lossy.** For this screen `-lossless` is 209,940 bytes against 212,312 for
+`-q 90` — smaller *and* exact, and lossy encoding softens 14px type. The hero photograph
+stays `-q 82`; it has no type in it.
+
+**How it was verified.** `localhost:4321` at 1440×900, snap off, scroll stepped by hand with
+`ScrollTrigger.update()`. At y=900 (capabilities at rest): slide `--t` 1, `opacity` 1,
+`background-image` resolved to the webp, `background-size cover`, `data-filled true`. At
+y=450, mid-crossing: hero `--t` 0.5 and capabilities `--t` 0.5 — the two pictures cross-fade
+in lock-step. Decoded in the page: 2236×1578.
+
+**Left undone.** The 4:3 crop is more damaging here than on a photograph — it clips the
+user avatar on the right and eats the logo's left margin. Reproduced the crop offline with
+`sips` and sent it; `contain` is the alternative (~12px of frame tint top and bottom, whole
+screen visible) and it is the client's call, so `cover` stands for now. Five slides still
+empty. No screenshot of the real page — the pane still does not repaint.
+
 ## 2026-09-02 — copy edits, hyphenation off, and a repair of main
 
 **What changed by me.** `index.html`: two titles rewritten — "Уникальное, как твой бизнес" →

@@ -89,7 +89,7 @@ period inside a subtitle (section 5) stays.
 | 1 | Одна платформа на всю онлайн-торговлю | Продавай больше, управляй с легкостью, расширяй аудиторию с единой платформой для управления электронной коммерцией | Начать бесплатно |
 | 2 | Весь цикл продаж в одном кабинете | Свой сайт, приложение, аналитика, управление рекламой и логистикой, деньги, остатки и отзывы | О платформе |
 | 3 | Свои каналы продаж за один день | Онлайн-витрины без подрядчиков, с привязкой к Telegram и Max — рабочие, красивые и с твоей наценкой | Сделать сайт |
-| 4 | Стиль уникальный, как ты сам | Выбирай из стильных шаблонов и докручивай, пока не будет идеально подходить под твой вкус | Посмотреть шаблоны |
+| 4 | Стиль магазина уникальный, как ты сам | Выбирай из стильных шаблонов и докручивай, пока не будет идеально подходить под твой вкус | Посмотреть шаблоны |
 | 5 | Управляй своим бизнесом на маркетплейсах | Даём сводную аналитику, картину по заказам, остаткам, логистике. Помогаем выбрать самые продающие карточки товаров | Подключить |
 | 6 | Смелые уже с нами | Огромные корпорации и небольшие бизнесы уже вернули контроль в свои руки с нашей платформой | Все кейсы |
 | 7 | Продавай по своим правилам | Верни контроль над бизнесом и заставь его работать на твою мечту | Начать бесплатно |
@@ -341,6 +341,10 @@ The column floor is a composition choice, not a constraint — how much screen t
 before the frame takes the rest. It stopped being a constraint when the xl size came down: at 36px the longest word in the
 copy sits well inside a 380px column.
 
+**Titles are set with `text-wrap: balance`**, so lines even out instead of each being filled
+to the column edge. It never breaks a word, so it composes with the non-breaking spaces
+rather than fighting them.
+
 **Hyphenation is off, deliberately.** It was on while titles set at 44px and a long word
 could overflow, and it then did harm: `hyphens: auto` split `бизнесом` across two lines to
 even out the rag, when the word fits whole on the next line. Only `overflow-wrap: break-word`
@@ -413,11 +417,19 @@ Figma's own `#1E1E1E` canvas in as a full-bleed `<rect>`.
 | Section | File | Figma node | Source |
 |---|---|---|---|
 | 1 — hero | `assets/images/hero.webp` | `196:53708` | 1118×789, exported @2x → 2236×1578, cwebp `-q 82`, 101 KB |
+| 2 — capabilities | `assets/images/capabilities.webp` | `204:51472` | same size and export, cwebp **`-lossless`**, 205 KB |
 
 Slides are filled with a CSS `background-image` on
-`.stage-frame__slide[data-for="…"]`, `center / cover`. The hero source is 1.42:1 against a
-4:3 frame, so `cover` trims about 66px off each side at @2x — measured, and the client is
-fine with it (§3 already notes the ratio mismatch).
+`.stage-frame__slide[data-for="…"]`, `center / cover`. Every source so far is 1.42:1 against
+a 4:3 frame, so `cover` trims 33px off each side at 1x — measured, and the client is fine
+with it (§3 already notes the ratio mismatch). On the capabilities screen that crop is more
+visible than on a photograph: it clips the user avatar at the right edge and takes the
+logo's left margin. `contain` would show the whole screen at the cost of ~12px of frame tint
+above and below. Raised, not decided.
+
+**A UI screen is encoded lossless, a photograph is not.** On the capabilities screen
+`-lossless` came out both smaller and sharper than `-q 90` (205 KB against 207 KB), and
+lossy encoding softens small type.
 
 A slide that carries an image gets `data-filled="true"` in the markup, which drops the
 frame's dashed placeholder outline via `--frame-outline: transparent` — otherwise it is
