@@ -228,6 +228,8 @@ img { display: block; max-width: 100%; height: auto; }
 /* ---------- section ---------- */
 
 .section {
+  position: relative;
+  z-index: 1;
   min-height: 100vh;
   scroll-snap-align: start;
   scroll-snap-stop: always;
@@ -272,6 +274,24 @@ img { display: block; max-width: 100%; height: auto; }
 .section__frame-slot {
   aspect-ratio: 4 / 3;
   width: var(--frame-w);
+}
+
+/* ---------- photographic ground ----------
+   One section (customization) is backed by a photograph instead of a flat colour. It
+   sits above the page's painted ground and below everything else, its opacity is
+   interpolated by the same scroll that mixes the colours, and it drifts vertically a
+   little slower than the content. Taller than the viewport so the drift never exposes
+   an edge. Experimental — the client may roll this back. */
+.stage-photo {
+  position: fixed;
+  inset: -12vh 0;
+  /* Layer 0, with the content explicitly on layer 1 below. A negative z-index would
+     also work, but only because the body's background propagates to the canvas — too
+     subtle a thing to rest the whole page on. */
+  z-index: 0;
+  opacity: 0;
+  background: url("../images/customization.webp") center / cover no-repeat;
+  will-change: opacity, transform;
 }
 
 /* ---------- the frame that stays ---------- */
@@ -319,6 +339,8 @@ img { display: block; max-width: 100%; height: auto; }
    position is the end of the page and therefore reachable. Aligning it to the
    top would put its snap point past the maximum scroll. */
 .footer {
+  position: relative;
+  z-index: 1;
   color: var(--ink);
   padding: 96px var(--page-pad);
   scroll-snap-align: end;
@@ -351,20 +373,15 @@ img { display: block; max-width: 100%; height: auto; }
   margin-top: 32px;
 }
 
-/* Same trick as the logo mark: masked, so the icon follows the ink.
-   The urls live here, not in an inline style: a url() inside a custom property is
-   resolved against the stylesheet that *uses* it, so an inline `--icon` pointing at
-   `assets/icons/...` was being fetched from `assets/css/assets/icons/...`. */
-.footer__icon--telegram  { --icon: url("../icons/telegram.svg"); }
-.footer__icon--instagram { --icon: url("../icons/instagram.svg"); }
-.footer__icon--vk        { --icon: url("../icons/vk.svg"); }
-.footer__icon--mail      { --icon: url("../icons/mail.svg"); }
-
+/* Placed, not painted. These icons cannot be masked and they do not need to be: each
+   one is a two-colour asset — a white squircle badge with the glyph carved out over a
+   #0F0F0F backplate — so the glyph is a difference in colour, not in alpha. A mask reads
+   alpha, and 93% of the box is opaque, so masking rendered a solid square. Nothing is
+   lost by placing them: the footer's ground is black in every state, so there is no
+   recolour to follow. Measured 2026-09-02, and the vendored files are byte-identical to
+   a fresh export of Figma node 201:56530. */
 .footer__icon {
   display: block;
   width: 40px;
   height: 40px;
-  background: var(--ink);
-  mask: var(--icon) center / contain no-repeat;
-  -webkit-mask: var(--icon) center / contain no-repeat;
 }

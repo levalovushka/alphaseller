@@ -103,8 +103,8 @@ period inside a subtitle (section 5) stays.
 ### Header
 
 - Logo (Alpha Seller only — no Alfa-Bank lockup).
-- Links: `продукты`, `тарифы`, `крупному бизнесу`, `примеры`, `блог`.
-- Button: `начать бесплатно`.
+- Links: `Продукты`, `Тарифы`, `Крупному бизнесу`, `Примеры`, `Блог`.
+- Button: `Начать бесплатно`.
 - **Full-bleed**, not inside the page container: 16px from the top, 20px from both edges.
   The height follows from the padding plus the 52px controls; nothing fixes it — it lands
   at 88px. The bottom padding (20px) is still a placeholder.
@@ -121,10 +121,17 @@ styling**. No red panel, no pills: black background, continuous with the closer.
 
 - Column 1: `support@alfasell.com`, `© Альфа-Селлер, 2026`, plus social icons
   (Telegram, Instagram, VK, email).
-- Column 2: `продукты`, `тарифы`, `крупному бизнесу`, `примеры`.
-- Column 3: `блог`, `база знаний`, `реферальная программа`, `о компании`.
+- Column 2: `Продукты`, `Тарифы`, `Крупному бизнесу`, `Примеры`.
+- Column 3: `Блог`, `База знаний`, `Реферальная программа`, `О компании`.
 - Column 4: `Публичная оферта`, `Политика конфиденциальности`,
   `Согласие на обработку персональных данных`.
+
+**Every link on the page is sentence case — capital first letter, lowercase rest.** That
+covers the header nav and all four footer columns; the client asked for it on 2026-09-02
+because the lowercase nav and the capitalised legal column read as two different systems.
+Only `support@alfasell.com` stays as it is — it is an address, not a label. Done in the
+markup, not with `text-transform`: `capitalize` would upper-case every word and give
+"Крупному Бизнесу".
 
 ## 5. Motion
 
@@ -205,6 +212,23 @@ by its own docs does not coexist with CSS scroll snapping. Not worth the depende
 what native snapping does in three declarations. Do not re-litigate this without a new
 reason.
 
+### The photographic ground (experimental)
+
+The customization section is backed by a photograph instead of a flat colour —
+`assets/images/customization.webp`, from Figma node `201:56528`, 1858×2000, 75 KB.
+`.stage-photo` is a fixed layer that covers the viewport with `background-size: cover`,
+its opacity interpolated by the same scroll that mixes the colours (0 → 1 → 0 across the
+two neighbouring transitions), drifting ±60px against the scroll so it sits further back
+and dissolves rather than leaves. The section keeps `data-theme="black"`, so the colour
+underneath the photo is black and the ink stays white.
+
+Layering is explicit — photo on `z-index: 0`, sections and footer on `1`, frame on `5`,
+header on `10`. A negative z-index would also work, but only by relying on the body's
+background propagating to the canvas; too subtle to rest the page on.
+
+**The client called this a test and may roll it back.** It is one `<div>`, one CSS block,
+one `data-photo="true"` attribute and about ten lines of JS.
+
 ### The `section:change` event
 
 Every switch fires a `CustomEvent` on `document`, so anything later — filling a slide,
@@ -260,6 +284,22 @@ recolor.
 
 **The header uses the mark only, inside a 52×52 rounded square.** The full lockup is not
 used on this page.
+
+### Social icons
+
+Vendored in `assets/icons/` as `telegram.svg`, `instagram.svg`, `vk.svg`, `mail.svg`, from
+Figma node `201:56530` (four 52.94×52.94 groups). Verified 2026-09-02: the vendored files
+are **byte-identical** to a fresh export, so there is nothing to re-pull.
+
+**They are two-colour assets and must be placed as `<img>`, never masked.** Each is a white
+squircle badge whose glyph is carved out of the badge path over a `#0F0F0F` backplate rect —
+the glyph is a difference in *colour*, not in alpha. 93.1% of the box is opaque (measured by
+rasterising each file to 40×40 and counting `alpha > 200`), so `mask` painted a solid
+square. Placing them costs nothing: the footer's ground is black in every state, so there is
+no recolour for the icon to follow. Rendered at 40×40.
+
+Note the export you want is the **vector-layer** SVG, not the node export — the latter bakes
+Figma's own `#1E1E1E` canvas in as a full-bleed `<rect>`.
 
 ### Product screens
 
@@ -372,6 +412,7 @@ Known nodes:
 | `196:46920` | Logo (full lockup + mark). |
 | `196:46921` | Footer element inventory. |
 | `196:46923` | Product screens (4 frames, 1366×964 each). |
+| `201:56530` | Social icons — Telegram, Instagram, VK, mail. |
 
 `get_metadata` on `1:49642` and on `196:46923` overflows the MCP transport. Read frame by
 frame; ask the client for direct links.

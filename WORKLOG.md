@@ -1,5 +1,83 @@
 # Worklog
 
+## 2026-09-02 — photographic ground for the customization section (experiment)
+
+**What changed.** New `assets/images/customization.webp` (from Figma node `201:56528`,
+1858×2000, 75 KB — the Figma export is a 9 MB PNG, converted with `cwebp -q 80`).
+`index.html`: a `.stage-photo` layer and `data-photo="true"` on the customization section.
+`assets/css/base.css`: the fixed photo layer, and explicit stacking — photo 0, sections and
+footer 1, frame 5, header 10. `assets/js/main.js`: photo opacity joins the colour
+interpolation, a scrubbed ±60px parallax runs across the section, and a load-time catch-up
+pass was added. `CONTEXT.md` records it as an experiment that may be rolled back.
+
+**Why.** The client asked to try a photograph as one section's background, with a light
+parallax so it drifts and dissolves more slowly than the content.
+
+**A real bug found on the way.** A deep link or a reload part-way down the page left the
+reveals permanently at `opacity: 0` — ScrollTrigger does not fire `onEnter` for triggers the
+page opens below, and with `once: true` they never fired at all. Reproduced at
+`/#customization`: `titleOpacity` was `0` and stayed there. The reveals are now collected
+into an array, and after `ScrollTrigger.refresh()` any whose trigger the page opened below
+is jumped to its end state.
+
+**How it was verified.** Live DOM at 1440×900, image request 200, `img.decode()` succeeds at
+1858×2000 with sampled pixels matching the photo. With snapping temporarily off, the photo's
+opacity across the passage reads 0.00 at 1800, 0.50 at 2250, 1.00 at 2700, 0.50 at 3150,
+0.00 at 3600, and stays 0 everywhere else including both black sections at the end; the
+parallax runs 60 → 0 → −60 linearly over the same range. Deep-linking to `/#customization`
+now settles with title and subtitle at opacity 1, ground black, photo at 1.
+
+**Harness note.** Screenshots of this section came back pure black several times. The cause
+is the tool, not the page: `screenshot` eventually returned *"the Browser pane is not
+displayed, so the page is not compositing frames"*. Composited layers (the fixed photo, with
+`will-change`) are the first thing to go missing. **The photograph has not been seen by
+anyone yet — it needs a human look.**
+
+## 2026-09-02 — footer social icons placed instead of masked
+
+**What changed.** `index.html`: the four `<span class="footer__icon">` masks are `<img>`
+again, pointing straight at `assets/icons/*.svg`. `assets/css/base.css`: the `--icon`
+custom properties and the `mask` / `-webkit-mask` / `background: var(--ink)` block are gone;
+`.footer__icon` is now just `display: block; width: 40px; height: 40px`. `CONTEXT.md` §7
+gains a "Social icons" subsection with the measurement and the rule, and §10 gains node
+`201:56530`.
+
+**Why.** The icons rendered as solid squares. Cause is the assets, not the CSS: each file is
+a white squircle badge whose glyph is carved out of the badge path over a `#0F0F0F`
+backplate, so the glyph is a difference in colour, not in alpha — and `mask` reads alpha.
+Nothing is lost by placing them, because the footer ground is black in every state.
+
+**How it was verified.** Rasterised each file to 40×40 in a canvas and counted pixels.
+Before, as a mask source: `alpha > 200` over **93.1%** of the box in all four — a solid
+square. After, drawing the live `<img>` elements: telegram 1227 white / 251 dark, vk 1251 /
+196, mail 1173 / 269, instagram 1152 / 212, 52 transparent corner px each — two colours, the
+badge and the glyph. DOM confirms `tagName IMG`, `mask none`, `filter none`, 40×40 box,
+`naturalWidth 53`. Pulled fresh SVGs from Figma `201:56530` and diffed them against the
+vendored files: identical, byte for byte, all four.
+
+**Left undone.** The screenshot check is still blocked — the browser pane is hidden, the
+compositor does not repaint and every screenshot of the footer comes back solid black, so
+the evidence above is pixel measurement through canvas, not a visual. The node-level Figma
+export is unusable (it bakes a `#1E1E1E` canvas rect in); only the vector-layer export is
+clean. The header logo mark keeps its mask — its alpha is real, 52.5% coverage.
+
+## 2026-09-02 — sentence case on every link
+
+**What changed.** `index.html`: the 5 header nav links and the 8 lowercase footer links in
+columns 2 and 3 are now sentence case (`продукты` → `Продукты`, `о компании` → `О компании`).
+Column 4 was already capitalised; `support@alfasell.com` is left alone. `CONTEXT.md` §4:
+header and footer inventories updated, with the rule and the reason recorded.
+
+**Why.** The lowercase nav next to the capitalised legal column read as two different
+systems. Client asked for one.
+
+**How it was verified.** Reloaded on `localhost:4321` and read the live DOM: all 5 nav and
+all 12 footer link strings; the "first character is not upper case" filter returns `[]`
+apart from the email. Done in the markup, not with `text-transform: capitalize` — that
+would have produced "Крупному Бизнесу".
+
+**Left undone.** Nothing on this item. Section titles, subtitles and CTA labels untouched.
+
 ## 2026-09-02 — colour interpolated against the scroll
 
 **What changed.** The colour system is now two live variables on `<html>`, `--ground` and

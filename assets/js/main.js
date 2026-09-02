@@ -13,6 +13,7 @@ gsap.registerPlugin(ScrollTrigger);
 const root = document.documentElement;
 const header = document.querySelector('.header');
 const frame = document.querySelector('.stage-frame');
+const photo = document.querySelector('.stage-photo');
 const slides = gsap.utils.toArray('.stage-frame__slide');
 const grounds = gsap.utils.toArray('.section, .footer');
 
@@ -46,7 +47,13 @@ function paint(ground, ink) {
 }
 
 function coloursOf(el) {
-  return { ground: rgb(GROUND[el.dataset.theme]), ink: rgb(INK[el.dataset.ink]) };
+  return {
+    ground: rgb(GROUND[el.dataset.theme]),
+    ink: rgb(INK[el.dataset.ink]),
+    /* 1 on the one section that is backed by a photograph, 0 everywhere else — it
+       cross-fades on the same scroll as the colours. */
+    photo: el.dataset.photo === 'true' ? 1 : 0,
+  };
 }
 
 /* The colour is interpolated across the scroll from one ground to the next, not
@@ -67,6 +74,7 @@ grounds.forEach((ground, i) => {
     onUpdate: (self) => {
       const t = self.progress;
       paint(mix(from.ground, to.ground, t), mix(from.ink, to.ink, t));
+      photo.style.opacity = String(from.photo + (to.photo - from.photo) * t);
     },
   });
 });
@@ -129,28 +137,65 @@ gsap.to(frame, {
   },
 });
 
+/* The photograph drifts against the scroll — slower than the text, so it feels set
+   further back and dissolves rather than leaves. Motion only, so it goes with the rest
+   of the motion when the visitor asks for less. */
+gsap.matchMedia().add('(prefers-reduced-motion: no-preference)', () => {
+  gsap.fromTo(
+    photo,
+    { y: 60 },
+    {
+      y: -60,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: document.querySelector('[data-photo="true"]'),
+        start: 'top bottom',
+        end: 'bottom top',
+        scrub: true,
+      },
+    }
+  );
+});
+
 /* ---------- reveals ----------
    The trigger is the title, not the section: sections are a full viewport tall with
    their content centred, so anything anchored to the section fires while the content
    is still a screen below the fold and the animation is over before it comes into
    view. Skipped entirely when the visitor asked for less motion. */
+const reveals = [];
+
 gsap.matchMedia().add('(prefers-reduced-motion: no-preference)', () => {
   gsap.utils.toArray('.section').forEach((section) => {
     const targets = section.querySelectorAll(
       '.section__title, .section__subtitle, .btn'
     );
 
-    gsap.from(targets, {
-      y: 24,
-      opacity: 0,
-      duration: 0.8,
-      ease: 'power2.out',
-      stagger: 0.08,
-      scrollTrigger: {
-        trigger: section.querySelector('.section__title'),
-        start: 'top 90%',
-        once: true,
-      },
-    });
+    reveals.push(
+      gsap.from(targets, {
+        y: 24,
+        opacity: 0,
+        duration: 0.8,
+        ease: 'power2.out',
+        stagger: 0.08,
+        scrollTrigger: {
+          trigger: section.querySelector('.section__title'),
+          start: 'top 90%',
+          once: true,
+        },
+      })
+    );
   });
+});
+
+/* A reload part-way down the page, or a deep link like /#customization, opens below
+   most of these triggers. Two things go wrong without this pass: every scrubbed value
+   stays at its CSS default until the first scroll (the ground would stay the hero's
+   and the photograph invisible), and any reveal the page opened below never fires, so
+   its text is left sitting at opacity 0 — permanently, since it only fires `once`. */
+ScrollTrigger.refresh();
+ScrollTrigger.update();
+
+reveals.forEach((tween) => {
+  const trigger = tween.scrollTrigger;
+  if (trigger && window.scrollY > trigger.start) tween.progress(1);
 });

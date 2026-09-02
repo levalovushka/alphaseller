@@ -16,11 +16,11 @@
     <span class="header__mark"></span>
   </a>
   <nav class="header__nav" aria-label="Основная навигация">
-    <a class="header__link" href="#">продукты</a>
-    <a class="header__link" href="#">тарифы</a>
-    <a class="header__link" href="#">крупному бизнесу</a>
-    <a class="header__link" href="#">примеры</a>
-    <a class="header__link" href="#">блог</a>
+    <a class="header__link" href="#">Продукты</a>
+    <a class="header__link" href="#">Тарифы</a>
+    <a class="header__link" href="#">Крупному бизнесу</a>
+    <a class="header__link" href="#">Примеры</a>
+    <a class="header__link" href="#">Блог</a>
   </nav>
   <button class="btn header__cta" type="button">Начать бесплатно</button>
 </header>
@@ -36,6 +36,10 @@
   <div class="stage-frame__slide" data-for="audience"></div>
   <div class="stage-frame__slide" data-for="closer"></div>
 </div>
+
+<!-- A photographic ground for one section. Fades in and out with the section change
+     and drifts slower than the content. Experimental — may be rolled back. -->
+<div class="stage-photo" aria-hidden="true"></div>
 
 <main>
 
@@ -78,7 +82,7 @@
     </div>
   </section>
 
-  <section class="section" id="customization" data-theme="black" data-ink="light">
+  <section class="section" id="customization" data-theme="black" data-ink="light" data-photo="true">
     <div class="section__inner">
       <div class="section__lead">
         <h2 class="section__title">Уникальное, как&nbsp;твой бизнес</h2>
@@ -139,25 +143,25 @@
       <a class="footer__link" href="#">support@alfasell.com</a>
       <p class="footer__copy">© Альфа-Селлер, 2026</p>
       <ul class="footer__socials">
-        <li><a class="footer__social" href="#" aria-label="Telegram"><span class="footer__icon footer__icon--telegram"></span></a></li>
-        <li><a class="footer__social" href="#" aria-label="Instagram"><span class="footer__icon footer__icon--instagram"></span></a></li>
-        <li><a class="footer__social" href="#" aria-label="ВКонтакте"><span class="footer__icon footer__icon--vk"></span></a></li>
-        <li><a class="footer__social" href="#" aria-label="Почта"><span class="footer__icon footer__icon--mail"></span></a></li>
+        <li><a class="footer__social" href="#" aria-label="Telegram"><img class="footer__icon" src="assets/icons/telegram.svg" alt="" width="53" height="53"></a></li>
+        <li><a class="footer__social" href="#" aria-label="Instagram"><img class="footer__icon" src="assets/icons/instagram.svg" alt="" width="53" height="53"></a></li>
+        <li><a class="footer__social" href="#" aria-label="ВКонтакте"><img class="footer__icon" src="assets/icons/vk.svg" alt="" width="53" height="53"></a></li>
+        <li><a class="footer__social" href="#" aria-label="Почта"><img class="footer__icon" src="assets/icons/mail.svg" alt="" width="53" height="53"></a></li>
       </ul>
     </div>
 
     <nav class="footer__col" aria-label="Продукт">
-      <a class="footer__link" href="#">продукты</a>
-      <a class="footer__link" href="#">тарифы</a>
-      <a class="footer__link" href="#">крупному бизнесу</a>
-      <a class="footer__link" href="#">примеры</a>
+      <a class="footer__link" href="#">Продукты</a>
+      <a class="footer__link" href="#">Тарифы</a>
+      <a class="footer__link" href="#">Крупному бизнесу</a>
+      <a class="footer__link" href="#">Примеры</a>
     </nav>
 
     <nav class="footer__col" aria-label="Компания">
-      <a class="footer__link" href="#">блог</a>
-      <a class="footer__link" href="#">база знаний</a>
-      <a class="footer__link" href="#">реферальная программа</a>
-      <a class="footer__link" href="#">о компании</a>
+      <a class="footer__link" href="#">Блог</a>
+      <a class="footer__link" href="#">База знаний</a>
+      <a class="footer__link" href="#">Реферальная программа</a>
+      <a class="footer__link" href="#">О компании</a>
     </nav>
 
     <nav class="footer__col" aria-label="Документы">
