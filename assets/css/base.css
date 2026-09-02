@@ -459,20 +459,7 @@ img { display: block; max-width: 100%; height: auto; }
   --frame-outline: transparent;
 }
 
-/* The label the frame carries once it has become the call to action. Its opacity is
-   scrubbed with the rest of the transformation; it only takes clicks at the end. */
-.stage-frame__cta {
-  display: grid;
-  place-items: center;
-  width: 100%;
-  height: 100%;
-  color: var(--c-black);
-  text-decoration: none;
-  opacity: 0;
-  pointer-events: none;
-}
 
-.stage-frame[data-cta="true"] .stage-frame__cta { pointer-events: auto; }
 
 @media (prefers-reduced-motion: reduce) {
   .stage-frame,
@@ -508,7 +495,13 @@ img { display: block; max-width: 100%; height: auto; }
   gap: 32px;
 }
 
-.cases__head .section__title { max-width: var(--col-min); }
+/* The cases heading is the one place the xxl size is used. Its measure is wider than a
+   text column so it sets in two lines — 560 is a composition guess, not a client number. */
+.cases__head .section__title--xxl {
+  max-width: 560px;
+  font-size: var(--fs-xxl);
+  line-height: var(--lh-xxl);
+}
 
 /* Four equal cards along the bottom of the screen. Their width comes from the grid and
    their height from the ratio, capped by whatever the row actually has. */
@@ -524,22 +517,24 @@ img { display: block; max-width: 100%; height: auto; }
   flex-direction: column;
   justify-content: space-between;
   gap: 32px;
-  aspect-ratio: 7 / 6;
+  aspect-ratio: 1 / 1;
   max-height: 100%;
   padding: 28px;
   border-radius: var(--radius-btn);
-  /* The warm dark from the palette, which nothing else on the page uses. The card keeps
-     its own ink: it is dark whatever the section under it is doing. */
-  background: var(--c-graphite);
-  color: var(--c-white);
+  /* The card keeps its own colours: white on the smoky section, whatever --ink is doing. */
+  background: var(--c-white);
+  color: var(--c-black);
 }
 
 @supports (corner-shape: squircle) {
   .case { corner-shape: squircle; }
 }
 
-/* The partner logos ship white on transparent, which is why the cards are dark on a
-   light section rather than the other way round. */
+/* The partner logos ship white on transparent — there is no dark version of the source
+   artwork, so the three that are pure white are inverted to sit on a white card. M.Reason
+   is not: it is dark lettering on its own white plate and already reads correctly. */
+.case__logo[data-invert="true"] { filter: invert(1); }
+
 .case__logo {
   /* Without this the flex column stretches the box to the card's width; the image would
      still be drawn correctly by object-fit, but the box would lie about its size. */

@@ -1,5 +1,89 @@
 # Worklog
 
+## 2026-09-02 — square white cards, xxl in use, the frame stops becoming a button
+
+**What changed.** `assets/css/base.css`: `.case` is square (`aspect-ratio: 1 / 1`), white with
+its own black ink; the three pure-white logos get `filter: invert(1)`; the cases heading takes
+`--fs-xxl`. `index.html`: `data-invert` on those three logos, `--xxl` class on the heading,
+and the frame's `<a class="stage-frame__cta">` removed — the frame is decorative again.
+`assets/js/main.js`: the whole `morph()` block and its trigger are gone; the frame now only
+has its exit, and `settleFrame()` shrank to match. `CONTEXT.md` rewritten on all three points.
+
+**Why.** Client: cards square and white, "С нами работают самые смелые" in the new xxl size,
+and the closer's button detached from the frame while he redraws that screen.
+
+**A knock-on worth knowing.** The partner logos are white on transparent and there is no dark
+version of the source artwork — I checked the raw bitmaps behind the Figma nodes, they are
+white too. On a white card the three pure-white ones are inverted in CSS. M.Reason is left
+alone: it is dark lettering on its own white plate. Real dark exports would beat the filter.
+
+**How it was verified.** Live DOM, no failed resources.
+- Frame: 283 and visible on the hero and marketplaces, −617 and off screen on the cases
+  **and on the closer**, back to 283 after scrolling to the top. No `.stage-frame__cta` in
+  the document, and the closer's middle row is empty.
+- Cards: 295×295 at 1440 and 390×390 at 1920, `rgb(255, 255, 255)` with black text, the
+  grid fitting the screen at both. `filter` on the flagged logos computes to `invert(1)`.
+- Heading: 56/56 at 1440 and 64 at 1920, two lines at both.
+- No horizontal overflow; the closer still fits its screen.
+
+**Mine, not the client's.** The heading's 560px measure — it is what makes the xxl title set
+in two lines rather than four.
+
+## 2026-09-02 — tabbed panes in the capabilities frame
+
+**What changed.** `index.html`: the capabilities slide now holds three `.frame-pane`s and a
+`.frame-tabs` strip of three buttons (`Продвижение`, `Заказы`, `Логистика` — capitalised,
+per the sentence-case rule); it lost `aria-hidden`, because it takes clicks.
+`assets/css/base.css`: `.frame-pane` (absolute, `cover`, cross-faded on `--tab-fade`),
+`.frame-tabs` (below the frame at `top: 100%`, `pointer-events: auto` inside the frame's
+`none`), `.frame-tab` (a two-stop gradient clipped to the text with `background-clip: text`,
+swept by `--p`), four new tokens, and `.frame-pane` added to the squircle group. The
+capabilities image moved off the slide onto the first pane. `assets/js/main.js`: a tabs
+controller — one GSAP tween per dwell that both moves `--p` and advances the pane on
+completion; click switches to manual for the page's life; `stage()` gained the gate that
+makes the strip live only while its slide is fully on stage; `currentSection()` extracted
+out of `settleSlides()`.
+
+**Why.** Client's spec: tabs under the frame on section 2, green fill, 5s auto-advance,
+click drops to manual until reload.
+
+**The gate moved off `section:change`.** It was the obvious hook and it was wrong: a
+discrete toggle can be missed on a jump, and it is processed in GSAP's tick loop. `--t` is
+written on every path instead, and `stage()` is its single writer, so the gate is right for
+a crossing, a jump, a deep link and a refresh alike.
+
+**How it was verified.** `localhost:4321` at 1440×900, snap off, `ScrollTrigger.update()`
+after each move on a clean load:
+
+| scrollY | slide `--t` | strip inert |
+|---|---|---|
+| 0 (load) | 0 | true |
+| 450 | 0.5 | true |
+| 899 | 0.9989 | **false** |
+| 900 | 1 | false |
+| 450 (back up) | 0.5 | **true** |
+| 0 | 0 | true |
+
+Timer, driven by real elapsed time with `gsap.ticker.lagSmoothing(0)` and manual ticks
+(the pane's rAF is frozen while the browser pane is hidden): panes cycle
+`promotion → orders → logistics → promotion`, with the fill mid-sweep at 59.98% two and a
+half seconds into a dwell. Real pointer click on `Продвижение` at (346, 371): `--p` 100% on
+it, 0% on the others, pane switched, `aria-selected` moved, focus on the button — so the
+click really does get through the frame's `pointer-events: none`. Then +3s and +6s: no
+advance; left the section and returned: still manual, not restarted. Computed style on a
+tab: `background-clip: text`, `color: rgba(0, 0, 0, 0)`, gradient
+`rgb(166, 237, 0)` → `color(srgb 0.685 0.691 0.7)`. Strip measures 295px wide, 32px below
+the frame. `node --check` clean, snap restored.
+
+**Left undone.** Two of the three panes have no image — the client owes the Figma nodes for
+`Заказы` and `Логистика`; until then the frame's own tint shows through on those two.
+`--tab-fade`, `--tab-gap`, `--tab-drop`, the idle grey (25% ink) and the `md` type are my
+placeholders. One reading is still open: on click the chosen tab stays fully green, but
+"заливка зеленым выключается" could mean it should drop to ink instead. Keyboard support is
+whatever native buttons give — no arrow-key roving tabindex. `onLeave` / `onLeaveBack` pin
+the crossing ends through GSAP's toggle path, which this preview cannot exercise; the ends
+were confirmed through `onUpdate` at 0.0011 and 0.9989 instead.
+
 ## 2026-09-02 — partner logos, cases back to smoke, an xxl token
 
 **What changed.** `assets/logos/` — four partner logos vendored from Figma node `32:29061`

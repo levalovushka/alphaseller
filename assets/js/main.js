@@ -5,7 +5,7 @@
    what the frame holds changes as the section changes.
      1. the ground colour, the ink and the frame's slides are all interpolated against
         the same scroll, so a section change lands as one movement,
-     2. the frame becomes the closing call to action,
+     2. the frame leaves upward on the one section that has none,
      3. each section's text reveals once as it enters the viewport.
    The header never hides. */
 
@@ -85,8 +85,17 @@ function coloursOf(el) {
 
 const slideFor = (id) => slides.find((slide) => slide.dataset.for === id);
 
+/* One slide holds interactive content — the capabilities tabs — so it has to know how far
+   on stage it is: its controls must not take clicks or focus from behind another section.
+   `stage()` is the single writer of `--t`, so the gate hangs off it and is right in every
+   path: a crossing, a jump, a deep link, a refresh. Assigned by the controller below. */
+const tabsSlide = document.querySelector('.frame-tabs')?.closest('.stage-frame__slide');
+let gateTabs = () => {};
+
 function stage(slide, t) {
-  if (slide) slide.style.setProperty('--t', String(t));
+  if (!slide) return;
+  slide.style.setProperty('--t', String(t));
+  if (slide === tabsSlide) gateTabs(t);
 }
 
 grounds.forEach((ground, i) => {
@@ -207,10 +216,6 @@ grounds.forEach((ground) => {
 const DWELL = 5;   /* seconds, the client's number — mirrored by --tab-dwell in the CSS */
 const tabStrip = document.querySelector('.frame-tabs');
 
-/* Assigned below when the strip exists; called again after the load-time refresh, once the
-   resting section is actually known. */
-let gateTabs = () => {};
-
 if (tabStrip) {
   const tabs = gsap.utils.toArray('.frame-tab', tabStrip);
   const panes = gsap.utils.toArray('.frame-pane');
@@ -269,114 +274,56 @@ if (tabStrip) {
     });
   });
 
-  /* On stage: run. Off stage: stop, and take the strip out of the tab order. */
-  gateTabs = (id) => {
-    const onStage = id === 'capabilities';
+  /* Driven by the slide's own `--t`, not by `section:change`: `--t` is written on every
+     path — crossing, jump, deep link, refresh — while a discrete toggle can be missed.
+     Only the edges matter, or a crossing's last frames would restart the sweep. */
+  let live = null;
+
+  gateTabs = (t) => {
+    const onStage = Number(t) > 0.99;
+    if (onStage === live) return;
+    live = onStage;
+
     tabStrip.inert = !onStage;
     if (onStage) runTimer();
     else stopTimer();
   };
 
-  document.addEventListener('section:change', (e) => gateTabs(e.detail.id));
-
   show(0);
-  gateTabs(currentSection().id);
+  gateTabs(currentSection().id === 'capabilities' ? 1 : 0);
 }
 
-/* On the way into the closer the frame becomes the call to action: it shrinks to
-   200×150 — the same 4:3, just smaller — fills with the brand green, drops its dashed
-   outline and brings up its label. All of it scrubbed to the scroll, so it is complete
-   exactly when that screen lands.
+/* One section has no frame: the cases grid fills the screen on its own. Rather than fade
+   the frame out there, it leaves the way everything else does — upward, at exactly the
+   speed of the section it belonged to, so it reads as part of that screen departing. It
+   does not come back: the closer draws its own call to action.
 
-   The fill is interpolated by hand rather than left to a CSS transition, because it
-   starts from the live tint (6% of the current ink) and ends on an opaque green. */
-const CTA_WIDTH = 200;
-const GREEN = rgb(GROUND.green);
-const closer = document.querySelector('#closer');
-const cta = frame.querySelector('.stage-frame__cta');
-let frameWidth = frame.getBoundingClientRect().width;
+   (It used to shrink into that button. The client detached the two while he redraws the
+   footer — do not re-couple them without asking.) */
+const frameless = document.querySelector('[data-frame="none"]');
+const setFrameTop = (px) => { frame.style.top = `${px}px`; };
 let frameTop = 0;
 
-/* One section has no frame: the cases grid fills the screen on its own. Rather than
-   fade the frame out there, it leaves the way everything else does — upward, at exactly
-   the speed of the section it belonged to, so it reads as part of that screen departing.
-   It is parked a full viewport above until the closer brings it back down as the button.
-
-   The two moves are adjacent ranges and share this parked position, so nothing jumps. */
-const frameless = document.querySelector('[data-frame="none"]');
-const parkedTop = () => frameTop - window.innerHeight;
-const setFrameTop = (px) => { frame.style.top = `${px}px`; };
-
-function morph(t) {
-  if (t === 0) {
-    frame.style.removeProperty('width');
-    frame.style.removeProperty('--frame-bg');
-    frame.style.removeProperty('--frame-outline');
-    /* Not `removeProperty`: at this end of the range the frame is parked above the
-       screen, where the cases section left it. */
-    setFrameTop(parkedTop());
-    cta.style.opacity = '0';
-    frame.dataset.cta = 'false';
-    return;
-  }
-
-  const ink = rgb(INK[closer.dataset.ink]);
-  const fill = ink.map((v, i) => Math.round(v + (GREEN[i] - v) * t));
-
-  /* On every other section the frame sits on the content's optical centre, which the
-     header pushes below the middle of the screen. As the button, it belongs on the
-     screen's own centre — so the last thing the morph does is take that offset out. */
-  const centre = window.innerHeight / 2;
-  const start = parkedTop();
-
-  setFrameTop(start + (centre - start) * t);
-  frame.style.width = `${frameWidth + (CTA_WIDTH - frameWidth) * t}px`;
-  frame.style.setProperty('--frame-bg', `rgba(${fill.join(', ')}, ${0.06 + 0.94 * t})`);
-  frame.style.setProperty('--frame-outline', `rgba(${ink.join(', ')}, ${0.25 * (1 - t)})`);
-  cta.style.opacity = String(t);
-  frame.dataset.cta = String(t > 0.99);
-}
-
-const morphTrigger = ScrollTrigger.create({
-  trigger: closer,
-  start: 'top bottom',
-  end: 'top top',
-  /* Re-measure the frame's natural size and position after a resize, with the inline
-     ones cleared — both come from viewport-dependent custom properties. */
-  onRefresh: () => {
-    frame.style.removeProperty('width');
-    frame.style.removeProperty('top');
-    frameWidth = frame.getBoundingClientRect().width;
-    frameTop = parseFloat(getComputedStyle(frame).top);
-  },
-  onUpdate: (self) => morph(self.progress),
-  onLeave: () => morph(1),
-  onLeaveBack: () => morph(0),
-});
-
-/* The frame's exit, on the boundary into the section that has none. */
 const exitTrigger = ScrollTrigger.create({
   trigger: frameless,
   start: 'top bottom',
   end: 'top top',
-  onRefresh: (self) => setFrameTop(frameTop - self.progress * window.innerHeight),
+  /* Re-measure the frame's natural position after a resize, with the inline one cleared:
+     it comes from viewport-dependent custom properties. */
+  onRefresh: (self) => {
+    frame.style.removeProperty('top');
+    frameTop = parseFloat(getComputedStyle(frame).top);
+    setFrameTop(frameTop - self.progress * window.innerHeight);
+  },
   onUpdate: (self) => setFrameTop(frameTop - self.progress * window.innerHeight),
-  onLeave: () => setFrameTop(parkedTop()),
+  onLeave: () => setFrameTop(frameTop - window.innerHeight),
   onLeaveBack: () => setFrameTop(frameTop),
 });
 
-/* Both of the frame's moves are scrubbed, so at rest between them nothing has run and a
-   jump can clear a whole range without firing anything — the same trap the slides have.
-   Settle it from the two triggers' own progress on load, on refresh, and on every section
-   change. Without this, scrolling from the closer back to the hero in one step left the
-   frame parked above the screen for good. */
+/* The exit is scrubbed, so a jump that clears the whole range fires nothing — the same
+   trap the slides have. Settle it from the trigger's own progress on load, on refresh and
+   on every section change. */
 function settleFrame() {
-  if (morphTrigger.progress > 0) {
-    morph(morphTrigger.progress);
-    return;
-  }
-
-  morph(0);
   setFrameTop(frameTop - exitTrigger.progress * window.innerHeight);
 }
 
@@ -442,9 +389,7 @@ gsap.matchMedia().add('(prefers-reduced-motion: no-preference)', () => {
 ScrollTrigger.refresh();
 ScrollTrigger.update();
 settleSlides();
-/* A deep link can open straight on the capabilities section, past the trigger that would
-   otherwise have started its timer. */
-gateTabs(currentSection().id);
+
 ScrollTrigger.addEventListener('refresh', settleSlides);
 
 /* Any reveal the page is already past must render finished rather than sit at its

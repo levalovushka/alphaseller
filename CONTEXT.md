@@ -117,23 +117,28 @@ Every section carries exactly three strings: title, subtitle, CTA label.
 ### Cases
 
 Section 6 is a card grid, after cash.app's stats block: the title and a `Все кейсы` button
-at the top left, four equal cards along the bottom. The section keeps the smoky ground; the
-**cards** are `--c-graphite` — the one place the warm dark from the palette is used. The
-client's screenshot showed the whole section black, but that was a layout reference, not a
-colour decision.
+at the top left, four equal cards along the bottom. The section keeps the smoky ground and the cards are
+**white and square**, carrying their own colours rather than following `--ink`. The client's
+screenshot showed the whole section black, but that was a layout reference, not a colour
+decision.
 
-Dark cards on a light section is not a free choice: the partner logos ship white on
-transparent (`assets/logos/`, from Figma node `32:29061` — KINASH, Домодедово, 12 месяцев,
-M.Reason), so they need a dark ground to be visible at all. Cards therefore carry their own
-ink rather than following `--ink`.
+The partner logos (`assets/logos/`, from Figma node `32:29061` — KINASH, Домодедово,
+12 месяцев, M.Reason) ship **white on transparent**, and there is no dark version of the
+source artwork. Three of them are therefore inverted in CSS (`[data-invert="true"]`) to sit
+on a white card. M.Reason is not: it is dark lettering on its own white plate and already
+reads correctly. Proper dark exports would be better than the filter.
+
+The heading here is the one place the `xxl` size is used.
 
 No subtitle column, so the subtitle that section used to have is currently unused.
 
-**The frame does not appear here.** The section carries `data-frame="none"`, and instead of
-fading out the frame *leaves* — upward, one viewport, at exactly the speed of the section it
-belonged to, so it reads as part of that screen departing. It is parked a viewport above
-until the closer brings it back down as the button, which is why the two moves share a
-"parked" position and nothing jumps between them.
+**The frame does not appear here, and does not come back.** The section carries
+`data-frame="none"`, and instead of fading out the frame *leaves* — upward, one viewport, at
+exactly the speed of the section it belonged to, so it reads as part of that screen
+departing. After that it stays parked above the screen for the rest of the page.
+
+It used to come back down and shrink into the closer's green button. **The client detached
+the two** while he redraws the footer — do not re-couple them without asking.
 
 **The card copy is placeholder written by me**, at the client's request, four sentences in
 the site's voice. Replace it with real cases before this goes anywhere near a customer.
@@ -144,30 +149,11 @@ The last section and the footer are a single 100vh block, not two. Title top-lef
 header, subtitle top-right, the footer's four columns along the bottom, and in the middle —
 where the frame stands on every other section — the call to action.
 
-**The call to action is the frame itself.** It does not fade out and hand over to a separate
-green block (that was the first attempt, and it was not what the client wanted). Across the
-approach to the closer the frame *becomes* the button, everything scrubbed to the scroll so
-it completes exactly as that screen lands:
-
-| | from | to |
-|---|---|---|
-| size | `--frame-w` (553 at 1440) | **200×150** — same 4:3, smaller |
-| fill | 6% of the current ink | opaque `#A6ED00` |
-| outline | 25% dashed | transparent |
-| label | invisible | `Начать бесплатно`, and it starts taking clicks |
-| position | the content's optical centre | the **screen's** centre |
-
-That last row matters: on every other section the frame sits on the optical centre of the
-content, which the header pushes ~20px below the middle of the screen. As a button it reads
-as sitting low there, so the morph takes the offset out. The closer's head also gets 32px
-more air under the navbar than a normal section's top padding gives.
-
-The label lives in the frame's `closer` slide as a real `<a>`; the other six slides stay
-`aria-hidden`. `pointer-events` only open up at the end, on `.stage-frame[data-cta="true"]`.
-The closer's middle grid row is an empty spacer — the frame is fixed and comes to rest in it.
-
-The fill is interpolated in JS rather than by a CSS transition because it starts from a live
-value: 6% of `--ink`, which is itself moving.
+**The middle of this screen is currently empty.** The frame used to travel back down and
+shrink into a green `Начать бесплатно` button here; the client detached that while he
+redraws the footer, so the middle grid row is a bare spacer and the section has no call to
+action of its own. The closer's head gets 32px more air under the navbar than a normal
+section's top padding gives.
 
 This also removed a standing problem. The old footer was ~344px tall, so it could never
 hold a snap point of its own and the closer could never centre itself before the page ran
@@ -464,6 +450,35 @@ drawn over the picture. It switches instantly rather than fading; the change lan
 cross-fade, and giving the outline a transition of its own would fight the per-frame ink
 interpolation.
 
+### The capabilities tabs
+
+Under the frame on section 2 sits a strip of three tabs — `Продвижение`, `Заказы`,
+`Логистика` — and the frame shows one pane per tab.
+
+- The active label **fills with green from left to right over 5s**, and that fill *is* the
+  timer: one GSAP tween moves `--p` and, on completion, advances to the next pane, so the
+  bar and the switch cannot drift. It wraps around.
+- **Click and it goes manual for the rest of the page's life** — the client's "до
+  перезагрузки". The timer never runs again; the chosen tab stays fully green. Leaving the
+  section and coming back does not restart it.
+- Nothing runs while the slide is off stage, and the strip is `inert` there — a slide at
+  `opacity: 0` still takes clicks and focus. The gate hangs off the slide's own `--t`
+  (> 0.99), not off `section:change`: `--t` is written on every path — crossing, jump, deep
+  link, refresh — while a discrete toggle can be missed.
+- The pane swap *is* a wall-clock cross-fade, unlike a section change: a click or a timer
+  has no scroll to scrub against.
+- The strip lives inside the slide but is positioned below the frame — slide children are
+  not clipped. It is the first user of that.
+- `prefers-reduced-motion: reduce` starts in manual mode: no carousel, no fill.
+
+**Only `Продвижение` has a screen** (`206:58220`). The other two panes are empty until the
+client supplies nodes.
+
+Mine, not the client's — `--tab-fade: 0.4s`, `--tab-gap: 28px` (the header's nav gap),
+`--tab-drop: 32px`, the idle grey at 25% ink over the ground, and the `md` type style. The
+5s dwell and the labels are his. Also his call to settle: on click the chosen tab stays
+**fully green**; "заливка выключается" could instead mean it drops to ink.
+
 ### Product screens
 
 Vendored in `assets/screens/` as flat PNGs. The client dislikes their current design and
@@ -498,7 +513,7 @@ Verified with fontTools (2026-09-02):
 
 | Style | Cut | Size / leading | Tracking | Used for |
 |---|---|---|---|---|
-| `xxl` | Hyper Medium | 56 / 56 at 1440 → 64 / 64 at 1920 | normal | **Declared, not yet used** |
+| `xxl` | Hyper Medium | 56 / 56 at 1440 → 64 / 64 at 1920 | normal | The cases heading |
 | `xl` | Hyper Medium | 36 / 36 at 1440 → 44 / 44 at 1920 | normal | Section titles |
 | `md` | Hyper Regular | 16 / 21.33 at 1440 → 18 / 24 at 1920 | 1% (`0.01em`) | Everything else |
 

@@ -27,7 +27,7 @@
 
 <!-- The frame stays put while the text columns scroll past it. One slide per section;
      the active one is swapped as the section under the header changes. -->
-<div class="stage-frame" data-ink="dark">
+<div class="stage-frame" data-ink="dark" aria-hidden="true">
   <div class="stage-frame__slide" data-for="hero" data-filled="true" aria-hidden="true"></div>
   <!-- The one slide that holds more than a picture: three panes and a tab strip under the
        frame. The strip is real markup, not aria-hidden, because it takes clicks; JS makes
@@ -37,18 +37,16 @@
     <div class="frame-pane" data-pane="orders" aria-hidden="true"></div>
     <div class="frame-pane" data-pane="logistics" aria-hidden="true"></div>
     <div class="frame-tabs" role="tablist" aria-label="Что показывает кабинет">
-      <button class="frame-tab" type="button" role="tab" data-pane="promotion" aria-selected="true">продвижение</button>
-      <button class="frame-tab" type="button" role="tab" data-pane="orders" aria-selected="false">заказы</button>
-      <button class="frame-tab" type="button" role="tab" data-pane="logistics" aria-selected="false">логистика</button>
+      <button class="frame-tab" type="button" role="tab" data-pane="promotion" aria-selected="true">Продвижение</button>
+      <button class="frame-tab" type="button" role="tab" data-pane="orders" aria-selected="false">Заказы</button>
+      <button class="frame-tab" type="button" role="tab" data-pane="logistics" aria-selected="false">Логистика</button>
     </div>
   </div>
   <div class="stage-frame__slide" data-for="speed" aria-hidden="true"></div>
   <div class="stage-frame__slide" data-for="customization" aria-hidden="true"></div>
   <div class="stage-frame__slide" data-for="marketplaces" aria-hidden="true"></div>
   <div class="stage-frame__slide" data-for="audience" aria-hidden="true"></div>
-  <div class="stage-frame__slide" data-for="closer">
-    <a class="stage-frame__cta" href="#">Начать бесплатно</a>
-  </div>
+  <div class="stage-frame__slide" data-for="closer" aria-hidden="true"></div>
 </div>
 
 <!-- A photographic ground for one section. Fades in and out with the section change
@@ -128,21 +126,21 @@
     <div class="cases">
 
       <div class="cases__head">
-        <h2 class="section__title">С&nbsp;нами работают самые смелые</h2>
+        <h2 class="section__title section__title--xxl">С&nbsp;нами работают самые смелые</h2>
         <button class="btn btn--secondary" type="button">Все кейсы</button>
       </div>
 
       <ul class="cases__grid">
           <li class="case">
-            <img class="case__logo" src="assets/logos/kinash.webp" alt="KINASH" width="120" height="40">
+            <img class="case__logo" data-invert="true" src="assets/logos/kinash.webp" alt="KINASH" width="120" height="40">
             <p class="case__text">Нарастили продажи на&nbsp;40%, потому что смогли выйти из&nbsp;операционки</p>
           </li>
           <li class="case">
-            <img class="case__logo" src="assets/logos/domodedovo.webp" alt="Домодедово" width="120" height="40">
+            <img class="case__logo" data-invert="true" src="assets/logos/domodedovo.webp" alt="Домодедово" width="120" height="40">
             <p class="case__text">Собрали витрину за&nbsp;выходные и&nbsp;в&nbsp;понедельник уже принимали заказы</p>
           </li>
           <li class="case">
-            <img class="case__logo" src="assets/logos/12mesyatsev.webp" alt="12 месяцев" width="120" height="40">
+            <img class="case__logo" data-invert="true" src="assets/logos/12mesyatsev.webp" alt="12 месяцев" width="120" height="40">
             <p class="case__text">Свели пять маркетплейсов в&nbsp;один кабинет и&nbsp;перестали терять остатки</p>
           </li>
           <li class="case">
