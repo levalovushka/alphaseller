@@ -72,7 +72,7 @@ Header + 7 sections + footer.
 | 3 | Speed | Smoky white `#E9EBEE` |
 | 4 | Customization | Black `#000000` |
 | 5 | Marketplaces | Smoky white `#E9EBEE` |
-| 6 | Cases | Black `#000000` — card grid, see below |
+| 6 | Cases | Smoky white `#E9EBEE` — card grid, see below |
 | 7 | Closer + footer | Black `#000000` — one screen, see below |
 
 **Red is not used on this page at all** (for now). Both dark sections use pure `#000000`;
@@ -117,9 +117,17 @@ Every section carries exactly three strings: title, subtitle, CTA label.
 ### Cases
 
 Section 6 is a card grid, after cash.app's stats block: the title and a `Все кейсы` button
-at the top left, four equal cards along the bottom. Black ground, cards in
-`--c-graphite` — the one place the warm dark from the palette is used. No subtitle column,
-so the subtitle that section used to have is currently unused.
+at the top left, four equal cards along the bottom. The section keeps the smoky ground; the
+**cards** are `--c-graphite` — the one place the warm dark from the palette is used. The
+client's screenshot showed the whole section black, but that was a layout reference, not a
+colour decision.
+
+Dark cards on a light section is not a free choice: the partner logos ship white on
+transparent (`assets/logos/`, from Figma node `32:29061` — KINASH, Домодедово, 12 месяцев,
+M.Reason), so they need a dark ground to be visible at all. Cards therefore carry their own
+ink rather than following `--ink`.
+
+No subtitle column, so the subtitle that section used to have is currently unused.
 
 **The frame does not appear here.** The section carries `data-frame="none"`, and instead of
 fading out the frame *leaves* — upward, one viewport, at exactly the speed of the section it
@@ -127,8 +135,8 @@ belonged to, so it reads as part of that screen departing. It is parked a viewpo
 until the closer brings it back down as the button, which is why the two moves share a
 "parked" position and nothing jumps between them.
 
-Placeholders waiting on the client: the four card logos (empty slots at the moment) and the
-card copy, which is one sentence repeated four times.
+**The card copy is placeholder written by me**, at the client's request, four sentences in
+the site's voice. Replace it with real cases before this goes anywhere near a customer.
 
 ### Closer + footer — one screen
 
@@ -490,6 +498,7 @@ Verified with fontTools (2026-09-02):
 
 | Style | Cut | Size / leading | Tracking | Used for |
 |---|---|---|---|---|
+| `xxl` | Hyper Medium | 56 / 56 at 1440 → 64 / 64 at 1920 | normal | **Declared, not yet used** |
 | `xl` | Hyper Medium | 36 / 36 at 1440 → 44 / 44 at 1920 | normal | Section titles |
 | `md` | Hyper Regular | 16 / 21.33 at 1440 → 18 / 24 at 1920 | 1% (`0.01em`) | Everything else |
 

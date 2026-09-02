@@ -29,7 +29,19 @@
      the active one is swapped as the section under the header changes. -->
 <div class="stage-frame" data-ink="dark">
   <div class="stage-frame__slide" data-for="hero" data-filled="true" aria-hidden="true"></div>
-  <div class="stage-frame__slide" data-for="capabilities" data-filled="true" aria-hidden="true"></div>
+  <!-- The one slide that holds more than a picture: three panes and a tab strip under the
+       frame. The strip is real markup, not aria-hidden, because it takes clicks; JS makes
+       it inert while this slide is off stage. -->
+  <div class="stage-frame__slide" data-for="capabilities" data-filled="true">
+    <div class="frame-pane" data-pane="promotion" data-active="true" aria-hidden="true"></div>
+    <div class="frame-pane" data-pane="orders" aria-hidden="true"></div>
+    <div class="frame-pane" data-pane="logistics" aria-hidden="true"></div>
+    <div class="frame-tabs" role="tablist" aria-label="Что показывает кабинет">
+      <button class="frame-tab" type="button" role="tab" data-pane="promotion" aria-selected="true">продвижение</button>
+      <button class="frame-tab" type="button" role="tab" data-pane="orders" aria-selected="false">заказы</button>
+      <button class="frame-tab" type="button" role="tab" data-pane="logistics" aria-selected="false">логистика</button>
+    </div>
+  </div>
   <div class="stage-frame__slide" data-for="speed" aria-hidden="true"></div>
   <div class="stage-frame__slide" data-for="customization" aria-hidden="true"></div>
   <div class="stage-frame__slide" data-for="marketplaces" aria-hidden="true"></div>
@@ -112,7 +124,7 @@
 
   <!-- Cases. The one section with no frame: it leaves upward with the section before,
        and comes back down as the closing call to action. -->
-  <section class="section section--cases" id="audience" data-theme="black" data-ink="light" data-frame="none">
+  <section class="section section--cases" id="audience" data-theme="smoke" data-ink="dark" data-frame="none">
     <div class="cases">
 
       <div class="cases__head">
@@ -122,20 +134,20 @@
 
       <ul class="cases__grid">
           <li class="case">
-            <div class="case__logo" aria-hidden="true"></div>
-            <p class="case__text">Нарастили продажи на&nbsp;40%, потому что смогли выйти из&nbsp;операционки.</p>
+            <img class="case__logo" src="assets/logos/kinash.webp" alt="KINASH" width="120" height="40">
+            <p class="case__text">Нарастили продажи на&nbsp;40%, потому что смогли выйти из&nbsp;операционки</p>
           </li>
           <li class="case">
-            <div class="case__logo" aria-hidden="true"></div>
-            <p class="case__text">Нарастили продажи на&nbsp;40%, потому что смогли выйти из&nbsp;операционки.</p>
+            <img class="case__logo" src="assets/logos/domodedovo.webp" alt="Домодедово" width="120" height="40">
+            <p class="case__text">Собрали витрину за&nbsp;выходные и&nbsp;в&nbsp;понедельник уже принимали заказы</p>
           </li>
           <li class="case">
-            <div class="case__logo" aria-hidden="true"></div>
-            <p class="case__text">Нарастили продажи на&nbsp;40%, потому что смогли выйти из&nbsp;операционки.</p>
+            <img class="case__logo" src="assets/logos/12mesyatsev.webp" alt="12 месяцев" width="120" height="40">
+            <p class="case__text">Свели пять маркетплейсов в&nbsp;один кабинет и&nbsp;перестали терять остатки</p>
           </li>
           <li class="case">
-            <div class="case__logo" aria-hidden="true"></div>
-            <p class="case__text">Нарастили продажи на&nbsp;40%, потому что смогли выйти из&nbsp;операционки.</p>
+            <img class="case__logo" src="assets/logos/mreason.webp" alt="M.Reason" width="120" height="40">
+            <p class="case__text">Запустили второй бренд, не&nbsp;нанимая ни&nbsp;одного разработчика</p>
           </li>
       </ul>
 

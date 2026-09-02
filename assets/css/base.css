@@ -20,7 +20,7 @@
   --c-smoke: #e9ebee;
   --c-green: #a6ed00;
   --c-black: #000000;
-  --c-graphite: #1a1817;  /* unused on this page */
+  --c-graphite: #1a1817;  /* the cards in the cases section */
   --c-red: #dc200c;       /* unused on this page */
 
   /* Layout — provisional, not a design decision. */
@@ -40,8 +40,11 @@
 
   /* Type — the whole site is two styles, both YFF Hyper
      (wdth 87 = "Hyper"). See CONTEXT.md §7. */
-  /* Style xl scales with the screen: 36/36 at 1440, 44/44 at 1920, held flat outside
-     that range. Leading always equals the size. */
+  /* The display sizes scale with the screen and hold flat outside 1440–1920. Leading
+     always equals the size. xxl is declared but not yet used anywhere — the client asked
+     for the token before deciding where it goes. */
+  --fs-xxl: clamp(56px, calc(32px + 1.6667vw), 64px);
+  --lh-xxl: var(--fs-xxl);
   --fs-xl: clamp(36px, calc(12px + 1.6667vw), 44px);
   --lh-xl: var(--fs-xl);
   --weight-xl: 500;  /* Hyper Medium, titles */
@@ -82,9 +85,18 @@
   --ink: var(--c-black);
   --ink-invert: var(--c-white);
 
-  /* Nothing is left on a discrete cross-fade — the slides moved onto the scroll too —
-     so this is declared and unused. Kept as the one place a wall-clock fade would go. */
+  /* Nothing tied to a section change is left on a discrete cross-fade — the slides moved
+     onto the scroll too — so this is declared and unused. Kept as the one place a
+     wall-clock fade would go. */
   --fade: 0.9s;
+
+  /* The capabilities tabs. --tab-dwell must match DWELL in main.js: the green fill is the
+     progress bar for it. TODO: --tab-fade, --tab-gap and --tab-drop are mine, not the
+     client's; 5s is his. */
+  --tab-dwell: 5s;
+  --tab-fade: 0.4s;
+  --tab-gap: 28px;
+  --tab-drop: 32px;
 
   /* Everything rounded on the page — the buttons, the logo square, the frame — takes
      the same radius. `--radius` is only the base it is derived from; nothing uses it
@@ -176,9 +188,10 @@ img { display: block; max-width: 100%; height: auto; }
   .header__logo,
   .btn,
   .stage-frame,
-  /* The slide clips its own image, so it needs the shape too — `border-radius: inherit`
-     carries the radius but not the corner shape. */
-  .stage-frame__slide { corner-shape: squircle; }
+  /* A slide and a pane each clip their own image, so they need the shape too —
+     `border-radius: inherit` carries the radius but not the corner shape. */
+  .stage-frame__slide,
+  .frame-pane { corner-shape: squircle; }
 }
 
 /* The mark is painted, not placed: a mask lets it take --ink-invert, so it stays the
@@ -373,8 +386,69 @@ img { display: block; max-width: 100%; height: auto; }
   background-image: url("../images/hero.webp");
 }
 
-.stage-frame__slide[data-for="capabilities"] {
+/* ---------- the capabilities tabs ----------
+   Three panes behind one strip of tabs under the frame. The pane swap is a wall-clock
+   cross-fade on purpose: unlike a section change, it is a discrete event — a click, or the
+   5s timer — with no scroll to scrub it against. */
+
+.frame-pane {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  opacity: 0;
+  transition: opacity var(--tab-fade) ease-in-out;
+}
+
+.frame-pane[data-active="true"] { opacity: 1; }
+
+/* TODO: only `promotion` has a screen — Figma `206:58220`. The client owes two more nodes;
+   until then those two panes are empty and the frame's own tint shows through. */
+.frame-pane[data-pane="promotion"] {
   background-image: url("../images/capabilities.webp");
+}
+
+/* Under the frame, not inside it: the slide does not clip its children. The strip takes
+   clicks even though the frame does not, and JS makes it inert while this slide is off
+   stage — an opacity of 0 still hit-tests. */
+.frame-tabs {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  translate: -50% 0;
+  margin-top: var(--tab-drop);
+  display: flex;
+  gap: var(--tab-gap);
+  white-space: nowrap;
+  pointer-events: auto;
+}
+
+/* The green fill is a progress bar drawn through the letters: a two-stop gradient clipped
+   to the text, with JS moving --p from 0% to 100% across --tab-dwell. Clicking freezes it
+   at 100% on the chosen tab and the timer never runs again. */
+.frame-tab {
+  font: inherit;
+  letter-spacing: inherit;
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+  background-color: transparent;
+  background-image: linear-gradient(
+    to right,
+    var(--c-green) 0 var(--p, 0%),
+    color-mix(in srgb, var(--ink) 25%, var(--ground)) var(--p, 0%) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* No 5s carousel for a visitor who asked for less motion — JS leaves it in manual mode
+     from the start, so the fill never animates either. */
+  .frame-pane { transition: none; }
 }
 
 /* A slide carrying its own image fills the frame edge to edge, so the empty-frame chrome
@@ -454,20 +528,26 @@ img { display: block; max-width: 100%; height: auto; }
   max-height: 100%;
   padding: 28px;
   border-radius: var(--radius-btn);
-  /* The warm dark from the palette, which nothing else on the page uses yet. */
+  /* The warm dark from the palette, which nothing else on the page uses. The card keeps
+     its own ink: it is dark whatever the section under it is doing. */
   background: var(--c-graphite);
+  color: var(--c-white);
 }
 
 @supports (corner-shape: squircle) {
   .case { corner-shape: squircle; }
 }
 
-/* Empty until the client supplies the logos. */
+/* The partner logos ship white on transparent, which is why the cards are dark on a
+   light section rather than the other way round. */
 .case__logo {
-  width: 100%;
+  /* Without this the flex column stretches the box to the card's width; the image would
+     still be drawn correctly by object-fit, but the box would lie about its size. */
+  align-self: flex-start;
+  width: auto;
   height: 40px;
-  border-radius: 4px;
-  background: color-mix(in srgb, var(--ink) 8%, transparent);
+  max-width: 100%;
+  object-fit: contain;
 }
 
 /* ---------- closer + footer ----------

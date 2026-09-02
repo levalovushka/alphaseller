@@ -146,11 +146,16 @@ showSlide(first.id);
 /* The boundary triggers cover the crossings; at rest between them nothing is running, so
    the slides are set from geometry instead. Needed on load and on a deep link, which can
    open past every boundary, and after a refresh, which re-measures at rest. */
-function settleSlides() {
+function currentSection() {
   let current = grounds[0];
   grounds.forEach((section) => {
     if (section.offsetTop <= window.scrollY + 1) current = section;
   });
+  return current;
+}
+
+function settleSlides() {
+  const current = currentSection();
   slides.forEach((slide) => stage(slide, slide.dataset.for === current.id ? 1 : 0));
 }
 
@@ -187,6 +192,96 @@ grounds.forEach((ground) => {
     },
   });
 });
+
+/* ---------- the capabilities tabs ----------
+   Three panes in the capabilities slide, one strip of tabs under the frame. The tab label
+   fills with green over DWELL seconds — the fill *is* the progress bar for the timer, so
+   the two cannot drift: the same tween moves `--p` and, on completion, advances the pane.
+
+   Click and it goes manual for the rest of the page's life: the timer never runs again and
+   the chosen tab stays fully green. The client asked for exactly that — "до перезагрузки".
+
+   Nothing runs while the slide is off stage. The strip is also made `inert` there, because
+   the slide's opacity of 0 still hit-tests. */
+
+const DWELL = 5;   /* seconds, the client's number — mirrored by --tab-dwell in the CSS */
+const tabStrip = document.querySelector('.frame-tabs');
+
+/* Assigned below when the strip exists; called again after the load-time refresh, once the
+   resting section is actually known. */
+let gateTabs = () => {};
+
+if (tabStrip) {
+  const tabs = gsap.utils.toArray('.frame-tab', tabStrip);
+  const panes = gsap.utils.toArray('.frame-pane');
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  let index = 0;
+  /* A visitor who asked for less motion starts in manual mode: no carousel, no fill. */
+  let manual = reduced;
+  let timer = null;
+
+  function stopTimer() {
+    if (timer) timer.kill();
+    timer = null;
+  }
+
+  function show(next) {
+    index = next;
+    panes.forEach((pane, n) => {
+      pane.dataset.active = String(n === index);
+    });
+    tabs.forEach((tab, n) => {
+      const on = n === index;
+      tab.setAttribute('aria-selected', String(on));
+      /* Idle tabs sit at 0%. The active one is full green when the timer is not running,
+         and swept from 0 to 100% by the tween when it is. */
+      tab.style.setProperty('--p', on && manual ? '100%' : '0%');
+    });
+  }
+
+  function runTimer() {
+    stopTimer();
+    if (manual) return;
+
+    const tab = tabs[index];
+    const sweep = { p: 0 };
+
+    timer = gsap.to(sweep, {
+      p: 100,
+      duration: DWELL,
+      ease: 'none',
+      onUpdate: () => tab.style.setProperty('--p', `${sweep.p}%`),
+      onComplete: () => {
+        tab.style.setProperty('--p', '0%');
+        show((index + 1) % tabs.length);
+        runTimer();
+      },
+    });
+  }
+
+  tabs.forEach((tab, i) => {
+    tab.addEventListener('click', () => {
+      manual = true;
+      stopTimer();
+      tabs.forEach((other) => other.style.setProperty('--p', '0%'));
+      show(i);
+    });
+  });
+
+  /* On stage: run. Off stage: stop, and take the strip out of the tab order. */
+  gateTabs = (id) => {
+    const onStage = id === 'capabilities';
+    tabStrip.inert = !onStage;
+    if (onStage) runTimer();
+    else stopTimer();
+  };
+
+  document.addEventListener('section:change', (e) => gateTabs(e.detail.id));
+
+  show(0);
+  gateTabs(currentSection().id);
+}
 
 /* On the way into the closer the frame becomes the call to action: it shrinks to
    200×150 — the same 4:3, just smaller — fills with the brand green, drops its dashed
@@ -347,6 +442,9 @@ gsap.matchMedia().add('(prefers-reduced-motion: no-preference)', () => {
 ScrollTrigger.refresh();
 ScrollTrigger.update();
 settleSlides();
+/* A deep link can open straight on the capabilities section, past the trigger that would
+   otherwise have started its timer. */
+gateTabs(currentSection().id);
 ScrollTrigger.addEventListener('refresh', settleSlides);
 
 /* Any reveal the page is already past must render finished rather than sit at its

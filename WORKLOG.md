@@ -1,5 +1,33 @@
 # Worklog
 
+## 2026-09-02 — partner logos, cases back to smoke, an xxl token
+
+**What changed.** `assets/logos/` — four partner logos vendored from Figma node `32:29061`
+(KINASH, Домодедово, 12 месяцев, M.Reason), exported at 3× and converted to webp, 1.5–4.8 KB
+each. `index.html`: the cases section carries them, its ground goes back to
+`data-theme="smoke"` / `data-ink="dark"`, and each card gets its own placeholder sentence
+instead of one repeated four times. `assets/css/base.css`: logo styling, cards keep their own
+white ink, and a new `--fs-xxl` / `--lh-xxl`. `CONTEXT.md` updated.
+
+**Why.** Client's corrections: the black section in his screenshot was a layout reference,
+not a colour decision; he asked me to write placeholder card copy; and he wants an xxl size
+declared.
+
+**A consequence worth stating.** The logos ship white on transparent, so they need a dark
+ground. With the section back to smoky white, the cards stay `--c-graphite` and carry their
+own ink — dark cards on a light section. If the cards should be light instead, the logos have
+to be re-exported in a dark version.
+
+**How it was verified.** Live DOM at 1440×900. Grounds across the page read green → smoke →
+smoke → black → smoke → **smoke** → black, so the cases section is light again. Card ground
+computes to `rgb(26, 24, 23)` with white text. All four logos load and keep their own
+proportions at 40px tall — 63, 102, 64 and 119 wide against naturals of 190, 306, 192 and 357
+at 120. No failed resources, the grid fits the screen, no horizontal overflow. `--fs-xxl`
+resolves to `clamp(56px, calc(32px + 1.6667vw), 64px)`.
+
+**Open.** `xxl` is declared and unused — it needs a home. The card sentences are mine and
+should be replaced with real cases. The section's old subtitle still has nowhere to sit.
+
 ## 2026-09-02 — cases grid, and the frame learns to leave
 
 **What changed.** `index.html`: section 6 rebuilt as `.section--cases` — black ground,
