@@ -90,13 +90,16 @@ hand rather than leaving them to `text-wrap: balance`.
 | # | Title | Subtitle | CTA |
 |---|---|---|---|
 | 1 | Одна платформа на всю онлайн-торговлю | Продавай больше, управляй с легкостью, расширяй аудиторию с единой платформой для управления электронной коммерцией | Начать бесплатно |
-| 2 | Весь цикл ⏎ в одном кабинете | Свой сайт, приложение, аналитика, управление рекламой и логистикой, деньги, остатки и отзывы | О платформе |
-| 3 | Свой сайт, ⏎ и приложение ⏎ за один день | Онлайн-витрины без подрядчиков, с привязкой к Telegram и Max — рабочие, красивые и с твоей наценкой | Сделать сайт |
+| 2 | Весь цикл ⏎ в одном кабинете | Свой сайт, приложение, аналитика, управление рекламой и логистикой, деньги, остатки и отзывы | — **dropped** |
+| 3 | Твоё приложение ⏎ и интернет магазин ⏎ за один день | Онлайн-витрины без подрядчиков, с привязкой к Telegram и Max — рабочие, красивые и с твоей наценкой | Сделать сайт |
 | 4 | Стиль магазина уникальный, как ты сам | Выбирай из стильных шаблонов и докручивай, пока не будет идеально подходить под твой вкус | Посмотреть шаблоны |
 | 5 | Управляй своим бизнесом на маркетплейсах | Даём аналитику по заказам, остаткам, логистике и помогаем выбрать лучшие карточки товаров | Подключить |
 | 6 | С нами работают самые смелые | *(unused — the cases layout has no subtitle column)* | Все кейсы |
 | 7 | Продавай по своим правилам | Верни контроль над бизнесом и заставь его работать на твою мечту | Начать бесплатно |
 
+- **Section 2 has no CTA.** `О платформе` was removed on 2026-09-02 once the frame got its
+  tabs: the tabs are the thing to interact with there, and a second control next to them
+  competed with the first.
 - Sections 1 and 7 share the CTA `Начать бесплатно`, and the header carries it too. **This
   repetition is intentional** — do not "fix" it.
 - Copy is v1 and will change. Keep every string in one place in the markup so swapping is
@@ -625,6 +628,27 @@ Known nodes:
 
 `get_metadata` on `1:49642` and on `196:46923` overflows the MCP transport. Read frame by
 frame; ask the client for direct links.
+
+## 11. Verifying in the browser
+
+Two traps, both hit more than once:
+
+- **The stylesheet caches independently of the page.** A query string on the document does
+  not bust `base.css`, so measurements can silently run against the previous CSS. Before
+  measuring anything style-dependent, swap the link:
+
+  ```js
+  const link = document.querySelector('link[rel="stylesheet"]');
+  const fresh = link.cloneNode();
+  fresh.href = '/assets/css/base.css?cb=' + Date.now();
+  document.head.appendChild(fresh);
+  await new Promise((r) => fresh.addEventListener('load', r));
+  link.remove();
+  ScrollTrigger.refresh();
+  ```
+
+- **Console errors accumulate across loads**, so a clean page still shows old 404s. Check
+  `performance.getEntriesByType('resource').filter((e) => e.responseStatus >= 400)` instead.
 
 ## 11. Open questions
 

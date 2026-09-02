@@ -1,5 +1,57 @@
 # Worklog
 
+## 2026-09-02 — speed title rewritten, and a caching trap found
+
+**What changed.** `index.html`: the speed title is now "Твоё приложение<br>и интернет
+магазин<br>за один день". `assets/css/base.css`: the frame's cap went 760 → 752.
+`CONTEXT.md`: copy table, plus a new §11 on how to verify in the browser.
+
+**Why the frame cap moved.** At 1920 the cap is what sets the text columns: with the frame
+at 760 they came out 424, and "и интернет магазин" needs 425 at the 44px xl. The title broke
+to a fourth line one pixel short of fitting. Eight pixels off the frame gives the columns
+four each — 428 — and the three lines the client asked for. Below about 1830 the cap does not
+bind, so 1440 and 1512 are untouched (frame still 456 and 519).
+
+**The trap, which matters beyond this change.** The stylesheet caches independently of the
+document: a `?v=` on the page does not bust `base.css`. The first check of this change
+reported the frame still at 760 and the title still on four lines — the file on disk had the
+new value and the browser was using the old sheet. Any style-dependent measurement made this
+way can be wrong. The fix, now written into `CONTEXT.md` §11, is to swap the `<link>` for one
+with a cache-busting query and `ScrollTrigger.refresh()` before measuring. I re-checked the
+recent CSS-dependent claims with fresh CSS: cards 390×390 white with `invert(1)` on the
+flagged logos, xxl 64/64 with a 640px measure, the closer fitting its screen and the frame
+absent there — all still true.
+
+**How it was verified.** With a freshly loaded stylesheet: at 1440 frame 456, title in three
+lines; at 1920 frame 752, column 428, title in three lines. No collisions on any
+frame-bearing section, no horizontal overflow at either width.
+
+**One for the client.** The copy says "интернет магазин"; the usual spelling is
+"интернет-магазин" with a hyphen. Left exactly as written.
+
+## 2026-09-02 — no CTA on the capabilities section
+
+**What changed.** `index.html`: the `О платформе` secondary button is gone from
+`#capabilities`; its aside is now the subtitle alone, with a comment saying why.
+`CONTEXT.md` §4: the copy table's CTA cell for section 2 reads "dropped", and the note
+under the table records that the section deliberately has no CTA.
+
+**Why.** Client's call, once the frame got its tabs: the tabs are the thing to interact with
+there and a second control beside them competed with them.
+
+**How it was verified.** Reloaded `localhost:4321` and read the live DOM: `#capabilities
+.btn` count **0**, the aside's only child is `P.section__subtitle`, and the CTA labels left
+on the page are the six of sections 1, 3, 4, 5, 6 and 7. The three tabs are still there and
+the strip still goes live on that section. The reveal tween's target list includes `.btn`,
+so nothing needed changing there — it simply matches one fewer element.
+
+**On the console.** It still shows an old `Cannot read properties of null (reading 'style')`
+at `main.js:393`, from a version of the file that no longer exists — the MCP console buffer
+survives reloads and `console.clear()`. Checked rather than assumed: wiped `--t` off two
+slides and forced `ScrollTrigger.refresh()`; the listener registered on the *last* line of
+`main.js` re-settled them (`cap 1`, `hero 0`), so the top level runs to the end with no
+throw. Also tidied a stray blank line that edit had left at that spot.
+
 ## 2026-09-02 — two titles with hand-set breaks
 
 **What changed.** `index.html`: "Весь цикл продаж в одном кабинете" → "Весь цикл<br>в одном

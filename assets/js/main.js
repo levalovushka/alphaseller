@@ -390,7 +390,6 @@ gsap.matchMedia().add('(prefers-reduced-motion: no-preference)', () => {
 ScrollTrigger.refresh();
 ScrollTrigger.update();
 settleSlides();
-
 ScrollTrigger.addEventListener('refresh', settleSlides);
 
 /* Any reveal the page is already past must render finished rather than sit at its

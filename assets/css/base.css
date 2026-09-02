@@ -71,8 +71,12 @@
      1440 screen; dropping to 300 would give it 673, which the client judged too much
      for a laptop. */
   --col-min: 380px;
+  /* 752, not 760: at 1920 the cap is what sets the text columns, and at 760 they came out
+     424 while "и интернет магазин" needs 425 — the title broke to a fourth line one pixel
+     short. Eight pixels off the frame buys the columns four each. Below ~1830 the cap does
+     not bind and this number changes nothing. */
   --frame-w: min(
-    760px,
+    752px,
     calc(100vw - 2 * var(--page-pad) - 2 * var(--col-gap) - 2 * var(--col-min))
   );
 
