@@ -1,5 +1,16 @@
 # Worklog
 
+## 2026-09-02 — button optical shift back to 1px
+
+**What changed.** `assets/css/base.css`: `.btn` padding `4px 24px 0` -> `2px 24px 0`, so the
+label sits 1px below the geometric centre instead of 2px.
+
+**Why.** The client read 2px as overdone.
+
+**How it was verified.** Live DOM at 1440×900: both the 52px header button and the 44px
+section button measure a text-box offset of +0.75px from the button centre, down from
++1.75px — a 1px raise.
+
 ## 2026-09-02 — motion, squircle everywhere
 
 **What changed.** New `assets/js/main.js` and vendored GSAP 3.15 + ScrollTrigger in

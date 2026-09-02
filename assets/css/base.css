@@ -163,9 +163,9 @@ img { display: block; max-width: 100%; height: auto; }
   align-items: center;
   height: var(--btn-h);
   /* Optical centring: YFF sits high in its line box, so the label is pushed
-     2px below the geometric centre. Asymmetric padding does it — with the height
-     fixed and the label centred, a 4px top padding moves it down by 2. */
-  padding: 4px 24px 0;
+     1px below the geometric centre. With the height fixed and the label centred,
+     asymmetric padding shifts it by half the top padding. */
+  padding: 2px 24px 0;
   color: var(--ink-invert);
   background: var(--ink);
   border: 0;
