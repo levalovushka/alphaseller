@@ -128,7 +128,7 @@ source artwork. Three of them are therefore inverted in CSS (`[data-invert="true
 on a white card. M.Reason is not: it is dark lettering on its own white plate and already
 reads correctly. Proper dark exports would be better than the filter.
 
-The heading here is the one place the `xxl` size is used.
+The heading here is one of the two that carry the `xxl` size.
 
 No subtitle column, so the subtitle that section used to have is currently unused.
 
@@ -148,6 +148,9 @@ the site's voice. Replace it with real cases before this goes anywhere near a cu
 The last section and the footer are a single 100vh block, not two. Title top-left under the
 header, subtitle top-right, the footer's four columns along the bottom, and in the middle —
 where the frame stands on every other section — the call to action.
+
+Its heading carries `xxl`, and is allowed to run under the frame column
+(`grid-column: 1 / 3`) — one text column is too narrow at that size.
 
 **The middle of this screen is currently empty.** The frame used to travel back down and
 shrink into a green `Начать бесплатно` button here; the client detached that while he
@@ -513,7 +516,7 @@ Verified with fontTools (2026-09-02):
 
 | Style | Cut | Size / leading | Tracking | Used for |
 |---|---|---|---|---|
-| `xxl` | Hyper Medium | 56 / 56 at 1440 → 64 / 64 at 1920 | normal | The cases heading |
+| `xxl` | Hyper Medium | 56 / 56 at 1440 → 64 / 64 at 1920 | normal | The cases and closer headings |
 | `xl` | Hyper Medium | 36 / 36 at 1440 → 44 / 44 at 1920 | normal | Section titles |
 | `md` | Hyper Regular | 16 / 21.33 at 1440 → 18 / 24 at 1920 | 1% (`0.01em`) | Everything else |
 

@@ -1,5 +1,21 @@
 # Worklog
 
+## 2026-09-02 — the closer heading takes xxl too
+
+**What changed.** `index.html`: `section__title--xxl` on "Продавай по своим правилам".
+`assets/css/base.css`: the xxl rule is no longer scoped to the cases section, its measure
+became `calc(var(--fs-xxl) * 10)`, and the closer heading is allowed to span
+`grid-column: 1 / 3`. `CONTEXT.md` updated.
+
+**Why.** Client's call. The span and the measure follow from it: at 56–64px a single text
+column (380px) is far too narrow, and a fixed 560px measure put the closer heading on three
+lines at 1920.
+
+**How it was verified.** Live DOM. Measure resolves to 560px at 1440 and 640px at 1920. Both
+xxl headings set in two lines at both widths — "Продавай по своим / правилам" and "С нами
+работают / самые смелые". No overlap between the closer's heading and its subtitle (heading
+ends at 636, subtitle starts at 984 on 1440), the screen still fits, no horizontal overflow.
+
 ## 2026-09-02 — square white cards, xxl in use, the frame stops becoming a button
 
 **What changed.** `assets/css/base.css`: `.case` is square (`aspect-ratio: 1 / 1`), white with
