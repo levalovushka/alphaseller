@@ -3,8 +3,9 @@
    smooth-scroll library. The effect copied from cash.app is the one that matters:
    the frame in the middle stays put while the two text columns scroll past it, and
    what the frame holds changes as the section changes.
-     1. the ground colour and the ink are interpolated against the scroll,
-     2. the frame swaps its slide per section, and becomes the closing call to action,
+     1. the ground colour, the ink and the frame's slides are all interpolated against
+        the same scroll, so a section change lands as one movement,
+     2. the frame becomes the closing call to action,
      3. each section's text reveals once as it enters the viewport.
    The header never hides. */
 
@@ -63,30 +64,66 @@ function coloursOf(el) {
   };
 }
 
-/* The colour is interpolated across the scroll from one ground to the next, not
-   switched at a line and then transitioned. A CSS transition read as lag: it could
-   only start once the boundary had passed the header, by which point the section had
-   almost arrived, and the fade then ran on after it landed. Here the page finishes
-   changing colour at the exact moment the next section reaches the top. */
+/* ---------- the section boundary ----------
+   One trigger per boundary owns *everything* a section change drives, and it is scrubbed
+   by the scroll rather than switched at a line and then transitioned. A CSS transition
+   read as lag: it could only start once the boundary had passed the header, by which
+   point the section had almost arrived, and the fade then ran on after it landed — the
+   colour finished while the picture was still a wall-clock fade behind.
+
+   Anything else that has to move with a section change belongs here, not on a transition
+   of its own. Two ways in, both already synchronised:
+
+     - CSS: each slide carries `--t`, 0 fully off stage, 1 fully on. Read it from anything
+       inside that slide — `translate: calc((1 - var(--t)) * 40px)` and the like. Slide
+       children are not clipped, so they can leave the frame.
+     - JS: a `section:scrub` event on `document` for every step of every crossing:
+
+         document.addEventListener('section:scrub', (e) => {
+           e.detail; // { from, to, t } — the two section elements and 0..1
+         }); */
+
+const slideFor = (id) => slides.find((slide) => slide.dataset.for === id);
+
+function stage(slide, t) {
+  if (slide) slide.style.setProperty('--t', String(t));
+}
+
 grounds.forEach((ground, i) => {
   if (i === 0) return;
 
-  const from = coloursOf(grounds[i - 1]);
+  const previous = grounds[i - 1];
+  const from = coloursOf(previous);
   const to = coloursOf(ground);
+  const leaving = slideFor(previous.id);
+  const entering = slideFor(ground.id);
+
+  /* t = 0 is the previous section fully in place, t = 1 this one fully in place. */
+  const apply = (t) => {
+    paint(
+      mix(from.ground, to.ground, t),
+      mix(from.ink, to.ink, t),
+      mix(from.counter, to.counter, t)
+    );
+    photo.style.opacity = String(from.photo + (to.photo - from.photo) * t);
+    stage(leaving, 1 - t);
+    stage(entering, t);
+
+    document.dispatchEvent(
+      new CustomEvent('section:scrub', { detail: { from: previous, to: ground, t } })
+    );
+  };
 
   ScrollTrigger.create({
     trigger: ground,
     start: 'top bottom',
     end: 'top top',
-    onUpdate: (self) => {
-      const t = self.progress;
-      paint(
-        mix(from.ground, to.ground, t),
-        mix(from.ink, to.ink, t),
-        mix(from.counter, to.counter, t)
-      );
-      photo.style.opacity = String(from.photo + (to.photo - from.photo) * t);
-    },
+    onUpdate: (self) => apply(self.progress),
+    /* onUpdate only fires inside the range, and a jump can clear the whole range in one
+       step, so the two ends are pinned explicitly. Without this a fast scroll can leave a
+       slide stranded part-way lit. */
+    onLeave: () => apply(1),
+    onLeaveBack: () => apply(0),
   });
 });
 
@@ -105,6 +142,19 @@ paint(
   COUNTER[first.dataset.ink]
 );
 showSlide(first.id);
+
+/* The boundary triggers cover the crossings; at rest between them nothing is running, so
+   the slides are set from geometry instead. Needed on load and on a deep link, which can
+   open past every boundary, and after a refresh, which re-measures at rest. */
+function settleSlides() {
+  let current = grounds[0];
+  grounds.forEach((section) => {
+    if (section.offsetTop <= window.scrollY + 1) current = section;
+  });
+  slides.forEach((slide) => stage(slide, slide.dataset.for === current.id ? 1 : 0));
+}
+
+settleSlides();
 
 /* Whatever ground sits under the header owns the slide. The switch point is the
    header's own middle, so it lands as the boundary passes the logo.
@@ -251,6 +301,8 @@ gsap.matchMedia().add('(prefers-reduced-motion: no-preference)', () => {
    its text is left sitting at opacity 0 — permanently, since it only fires `once`. */
 ScrollTrigger.refresh();
 ScrollTrigger.update();
+settleSlides();
+ScrollTrigger.addEventListener('refresh', settleSlides);
 
 /* Any reveal the page is already past must render finished rather than sit at its
    from-state. ScrollTrigger does not fire `onEnter` for a trigger that is jumped over in

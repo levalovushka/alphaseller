@@ -89,8 +89,8 @@ period inside a subtitle (section 5) stays.
 | 1 | Одна платформа на всю онлайн-торговлю | Продавай больше, управляй с легкостью, расширяй аудиторию с единой платформой для управления электронной коммерцией | Начать бесплатно |
 | 2 | Весь цикл продаж в одном кабинете | Свой сайт, приложение, аналитика, управление рекламой и логистикой, деньги, остатки и отзывы | О платформе |
 | 3 | Свои каналы продаж за один день | Онлайн-витрины без подрядчиков, с привязкой к Telegram и Max — рабочие, красивые и с твоей наценкой | Сделать сайт |
-| 4 | Уникальное, как твой бизнес | Выбирай из стильных шаблонов и докручивай, пока не будет идеально подходить под твой вкус | Посмотреть шаблоны |
-| 5 | Управляй продажами на маркетплейсах | Даём сводную аналитику, картину по заказам, остаткам, логистике. Помогаем выбрать самые продающие карточки товаров | Подключить |
+| 4 | Стиль уникальный, как ты сам | Выбирай из стильных шаблонов и докручивай, пока не будет идеально подходить под твой вкус | Посмотреть шаблоны |
+| 5 | Управляй своим бизнесом на маркетплейсах | Даём сводную аналитику, картину по заказам, остаткам, логистике. Помогаем выбрать самые продающие карточки товаров | Подключить |
 | 6 | Смелые уже с нами | Огромные корпорации и небольшие бизнесы уже вернули контроль в свои руки с нашей платформой | Все кейсы |
 | 7 | Продавай по своим правилам | Верни контроль над бизнесом и заставь его работать на твою мечту | Начать бесплатно |
 
@@ -157,6 +157,13 @@ styling**. No red panel, no pills.
 - Column 3: `Блог`, `База знаний`, `Реферальная программа`, `О компании`.
 - Column 4: `Публичная оферта`, `Политика конфиденциальности`,
   `Согласие на обработку персональных данных`.
+
+**Every link on the page is sentence case — capital first letter, lowercase rest.** The
+header nav and all four footer columns; client asked for it on 2026-09-02 because the
+lowercase nav next to the capitalised legal column read as two different systems. Only
+`support@alfasell.com` is left alone — it is an address, not a label. Done in the markup,
+not with `text-transform: capitalize`, which would upper-case every word and give
+"Крупному Бизнесу".
 
 ## 5. Motion
 
@@ -256,10 +263,57 @@ mechanism is generic: any section can take a photographic ground by getting
 `data-photo="true"` and its own image — nothing in the JS is specific to this one section
 beyond the single image url in the CSS.
 
+### The three live colours
+
+JS keeps three custom properties on `<html>`, all interpolated against the scroll:
+
+| Property | What it is |
+|---|---|
+| `--ground` | what the page is painted with — the section's own colour |
+| `--ink` | everything drawn on the ground: text, the filled button, the logo square |
+| `--ink-invert` | what is drawn **on the ink**: a filled button's label, the logo mark |
+
+`--ink-invert` is the **opposite ink, never the ground**. It was the ground briefly and the
+client rejected it on sight: on the green hero it made the label inside the black pill green
+and the logo mark green inside its black square. It is white on the light and green
+sections, black on the two black ones, and it cross-fades on the same scroll as the other
+two. Secondary buttons take `--ink` for the label and the stroke, and swap to `--ink-invert`
+on `--ink` when they fill on hover.
+
+### The section boundary — one scrubbed pass
+
+**Everything a section change drives is scrubbed by the same scroll, in one place.** One
+`ScrollTrigger` per boundary, `top bottom` → `top top` on the incoming section, so every
+value finishes at the exact instant that section lands. Nothing gets a wall-clock transition
+of its own: the frame's slides used to, and the client caught it — the ground had finished
+recolouring while the photograph was still most of a 0.9s fade behind, because the swap only
+fired once the boundary had passed the middle of the header.
+
+That one pass writes the three colours, the photographic ground's opacity, and each slide's
+`--t`. Two hooks come out of it, both synchronised by construction, for whatever a section
+has to do next — an element flying out of the frame, a caption, a video:
+
+| Hook | What |
+|---|---|
+| CSS | every slide carries `--t`: 0 fully off stage, 1 fully on. Read it from anything inside that slide — `translate: calc((1 - var(--t)) * 40px)`. Slide children are **not** clipped, so they can leave the frame. Opacity is only the first consumer: `opacity: var(--t, 0)`. |
+| JS | `section:scrub` on `document`, every step of every crossing: `{ from, to, t }` — the two section elements and 0..1. |
+
+The two ends of a crossing are pinned with `onLeave` / `onLeaveBack`, and `settleSlides()`
+sets the slides from geometry at rest, on load and on refresh: `onUpdate` never fires for a
+boundary cleared in one jump, which a deep link does. Slide opacity comes from JS now, so
+with JS off the frame is empty. `--fade` is declared and unused — the one place a wall-clock
+fade would go if anything needs one again.
+
+**Known gap:** the frame's dashed placeholder outline is still keyed to `data-active`, which
+flips at the middle of the header, so crossing away from the hero it can reappear as a
+hairline while the photograph is still scrubbing out. Not fixed — the outline is also what
+the closer's morph overrides.
+
 ### The `section:change` event
 
-Every switch fires a `CustomEvent` on `document`, so anything later — filling a slide,
-starting a video, cueing a caption — hooks on without touching `main.js`:
+Separate from the scrub, and still useful for things that happen *at* a change rather than
+*across* it. Every switch fires a `CustomEvent` on `document`, so anything later — starting
+a video, cueing a caption — hooks on without touching `main.js`:
 
 ```js
 document.addEventListener('section:change', (e) => {
@@ -284,11 +338,13 @@ The **header is not on this grid**: it is full-bleed with a 16px side inset, so 
 the CTA sit closer to the edge than any section content does. That is deliberate.
 
 The column floor is a composition choice, not a constraint — how much screen the text keeps
-before the frame takes the rest. It stopped being a constraint once titles were allowed to
-hyphenate (`hyphens: auto` on `.section__title`, `overflow-wrap: break-word` as the fallback
-for a browser with no Russian patterns). With the laptop's 36px xl the longest word in the
-copy, `маркетплейсах`, is well inside a 380px column, so nothing is hyphenated in practice
-and the rule is a safety net for future copy.
+before the frame takes the rest. It stopped being a constraint when the xl size came down: at 36px the longest word in the
+copy sits well inside a 380px column.
+
+**Hyphenation is off, deliberately.** It was on while titles set at 44px and a long word
+could overflow, and it then did harm: `hyphens: auto` split `бизнесом` across two lines to
+even out the rag, when the word fits whole on the next line. Only `overflow-wrap: break-word`
+remains, which fires solely for a word too long for its column — no current title is.
 
 Measured:
 

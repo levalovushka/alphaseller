@@ -1,5 +1,86 @@
 # Worklog
 
+## 2026-09-02 — copy edits, hyphenation off, and a repair of main
+
+**What changed by me.** `index.html`: two titles rewritten — "Уникальное, как твой бизнес" →
+"Стиль уникальный, как ты сам", "Управляй продажами на маркетплейсах" → "Управляй своим
+бизнесом на маркетплейсах", both with their non-breaking spaces. `assets/css/base.css`:
+`hyphens: auto` removed from `.section__title`. `CONTEXT.md` updated on both.
+
+**Why hyphenation had to go.** With the new copy it broke `бизнесом` across two lines —
+"Управляй своим бизн- / есом / на маркетплейсах" — because `hyphens: auto` hyphenates to
+even out the rag even when the word fits whole on the next line. Without it the title sets
+as the client wanted: "Управляй своим / бизнесом / на маркетплейсах", three clean lines at
+1440, 1512 and 1920. `overflow-wrap: break-word` stays; it only fires for a word too long
+for its column, and no current title is.
+
+**What else is in this commit, and why.** The parallel session's work: the scrubbed slide
+transition in `assets/js/main.js`, the hero image (`assets/images/hero.webp` and
+`data-filled` in `index.html`), and their `CONTEXT.md` / `WORKLOG.md` entries. It is here
+because I had already broken `main` by staging shared files wholesale: commit `4cb5bf9` swept
+their half-finished CSS — `opacity: var(--t, 0)` on the slides and a `background-image`
+pointing at `assets/images/hero.webp` — while the JS that sets `--t` and the image file
+itself stayed uncommitted. `main` therefore had slides that could never become visible and a
+stylesheet referencing a missing file. Committing the working tree, which is verified
+working, is what makes the branch coherent again.
+
+**How it was verified.** Live DOM at 1440×900 unless noted. Line breaks read straight off the
+rendered text: `marketplaces` → "Управляй своим" / "бизнесом" / "на маркетплейсах" at 1440,
+1512 and 1920; `customization` → "Стиль уникальный," / "как ты сам"; no mid-word break in any
+of the seven titles. Frame collision sweep clean at all three widths, no horizontal overflow.
+Slides track their sections — opacity 1 on exactly the active one at each of the seven snap
+positions, ground colour correct at each. Hero slide shows `hero.webp` at opacity 1 and the
+file returns 200; no failed resources on the page.
+
+**Process.** Two parallel sessions have now collided three times in these files. Staging
+whole files is not safe here: either serialise the sessions, or stage hunk by hunk.
+
+## 2026-09-02 — slides scrubbed by the same scroll as the colours
+
+**What changed.** `assets/js/main.js`: the per-boundary trigger is now the single place that
+owns a section change. Its body became `apply(t)` — paints the three colours, sets the
+photographic ground's opacity, writes `--t` on the outgoing and incoming slides (`1 - t`
+and `t`), and dispatches a new `section:scrub` event with `{ from, to, t }`.
+`onLeave` / `onLeaveBack` pin the two ends; new `settleSlides()` sets slides from geometry at
+rest, called on load and on every `refresh`. `assets/css/base.css`: `.stage-frame__slide`
+lost `transition: opacity var(--fade)` and the `[data-active="true"]` opacity rule — opacity
+is `var(--t, 0)`; `--fade` is now declared and unused. `CONTEXT.md` §5: new "The section
+boundary — one scrubbed pass".
+
+**Why.** The client noticed the photograph outlasting the ground colour. Real, not an
+impression: the ground was scroll-linked, the slide swap fired at the middle of the header
+and then ran 0.9s of wall clock. He also asked that the fix generalise — later sections will
+fly elements out of the frame and those have to land with everything else — so the boundary
+is one scrubbed pass with a CSS hook (`--t` per slide, children unclipped) and a JS hook.
+
+**How it was verified.** `localhost:4321` at 1440×900. Snap off, stepped the scroll by hand
+across hero → capabilities, `ScrollTrigger.update()` at each stop, read live values:
+
+| scrollY | `--ground` | hero `--t` | hero opacity |
+|---|---|---|---|
+| 0 | `rgb(166, 237, 0)` | 1 | 1 |
+| 225 | `rgb(188, 242, 64)` | 0.75 | 0.75 |
+| 450 | `rgb(211, 246, 128)` | 0.5 | 0.5 |
+| 675 | `rgb(233, 251, 191)` | 0.25 | 0.25 |
+| 900 | `rgb(255, 255, 255)` | 0 | 0 |
+
+Lock-step — green→white at 25% is 166 + 89 × 0.25 = 188. `section:scrub` fired 13 times
+across the moves; sample `{ from: hero, to: capabilities, t: 0.333 }` at y=300 (300/900).
+Jumped y=0 → 2700 in one step, clearing two whole boundaries: `customization` alone at 1,
+every other slide 0; back to 0, hero 1 and the rest 0. Snap restored, `node --check` clean.
+
+**Left undone.** The frame's dashed placeholder outline is still keyed to `data-active`, so
+crossing away from the hero it can reappear as a hairline over the fading photograph.
+Fixable inside the same pass; not done, because the outline is also what the closer's morph
+overrides and it was not the ask. Reduced motion unchanged — a scroll-linked scrub is the
+same class as the colour interpolation, which was already kept. The
+`@media (prefers-reduced-motion)` rule zeroing `.stage-frame__slide`'s transition is dead
+now; left alone, it sits in the frame block another session is editing.
+
+**Note on the repo.** A parallel session's commits rewrote `CONTEXT.md` and dropped two
+sections I had added earlier today — "the three live colours" (`--ink-invert`) and the
+sentence-case link rule. Restored both in this pass. The code was untouched.
+
 ## 2026-09-02 — +12px on the side margins, 48px navbar controls
 
 **What changed.** `assets/css/base.css` only. `--page-pad`
