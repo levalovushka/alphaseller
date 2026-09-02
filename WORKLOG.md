@@ -1,5 +1,40 @@
 # Worklog
 
+## 2026-09-02 — the frame stays, the text scrolls past it
+
+**What changed.** `index.html`: the seven per-section frames became
+`.section__frame-slot` elements that only hold the middle grid column open, and one
+`.stage-frame` was added after the header, carrying one slide per section.
+`assets/css/base.css`: `.stage-frame` is `position: fixed`, aligned to the middle column via
+a shared `--frame-w` and a top offset that matches the section content's optical centre;
+slides cross-fade on `[data-active]`. `assets/js/main.js`: the ground trigger now drives the
+frame's ink and active slide as well as the header ink, and a scrubbed tween fades the frame
+out across the footer's entrance. `CONTEXT.md` rewritten on motion.
+
+**Why.** The earlier teardown of cash.app was wrong — see below — and the client corrected
+it. He wants what they actually do: the middle frame holds still while the two text columns
+scroll past, and the frame's content changes per section.
+
+**The earlier mistake.** The first reading of cash.app was taken with their nav overlay open.
+That state sets `body { overflow: hidden }` and collapses the page to 1280px, so the
+scrolling machinery was not in the DOM to be found, and I concluded they do not pin anything.
+Read properly: `body { overflow: hidden }` permanently, a `smooth-scroll-manager` element is
+the real scroller (`clientHeight` 900, `scrollHeight` 9745), and there are nine
+`homepage-scroll-section` elements of exactly one viewport each.
+
+**How it was verified.** Live DOM at 1440×900, no console errors. The fixed frame's rect
+matches the hero's slot exactly (x 389, y 214, 662×497). Walking hero → capabilities →
+customization → closer → footer → back to top, the frame stays at x 389 / y 214 at every
+stop; the active slide follows the section every time; ink flips to `light` on the black
+sections; opacity scrubs 1.00 → 0.50 → 0.00 across the footer and returns to 1.00 at the top.
+
+**Left undone / needs a decision.** The footer is only ~344px tall, so the page runs out of
+scroll before the closer section can centre itself: at maximum scroll the closer's content
+sits about 106px from the top of the screen and the frame is already half faded. The closer
+never gets a screen of its own. Raised with the client — the fix is the footer's height, his
+call. Still verified by measurement only; the browser pane here returns no usable
+screenshots.
+
 ## 2026-09-02 — drop the header hiding, double the button radius
 
 **What changed.** `assets/js/main.js`: the scroll-direction ScrollTrigger and all show/hide

@@ -44,6 +44,9 @@
   --logo-size: 52px;
   --btn-h-nav: 52px;
   --btn-h: 44px;
+  /* The middle column, shared by the frame and the slot that reserves its place. */
+  --frame-w: min(46vw, 760px);
+
   /* One radius for everything that is rounded; buttons take twice that. */
   --radius: 16px;
   --radius-btn: calc(var(--radius) * 2);
@@ -125,7 +128,7 @@ img { display: block; max-width: 100%; height: auto; }
 @supports (corner-shape: squircle) {
   .header__logo,
   .btn,
-  .section__frame { corner-shape: squircle; }
+  .stage-frame { corner-shape: squircle; }
 }
 
 .header__logo img {
@@ -212,14 +215,50 @@ img { display: block; max-width: 100%; height: auto; }
 
 /* Style md — inherited from body, nothing to override. */
 
-/* The frame: ~4:3, centered, empty until the client supplies content. */
-.section__frame {
+/* The middle grid column. The frame itself does not live here — this only holds the
+   column open so the two text columns keep their places. */
+.section__frame-slot {
   aspect-ratio: 4 / 3;
-  width: min(46vw, 760px);
+  width: var(--frame-w);
+}
+
+/* ---------- the frame that stays ---------- */
+
+/* Fixed over the page, aligned with the middle grid column: the text columns scroll
+   past it, it does not move. Sits on the same optical centre as the section content,
+   which is offset by the header and the bottom padding. */
+.stage-frame {
+  position: fixed;
+  left: 50%;
+  top: calc(var(--header-h) + (100vh - var(--header-h) - var(--page-pad)) / 2);
+  translate: -50% -50%;
+  z-index: 5;
+  width: var(--frame-w);
+  aspect-ratio: 4 / 3;
+  pointer-events: none;
   border-radius: var(--radius);
   background: color-mix(in srgb, var(--ink) 6%, transparent);
   outline: 1px dashed color-mix(in srgb, var(--ink) 25%, transparent);
   outline-offset: -1px;
+  /* Opacity is scrubbed by the scroll over the footer, so it is not transitioned. */
+  transition: background 0.6s, outline-color 0.6s;
+}
+
+/* One slide per section, cross-faded as the section changes. Empty until the client
+   supplies screens, video and people. */
+.stage-frame__slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  border-radius: inherit;
+  transition: opacity 0.6s;
+}
+
+.stage-frame__slide[data-active="true"] { opacity: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .stage-frame,
+  .stage-frame__slide { transition: none; }
 }
 
 /* ---------- footer ---------- */

@@ -128,34 +128,45 @@ styling**. No red panel, no pills: black background, continuous with the closer.
 
 ## 5. Motion
 
-**Decided: do what cash.app actually does — native scroll, nothing pinned.**
+**The frame stays, the text scrolls past it.** That is the effect the client wants, and it
+is what cash.app actually does.
 
-Reading cash.app's live homepage on 2026-09-02 settled a misconception: they do **not**
-scroll-jack and they do not pin sections. Verified there: no `gsap` / `ScrollTrigger` /
-`Lenis` / `LocomotiveScroll` globals (it is a Next.js bundle); `position: sticky` appears in
-9 CSS rules, all of them the nav header, table headers and the cookie banner — never a
-content section; and `animation-timeline` / `view-timeline` / `scroll-timeline` appear
-nowhere in 675 KB of CSS. What they do have: a sticky header that hides on scroll down and
-returns on scroll up (`transition: opacity .6s, transform .6s`, classes toggled by JS),
-`will-change: color; transition: color .6s` on section text so colours cross-fade rather
-than snap, a `mask-image` on the hero driven by a `--mask-scale` variable, and a
-`prefers-reduced-motion` block.
+### What cash.app really does (verified 2026-09-02, second reading)
 
-Ours, in `assets/js/main.js` (GSAP 3.15 + ScrollTrigger, vendored in `assets/vendor/`):
+An earlier reading of the page was wrong — it was taken with the nav overlay open, which
+locks the body and hides the machinery. Measured properly:
 
-1. The header takes the `data-ink` of the ground under it; the switch fires as the boundary
-   crosses the header's own middle, and the colour transitions over 0.6s.
-2. Each section's title, frame, subtitle and CTA reveal once on entry (rise 24px + fade,
-   0.8s, staggered), the whole set skipped under `prefers-reduced-motion: reduce`.
-   The trigger is the **title**, not the section: sections are a viewport tall with centred
-   content, so a section-anchored trigger fires a full screen too early and the animation is
-   over before anyone sees it.
+- `body { overflow: hidden }`; the document itself does not scroll.
+- A component named `smooth-scroll-manager` is the scroller: `overflow: auto hidden`,
+  `clientHeight` 900, `scrollHeight` 9745.
+- Nine `homepage-scroll-section` elements, each exactly one viewport tall (900px).
+- Section content is moved by JS transforms; the header is `position: sticky` and does not
+  hide on scroll.
+
+So: section-by-section, with a custom scroll container.
+
+### Ours
+
+Same visible result, built on **native page scroll** — no wheel hijacking, no smooth-scroll
+library, nothing pinned. `assets/js/main.js`, GSAP 3.15 + ScrollTrigger vendored in
+`assets/vendor/`:
+
+1. **One frame for the whole page**, `position: fixed`, aligned with the middle grid column.
+   The text columns scroll past it; it never moves. Each section keeps a
+   `.section__frame-slot` that only holds the grid column open.
+2. The frame holds one `.stage-frame__slide` per section, cross-faded over 0.6s as the
+   section under the header changes. Slides are empty until the client supplies screens,
+   video and people.
+3. The header and the frame take the `data-ink` of the section under the header; the switch
+   fires as the boundary crosses the header's middle, colour transitions over 0.6s.
+4. The frame fades out across the footer's entrance, scrubbed to the scroll.
+5. Each section's title, subtitle and CTA reveal once on entry (rise 24px + fade, 0.8s,
+   staggered). The trigger is the **title**, not the section — sections are a viewport tall
+   with centred content, so a section-anchored trigger fires a full screen too early.
+   Skipped under `prefers-reduced-motion: reduce`.
 
 **The header does not hide on scroll** — tried, dropped at the client's request. It stays
-put; only its ink changes.
-
-- No pinning, no scroll-jacking, no smooth-scroll library.
-- No custom cursor, no magnetic buttons.
+put; only its ink changes. No custom cursor, no magnetic buttons.
 
 ## 6. Content
 
