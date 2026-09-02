@@ -1,5 +1,33 @@
 # Worklog
 
+## 2026-09-02 — 36px titles on a laptop, wider section margins, tighter navbar
+
+**What changed.** `assets/css/base.css` only. `--fs-xl` is now
+`clamp(36px, calc(12px + 1.6667vw), 44px)` — 36/36 at 1440, still 44/44 at 1920.
+`--page-pad` went `clamp(32px, 3.3vw, 64px)` → `clamp(64px, 4.4vw, 84px)`.
+`--header-pad-side` 20px → 16px. `CONTEXT.md` updated.
+
+**Why.** Client: smaller titles on a MacBook, more air at the section edges, less at the
+navbar's.
+
+**How it was verified.** Live DOM, collision sweep over the six frame-bearing sections at
+each width.
+
+| viewport | xl | frame | section margin | collisions |
+|---|---|---|---|---|
+| 1440×900 | 36 / 36 | 480 | 64 | none |
+| 1512×830 | 37.2 | 543 | 67 | none |
+| 1920×1080 | 44 / 44 | 760 | 96 | none |
+
+At 1920 the margin is 96 rather than the 84 the padding asks for, because the 1728px
+`--page-max` binds first. Navbar: logo 16px from the left edge, CTA 16px from the right. No
+horizontal overflow anywhere. The closer still fits at 1440 — head at y=120, button 200×150
+centred at 450 against a screen centre of 450, footer bottom at 836 of 900.
+
+**Numbers that were mine, not the client's.** He asked for "bigger side margins" without a
+figure; `clamp(64px, 4.4vw, 84px)` is my reading of it, and the frame narrowing from 513 to
+480 is its consequence.
+
 ## 2026-09-02 — xl scales with the screen, frame settles at 513 on a laptop
 
 **What changed.** `assets/css/base.css` only: `--fs-xl` became

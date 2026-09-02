@@ -27,20 +27,20 @@
   --page-max: 1728px;
   /* Room at the page edges and between the three columns. Both shrink on a narrower
      screen so the frame keeps a usable width there — see --frame-w. */
-  --page-pad: clamp(32px, 3.3vw, 64px);
+  --page-pad: clamp(64px, 4.4vw, 84px);
 
   /* Header: full-bleed. Its height follows from the padding plus the 52px
      controls — nothing fixes it. */
   --header-pad-top: 16px;
-  --header-pad-side: 20px;
+  --header-pad-side: 16px;
   --header-pad-bottom: 20px;   /* TODO: not specified by the client */
   --header-h: calc(var(--header-pad-top) + var(--btn-h-nav) + var(--header-pad-bottom));
 
   /* Type — the whole site is two styles, both YFF Hyper
      (wdth 87 = "Hyper"). See CONTEXT.md §7. */
-  /* Style xl scales with the screen: 40/40 at 1440, 44/44 at 1920, held flat outside
+  /* Style xl scales with the screen: 36/36 at 1440, 44/44 at 1920, held flat outside
      that range. Leading always equals the size. */
-  --fs-xl: clamp(40px, calc(28px + 0.8333vw), 44px);
+  --fs-xl: clamp(36px, calc(12px + 1.6667vw), 44px);
   --lh-xl: var(--fs-xl);
   --weight-xl: 500;  /* Hyper Medium, titles */
   --fs-md: 18px;  --lh-md: 24px;  --weight-md: 400;  /* Hyper Regular, everything else */

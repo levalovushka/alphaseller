@@ -272,23 +272,30 @@ ground's own data attributes, `isSection` is false only for the footer.
 
 ### The three-column stage
 
-`--page-pad` and `--col-gap` are `clamp()`ed — `clamp(32px, 3.3vw, 64px)` and
-`clamp(24px, 2.5vw, 48px)` — so a narrower screen spends less on edges and gutters. The two
-text columns have a floor of `--col-min` (380px) and the frame takes what is left, capped at
-760px.
+`--page-pad` and `--col-gap` are `clamp()`ed — `clamp(64px, 4.4vw, 84px)` and
+`clamp(24px, 2.5vw, 48px)`. The two text columns have a floor of `--col-min` (380px) and the
+frame takes what is left, capped at 760px.
 
-That floor is a composition choice, not a constraint: how much screen the text keeps before
-the frame takes the rest. It stopped being a constraint once titles were allowed to
-hyphenate — `hyphens: auto` on `.section__title`, with `overflow-wrap: break-word` as the
-fallback for a browser with no Russian patterns. The longest unbreakable word in the copy is
-`маркетплейсах`; at 380px and the laptop's 40px xl it measures exactly 380 and fits without
-breaking, so hyphenation is a safety net rather than something the reader sees. It was
-visible at the earlier 360px floor and a 44px xl, where that title ran to four lines.
+The **header is not on this grid**: it is full-bleed with a 16px side inset, so the logo and
+the CTA sit closer to the edge than any section content does. That is deliberate.
 
-Resulting frame widths: **513px at 1440, 577px at 1512, 760px at 1920**. The history, for
-anyone tempted to re-tune: 416 / 488 / 760 with fixed padding, 473 / 537 / 760 once padding
-was clamped, 553 / 617 / 760 at a 360px floor with the type still at 44. The client asked for
-the moderate end of that range.
+The column floor is a composition choice, not a constraint — how much screen the text keeps
+before the frame takes the rest. It stopped being a constraint once titles were allowed to
+hyphenate (`hyphens: auto` on `.section__title`, `overflow-wrap: break-word` as the fallback
+for a browser with no Russian patterns). With the laptop's 36px xl the longest word in the
+copy, `маркетплейсах`, is well inside a 380px column, so nothing is hyphenated in practice
+and the rule is a safety net for future copy.
+
+Measured, with the section's effective left margin in brackets:
+
+| viewport | xl | frame | margin |
+|---|---|---|---|
+| 1440 | 36 / 36 | 480 | 64 |
+| 1512 | 37.2 | 543 | 67 |
+| 1920 | 44 / 44 | 760 | 96 — the 1728px `--page-max` binds before the padding does |
+
+For anyone tempted to re-tune the frame: it has been 416, 473, 553, 513 and now 480 across
+this conversation. The client keeps choosing the moderate end.
 
 ## 6. Content
 
@@ -391,14 +398,14 @@ Verified with fontTools (2026-09-02):
 
 | Style | Cut | Size / leading | Tracking | Used for |
 |---|---|---|---|---|
-| `xl` | Hyper Medium | 40 / 40 at 1440 → 44 / 44 at 1920 | normal | Section titles |
+| `xl` | Hyper Medium | 36 / 36 at 1440 → 44 / 44 at 1920 | normal | Section titles |
 | `md` | Hyper Regular | 18 / 24 | 1% (`0.01em`) | Everything else |
 
 "Hyper" is the `wdth 87` width; "Medium" is `wght 500`, "Regular" is `wght 400`. In CSS:
 `font-stretch: 87%` plus the weight.
 
-`xl` scales with the screen — `clamp(40px, calc(28px + 0.8333vw), 44px)`, with the leading
-always equal to the size — so a laptop gets 40/40 and a 1920 screen keeps the full 44/44.
+`xl` scales with the screen — `clamp(36px, calc(12px + 1.6667vw), 44px)`, with the leading
+always equal to the size — so a laptop gets 36/36 and a 1920 screen keeps the full 44/44.
 `md` does not scale. Note `h1`/`h2` default to bold — the title weight must
 be forced back to 500.
 
