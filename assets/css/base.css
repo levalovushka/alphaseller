@@ -24,10 +24,12 @@
   --c-red: #dc200c;       /* unused on this page */
 
   /* Layout — provisional, not a design decision. */
-  --page-max: 1728px;
+  /* 1704, not 1728: on a 1920 screen this is what sets the side margin, and the +12
+     the client asked for has to come from here rather than from --page-pad. */
+  --page-max: 1704px;
   /* Room at the page edges and between the three columns. Both shrink on a narrower
      screen so the frame keeps a usable width there — see --frame-w. */
-  --page-pad: clamp(64px, 4.4vw, 84px);
+  --page-pad: clamp(76px, calc(4.4vw + 12px), 96px);
 
   /* Header: full-bleed. Its height follows from the padding plus the 52px
      controls — nothing fixes it. */
@@ -47,8 +49,8 @@
   --tracking-md: 0.01em;
 
   /* Control heights, fixed by the client. */
-  --logo-size: 52px;
-  --btn-h-nav: 52px;
+  --logo-size: 48px;
+  --btn-h-nav: 48px;
   --btn-h: 44px;
   --btn-pad-x: 20px;   /* both sizes, header and sections */
   /* The three-column stage. The text columns never go below --col-min; the frame
@@ -76,7 +78,8 @@
   --ink: var(--c-black);
   --ink-invert: var(--c-white);
 
-  /* Discrete cross-fades that are not tied to the scroll: the frame's slides. */
+  /* Nothing is left on a discrete cross-fade — the slides moved onto the scroll too —
+     so this is declared and unused. Kept as the one place a wall-clock fade would go. */
   --fade: 0.9s;
 
   /* Everything rounded on the page — the buttons, the logo square, the frame — takes
@@ -150,7 +153,7 @@ img { display: block; max-width: 100%; height: auto; }
   html { scroll-behavior: auto; }
 }
 
-/* Mark only, no wordmark, inside a 52×52 rounded square.
+/* Mark only, no wordmark, inside a 48×48 rounded square.
    TODO: the square's fill and the mark's size inside it are not specified. */
 .header__logo {
   flex: 0 0 auto;
@@ -342,18 +345,21 @@ img { display: block; max-width: 100%; height: auto; }
 
 /* One slide per section, cross-faded as the section changes. Still empty on the sections
    the client has not supplied a screen, a video or a person for. */
+/* --t is how far this slide is on stage: 0 fully off, 1 fully on. JS writes it against
+   the scroll, in the same pass that mixes the ground colour, so everything a section
+   change drives finishes at the same instant. CSS decides what to do with the number —
+   opacity here, and anything a future slide needs (an element flying out of the frame,
+   say) reads the same `var(--t)` and is synchronised for free. Children are not clipped,
+   so they may leave the frame. */
 .stage-frame__slide {
   position: absolute;
   inset: 0;
-  opacity: 0;
   border-radius: inherit;
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
-  transition: opacity var(--fade) ease-in-out;
+  opacity: var(--t, 0);
 }
-
-.stage-frame__slide[data-active="true"] { opacity: 1; }
 
 /* Hero — Figma node 196:53708. The source is 1118×789 (1.42:1) against a 4:3 frame, so
    `cover` trims the sides; the client knows and is fine with it. */

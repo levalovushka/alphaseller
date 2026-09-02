@@ -1,5 +1,31 @@
 # Worklog
 
+## 2026-09-02 — +12px on the side margins, 48px navbar controls
+
+**What changed.** `assets/css/base.css` only. `--page-pad`
+`clamp(64px, 4.4vw, 84px)` → `clamp(76px, calc(4.4vw + 12px), 96px)`; `--page-max`
+1728 → 1704; `--logo-size` and `--btn-h-nav` 52 → 48. `CONTEXT.md` updated.
+
+**Why.** Client: side margins wider by 12px, navbar controls 48 tall.
+
+**The `--page-max` part is the non-obvious bit.** At 1920 the side margin is set by the
+container cap, not by the padding — raising `--page-pad` alone left 1920 at the old 96px.
+Taking 24 off `--page-max` is what delivers the +12 there. The frame stays 760 at that width,
+so nothing else moved.
+
+**How it was verified.** Live DOM, collision sweep over the six frame-bearing sections at
+each width.
+
+| viewport | side margin | frame | collisions |
+|---|---|---|---|
+| 1440×900 | 76 (was 64) | 456 | none |
+| 1512×830 | 79 (was 67) | 519 | none |
+| 1920×1080 | 108 (was 96) | 760 | none |
+
+Navbar: logo box 48×48, CTA 48 high, header 84 tall (16 + 48 + 20). No horizontal overflow
+at any width; the closer still fits its screen at 1512 and 1920, with the button centred on
+the screen centre.
+
 ## 2026-09-02 — 36px titles on a laptop, wider section margins, tighter navbar
 
 **What changed.** `assets/css/base.css` only. `--fs-xl` is now

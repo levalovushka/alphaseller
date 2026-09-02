@@ -272,9 +272,13 @@ ground's own data attributes, `isSection` is false only for the footer.
 
 ### The three-column stage
 
-`--page-pad` and `--col-gap` are `clamp()`ed — `clamp(64px, 4.4vw, 84px)` and
+`--page-pad` is `clamp(76px, calc(4.4vw + 12px), 96px)` and `--col-gap` is
 `clamp(24px, 2.5vw, 48px)`. The two text columns have a floor of `--col-min` (380px) and the
 frame takes what is left, capped at 760px.
+
+On a 1920 screen the side margin comes from `--page-max` (1704px), not from the padding —
+the container hits its cap before the padding matters. Both numbers have to move together to
+change the margin there.
 
 The **header is not on this grid**: it is full-bleed with a 16px side inset, so the logo and
 the CTA sit closer to the edge than any section content does. That is deliberate.
@@ -286,16 +290,17 @@ for a browser with no Russian patterns). With the laptop's 36px xl the longest w
 copy, `маркетплейсах`, is well inside a 380px column, so nothing is hyphenated in practice
 and the rule is a safety net for future copy.
 
-Measured, with the section's effective left margin in brackets:
+Measured:
 
-| viewport | xl | frame | margin |
+| viewport | xl | frame | side margin |
 |---|---|---|---|
-| 1440 | 36 / 36 | 480 | 64 |
-| 1512 | 37.2 | 543 | 67 |
-| 1920 | 44 / 44 | 760 | 96 — the 1728px `--page-max` binds before the padding does |
+| 1440 | 36 / 36 | 456 | 76 |
+| 1512 | 37.2 | 519 | 79 |
+| 1920 | 44 / 44 | 760 | 108 |
 
-For anyone tempted to re-tune the frame: it has been 416, 473, 553, 513 and now 480 across
-this conversation. The client keeps choosing the moderate end.
+For anyone tempted to re-tune the frame: it has been 416, 473, 553, 513, 480 and now 456
+across this conversation. The client keeps choosing the moderate end — do not "fix" it
+upward without asking.
 
 ## 6. Content
 
@@ -413,8 +418,8 @@ be forced back to 500.
 
 | Element | Size |
 |---|---|
-| Logo — **mark only, no wordmark**, in a rounded square | 52×52 |
-| Header CTA button | 52 high |
+| Logo — **mark only, no wordmark**, in a rounded square | 48×48 |
+| Header CTA button | 48 high |
 | Section CTA buttons (under the subtitle) | 44 high |
 | Corner radius — buttons, logo square, frame | 32 (`--radius-btn`) |
 | Button side padding — both sizes | 20 (`--btn-pad-x`) |
