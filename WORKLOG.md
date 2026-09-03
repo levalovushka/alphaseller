@@ -1,5 +1,50 @@
 # Worklog
 
+## 2026-09-03 — a Tinder deck in the frame on section 4
+
+**What changed.** `index.html`: the `customization` slide stops being empty — it gets
+`data-filled="true"` and a `.style-deck` with three `.style-card`s. `base.css`: a
+`the style deck` block — cards absolute on the frame, `cover`, radius inherited, only the
+front one takes a pointer. `main.js`: a `the style deck` controller, and `stage()`'s single
+gate hook generalised into a `gates` map so the tabs and the deck can both hang off it.
+Three new files under `assets/images/`, cropped out of the client's AVIFs.
+
+**Why.** Client asked for the mechanic on 2026-09-03 and picked all three options himself:
+by hand only (no timer, no buttons), the deck fans out, and the 16:9 screens are cropped to
+the frame rather than letterboxed. Cards rejoin the deck at the back after a throw — that
+part is mine, or three throws would leave an empty frame.
+
+**How it was verified.** Emulated 1440×900 (frame 424×318 there), GSAP on manual ticks with
+`lagSmoothing(0)`, synthetic `PointerEvent`s with `setPointerCapture` stubbed — the pane is
+hidden in this session, so trusted pointer events cannot be delivered.
+
+```
+at rest        furniture TOP z3 flat | bags z2 y10 +3.15° | apparel z1 y20 −3.10°
+drag 150px     transform x150 y8 rot 4.95°  (150/424 × 14° — exactly the spec)
+release        threshold 119px → flew out; after 520ms bags is TOP, apparel z2,
+               furniture back at the tail slot; after another 400ms the fan is closed up
+drag 60px      under the threshold → returned to identity, top card unchanged
+gate           load at hero: --t 0, deck inert. On section 4: --t 1, not inert.
+               Section 6: --t 0, inert again.
+tabs           unbroken by the gates refactor: not inert on section 2, sweep 0% → 12%
+               across 600ms of ticks (5s dwell)
+```
+
+No console errors. Screenshotted the deck at 1440×900 — the card fills the frame with the
+right radius, the crop keeps the shop's own header, and the two cards behind read as a fan.
+
+**What is left undone / known soft.**
+- The screenshot had to be taken with the deck forced on stage over the *hero's* green
+  ground: the hidden pane does not repaint after a scroll, so every capture at the
+  section's own black ground came back solid black. Its real ground is unseen.
+- Sources are too short: crop tops out at 836×627, which is 2.0x at a 1440 frame but
+  1.16x at 1920. Ask for taller screens.
+- Not touched by a real mouse or trackpad — no trusted pointer events in this session.
+- No shadow or hairline between cards; the fan relies on the black ground for contrast.
+- Keyboard cannot throw a card. Nothing was asked for, and the whole frame sits inside
+  `aria-hidden="true"`, so the deck is invisible to assistive tech either way — the same
+  as the capabilities tabs, and pre-existing.
+
 ## 2026-09-02 — subtitle narrowed 30%, xl down 4px
 
 **What changed.** `assets/css/base.css`: `.section__subtitle` gets `max-width: 70%`, and

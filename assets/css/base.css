@@ -483,6 +483,67 @@ img { display: block; max-width: 100%; height: auto; }
   .frame-pane { transition: none; }
 }
 
+/* ---------- the style deck ----------
+   Tinder, in the frame. The top card *is* the frame — same size, same 32px radius — and
+   the rest of the deck fans out behind it, turned a few degrees to alternating sides.
+   Thrown by hand only: no timer, no buttons. Client's call on 2026-09-03, along with the
+   fan and the crop.
+
+   The fan is laid out by JS rather than here. A card being dragged has to be moved from
+   the same place its resting position comes from, and two writers on one `transform`
+   is how a card ends up stuck mid-throw. `main.js`, section `the style deck`, holds the
+   numbers. */
+
+.style-deck {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  /* The frame itself takes no pointer events; this has to. */
+  pointer-events: auto;
+}
+
+.style-card {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  /* The screens are 16:9 against the frame's 4:3, so `cover` crops about a quarter of
+     their width away — the client picked that over letterboxing them. */
+  background-color: var(--c-white);
+  /* Only the front card is grabbable; the ones behind must not eat the pointer. */
+  pointer-events: none;
+  user-select: none;
+  /* JS animates the transform. Nothing here may compete for it. */
+  will-change: transform;
+}
+
+.style-card[data-top="true"] {
+  pointer-events: auto;
+  cursor: grab;
+  /* A sideways drag is ours; scrolling the page with a vertical one stays the browser's. */
+  touch-action: pan-y;
+}
+
+.style-card[data-drag="true"] { cursor: grabbing; }
+
+/* One file per card, named after the shop it shows. Cropped to the frame's 4:3 out of the
+   client's 16:9 screens, `cwebp -q 90`: furniture 836x627 / 48 KB, bags 800x601 / 28 KB,
+   apparel 802x602 / 35 KB. Lossless was three to four times bigger on all three — these
+   came in already-lossy AVIF, so there was nothing to preserve. */
+.style-card[data-card="furniture"] {
+  background-image: url("../images/customization-furniture.webp");
+}
+
+.style-card[data-card="bags"] {
+  background-image: url("../images/customization-bags.webp");
+}
+
+.style-card[data-card="apparel"] {
+  background-image: url("../images/customization-apparel.webp");
+}
+
 /* A slide carrying its own image fills the frame edge to edge, so the empty-frame chrome
    has nothing left to mark. The dashed outline would otherwise be drawn over the picture.
    `--frame-outline` is the same custom property JS drives for the closer's call to action,

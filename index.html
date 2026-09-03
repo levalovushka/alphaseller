@@ -43,7 +43,17 @@
     </div>
   </div>
   <div class="stage-frame__slide" data-for="speed" aria-hidden="true"></div>
-  <div class="stage-frame__slide" data-for="customization" aria-hidden="true"></div>
+  <!-- The second slide that holds more than a picture: a deck of store screens, thrown
+       away by hand. Not aria-hidden — the top card takes a pointer; JS makes the deck
+       inert while this slide is off stage. The cards themselves carry no text, so each
+       one names the shop it shows. -->
+  <div class="stage-frame__slide" data-for="customization" data-filled="true">
+    <div class="style-deck" aria-label="Примеры магазинов — потяните карточку в сторону">
+      <div class="style-card" data-card="furniture" role="img" aria-label="Магазин мебели"></div>
+      <div class="style-card" data-card="bags" role="img" aria-label="Магазин сумок"></div>
+      <div class="style-card" data-card="apparel" role="img" aria-label="Магазин одежды"></div>
+    </div>
+  </div>
   <div class="stage-frame__slide" data-for="marketplaces" aria-hidden="true"></div>
   <div class="stage-frame__slide" data-for="audience" aria-hidden="true"></div>
   <div class="stage-frame__slide" data-for="closer" aria-hidden="true"></div>

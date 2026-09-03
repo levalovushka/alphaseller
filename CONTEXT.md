@@ -530,6 +530,9 @@ Figma's own `#1E1E1E` canvas in as a full-bleed `<rect>`.
 | 2 — capabilities, `promotion` pane | `assets/images/capabilities-promotion.webp` | `206:62480` | node is named "Продвижение — 4×3 / content". 1118×838.5, @2x → 2236×1677, cwebp **`-lossless`**, 172 KB |
 | 2 — `orders` pane | `assets/images/capabilities-orders.webp` | `209:35586` | same size and export, 188 KB. Re-pulled once after the client edited the node — the file name stays, so a re-pull is a byte swap and nothing else |
 | 2 — `logistics` pane | `assets/images/capabilities-logistics.webp` | `223:37237` | same size and export, but **`-q 90`**, 167 KB |
+| 4 — customization, deck card | `assets/images/customization-furniture.webp` | none — client's file | screenshot of a furniture shop, supplied as AVIF 1080×627. Centre-cropped to the frame's 4:3 → 836×627, `cwebp -q 90`, 48 KB |
+| 4 — deck card | `assets/images/customization-bags.webp` | none — client's file | a bag shop, AVIF 1080×601 → cropped 800×601, `-q 90`, 28 KB |
+| 4 — deck card | `assets/images/customization-apparel.webp` | none — client's file | an apparel shop, AVIF 1080×602 → cropped 802×602, `-q 90`, 35 KB |
 
 `209:35586` was on the `promotion` pane first; the client then said that screen is
 **Заказы** and supplied `206:62480` for Продвижение, so the file was renamed, not
@@ -602,6 +605,42 @@ Mine, not the client's — `--tab-fade: 0.4s`, `--tab-gap: 12px`, `--tab-drop: 3
 `--tab-elapsed` at 78% ink over the ground (`#333435` on a light section), and reusing the
 button geometry. The 5s dwell, the labels and all three states are his. Idle pills have no
 hover state: a tab is not a call to action, so it does not fill like `.btn--secondary`.
+
+### The style deck
+
+Section 4 holds a deck of three shop screens in the frame — Tinder, thrown by hand. The
+front card *is* the frame: same size, same 32px radius. Everything about it is the client's
+call on 2026-09-03, chosen against the alternatives offered:
+
+- **By hand only.** No 5s carousel like the tabs, and no buttons under the frame. A card
+  that clears 28% of the frame's width flies out; one that does not falls back.
+- **The deck fans.** Each card behind sits 10px lower, 1.5% smaller and turned 3.2° to
+  alternating sides. Rejected: a straight ladder, and a stack with only its bottom edge
+  showing.
+- **`cover`, not letterboxed.** The screens are 16:9 and the frame is 4:3, so about a
+  quarter of each one's width is cropped away — which takes the shop logo on the left and
+  the cart on the right out of every screenshot's header. He picked that over fitting the
+  whole screen inside the card.
+
+**A thrown card rejoins the deck at the back, so it never runs out.** Mine, not his — three
+cards would otherwise leave an empty frame after three throws.
+
+**These files are short for a big screen.** The client's AVIFs are ~1080×600, so the crop
+tops out at 836×627. The frame is 424px wide at a 1440 viewport (2.0x — fine) but 720 at
+1920 (1.16x — soft). Ask for taller sources before this goes anywhere near production.
+
+**No shadow and no hairline between the cards.** The fan's slivers read against this
+section's black ground on their own. If they ever sit on a light ground they will need
+something — flagged, not decided.
+
+The transforms are written by JS only (`main.js`, section `the style deck`); `base.css`
+sets none. A card being dragged has to be moved from the same place its resting position
+comes from, and two writers on one `transform` is how a card ends up stuck mid-throw.
+
+Like the tabs, the deck is gated by its slide's `--t`: `inert` while the slide is off
+stage, because a slide at opacity 0 still hit-tests. Both gates now register themselves in
+one `gates` map that `stage()` calls — that is the only place a slide learns it is on
+stage, so a crossing, a jump, a deep link and a refresh all go through it.
 
 ### Product screens
 

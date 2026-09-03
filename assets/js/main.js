@@ -87,17 +87,17 @@ function coloursOf(el) {
 
 const slideFor = (id) => slides.find((slide) => slide.dataset.for === id);
 
-/* One slide holds interactive content — the capabilities tabs — so it has to know how far
-   on stage it is: its controls must not take clicks or focus from behind another section.
-   `stage()` is the single writer of `--t`, so the gate hangs off it and is right in every
-   path: a crossing, a jump, a deep link, a refresh. Assigned by the controller below. */
-const tabsSlide = document.querySelector('.frame-tabs')?.closest('.stage-frame__slide');
-let gateTabs = () => {};
+/* Two slides hold interactive content — the capabilities tabs and the style deck — so each
+   has to know how far on stage it is: its controls must not take clicks or focus from
+   behind another section. `stage()` is the single writer of `--t`, so the gates hang off it
+   and are right in every path: a crossing, a jump, a deep link, a refresh. Each controller
+   registers its own below. */
+const gates = new Map();
 
 function stage(slide, t) {
   if (!slide) return;
   slide.style.setProperty('--t', String(t));
-  if (slide === tabsSlide) gateTabs(t);
+  gates.get(slide)?.(t);
 }
 
 grounds.forEach((ground, i) => {
@@ -280,9 +280,10 @@ if (tabStrip) {
   /* Driven by the slide's own `--t`, not by `section:change`: `--t` is written on every
      path — crossing, jump, deep link, refresh — while a discrete toggle can be missed.
      Only the edges matter, or a crossing's last frames would restart the sweep. */
+  const tabsSlide = tabStrip.closest('.stage-frame__slide');
   let live = null;
 
-  gateTabs = (t) => {
+  const gate = (t) => {
     const onStage = Number(t) > 0.99;
     if (onStage === live) return;
     live = onStage;
@@ -292,8 +293,154 @@ if (tabStrip) {
     else stopTimer();
   };
 
+  gates.set(tabsSlide, gate);
   show(0);
-  gateTabs(currentSection().id === 'capabilities' ? 1 : 0);
+  gate(currentSection().id === 'capabilities' ? 1 : 0);
+}
+
+/* ---------- the style deck ----------
+   Tinder, in the frame: three store screens, the front one filling the frame exactly and
+   the rest fanned out behind it. Thrown by hand only — the client asked for no timer and
+   no buttons here, unlike the tabs above. A card that clears the catch distance flies out
+   and rejoins the deck at the back, so the deck never runs out; one that does not falls
+   back into place.
+
+   JS owns the cards' transforms outright (`base.css` sets none), because a card being
+   dragged has to be moved from the same place its resting position comes from. */
+
+const deck = document.querySelector('.style-deck');
+
+if (deck) {
+  const cards = gsap.utils.toArray('.style-card', deck);
+
+  const DECK = {
+    drop: 10,       /* px each card sits below the one in front of it */
+    shrink: 0.015,  /* how much smaller each card behind is */
+    tilt: 3.2,      /* deg, to alternating sides — a deck, not a ladder */
+    catch: 0.28,    /* how much of the frame's width a drag must cover to throw the card */
+    swing: 14,      /* deg the front card turns across a full-width drag */
+    close: 0.35,    /* s for the deck to close up behind a card that left */
+    fly: 0.45,      /* s for a thrown card to clear the frame */
+    fall: 0.4,      /* s for an undecided card to drop back into place */
+  };
+
+  /* Front to back. A thrown card moves to the end of this and the fan is re-read from it,
+     so the deck's order is the only state here. */
+  let order = cards.slice();
+  let flying = false;
+  let drag = null;
+
+  const slot = (i) => ({
+    x: 0,
+    y: i * DECK.drop,
+    rotation: i === 0 ? 0 : i % 2 ? DECK.tilt : -DECK.tilt,
+    scale: 1 - i * DECK.shrink,
+  });
+
+  function layout(animate) {
+    order.forEach((card, i) => {
+      card.dataset.top = String(i === 0);
+      /* Stacking order cannot be interpolated — it is set, never tweened. */
+      gsap.set(card, { zIndex: order.length - i });
+
+      const to = { ...slot(i), opacity: 1 };
+      if (animate) gsap.to(card, { ...to, duration: DECK.close, ease: 'power2.out', overwrite: true });
+      else gsap.set(card, to);
+    });
+  }
+
+  function fly(card, direction) {
+    flying = true;
+
+    gsap.to(card, {
+      x: direction * deck.clientWidth * 1.35,
+      y: '+=60',
+      rotation: direction * 26,
+      opacity: 0,
+      duration: DECK.fly,
+      ease: 'power2.in',
+      overwrite: true,
+      onComplete: () => {
+        order.push(order.shift());
+        /* Put it straight into the back slot, invisible; `layout` fades it in there while
+           the rest of the deck closes up. Sliding it back across the frame would read as
+           the card returning. */
+        gsap.set(card, { ...slot(order.length - 1), opacity: 0 });
+        layout(true);
+        flying = false;
+      },
+    });
+  }
+
+  function stopDrag() {
+    if (!drag) return;
+    drag.card.removeAttribute('data-drag');
+    drag = null;
+  }
+
+  deck.addEventListener('pointerdown', (e) => {
+    if (flying || drag) return;
+
+    const card = order[0];
+    if (e.target !== card) return;
+
+    card.setPointerCapture(e.pointerId);
+    card.dataset.drag = 'true';
+    gsap.killTweensOf(card);
+    drag = { card, id: e.pointerId, x: e.clientX, y: e.clientY, dx: 0 };
+  });
+
+  deck.addEventListener('pointermove', (e) => {
+    if (!drag || e.pointerId !== drag.id) return;
+
+    drag.dx = e.clientX - drag.x;
+
+    gsap.set(drag.card, {
+      x: drag.dx,
+      y: e.clientY - drag.y,
+      rotation: (drag.dx / deck.clientWidth) * DECK.swing,
+    });
+  });
+
+  const release = (e) => {
+    if (!drag || e.pointerId !== drag.id) return;
+
+    const { card, dx } = drag;
+    stopDrag();
+
+    if (Math.abs(dx) > deck.clientWidth * DECK.catch) fly(card, Math.sign(dx));
+    else gsap.to(card, { ...slot(0), duration: DECK.fall, ease: 'power2.out', overwrite: true });
+  };
+
+  deck.addEventListener('pointerup', release);
+  deck.addEventListener('pointercancel', release);
+
+  /* Same gate as the tabs, and for the same reason: a slide at opacity 0 still hit-tests,
+     and a card must not be draggable from behind another section. A crossing that starts
+     mid-drag drops the card where it belongs rather than leaving it hanging. */
+  const deckSlide = deck.closest('.stage-frame__slide');
+  let live = null;
+
+  const gate = (t) => {
+    const onStage = Number(t) > 0.99;
+    if (onStage === live) return;
+    live = onStage;
+
+    deck.inert = !onStage;
+
+    if (!onStage) {
+      stopDrag();
+      gsap.killTweensOf(cards);
+      flying = false;
+      layout(false);
+    }
+  };
+
+  gates.set(deckSlide, gate);
+  layout(false);
+  /* A reload or a deep link can open on any section, so the first state comes from
+     geometry — the same way the tabs get theirs. */
+  gate(currentSection().id === 'customization' ? 1 : 0);
 }
 
 /* One section has no frame: the cases grid fills the screen on its own. Rather than fade
