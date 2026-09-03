@@ -1,5 +1,36 @@
 # Worklog
 
+## 2026-09-03 — the closer gets the brand in its heading and a call to action back
+
+**What changed.**
+
+- `index.html`: the closer's heading is "Альфа Селлер работает на твою мечту"; a filled
+  `Начать бесплатно` button sits under it, the two wrapped in a new `.closer__lead`.
+- `base.css`: `.closer__lead` replaces the `grid-column: 1 / 3` that was on the heading
+  itself — a flex column, `gap: 24px`.
+
+**Why.** Client: 'на последнем самом слайде давай в тайтле напишем "Альфа Селлер работает на
+твою мечту" и кнопку начать бесплатно продублируем под тайтлом.' Offered stroke / filled /
+green for the button; he took filled, like the header's. The wrapper is needed because
+`.closer__head` is a three-column grid with `--col-gap` on both axes: a bare button beside
+the heading auto-places into the free third column, and a second grid row would space it off
+the heading by the column gap.
+
+**How it was verified.** At 1440: `.closer__lead` computes `grid-column: 1 / 3` and is 928
+wide, the heading fills its own 560 measure in three lines, the button is 163×40, white plate
+(`rgb(255,255,255)`) with a black label, sitting 24 under the heading. Screenshotted and
+looked at — white ink over the closer's photograph, legible.
+
+**Verification caveat worth knowing.** The preview pane's screenshot comes back **solid
+black** at any large scroll offset, so the closer cannot be captured by scrolling to it. The
+shot above was taken by killing the ScrollTriggers, hiding the sections above, and setting
+the closer's own declared state by hand (black ground, light ink, `data-photo` on, no frame —
+it does not come back there). The DOM measurements were taken on the untouched page first.
+
+**Left undone.** The heading breaks 'Альфа Селлер / работает / на твою мечту' — the natural
+wrap at its 560 measure, with a short middle line. Not hand-broken; two lines do not fit
+(“Альфа Селлер работает” is ~600 at the 1440 xxl). Raise it if the rag bothers him.
+
 ## 2026-09-03 — the tile stills trimmed and balanced by weight
 
 **What changed.** `assets/images/growth-{ads,loyalty,bloggers,partners}.webp` re-cut: each

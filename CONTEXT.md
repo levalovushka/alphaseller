@@ -100,7 +100,7 @@ hand rather than leaving them to `text-wrap: balance`.
 | 5 | Управляй своим бизнесом на маркетплейсах | Даём аналитику по заказам, остаткам, логистике и помогаем выбрать лучшие карточки товаров | Подключить |
 | 6 | Работают ⏎ с нами | Огромные корпорации и небольшие бизнесы уже вернули контроль в свои руки с нашей платформой | Все кейсы |
 | 7 | Приводите ⏎ и удерживайте ⏎ клиентов | — **none** | — **none** |
-| 8 | Работает на твою мечту | — **dropped** | Начать бесплатно |
+| 8 | Альфа Селлер работает на твою мечту | — **dropped** | Начать бесплатно — **under the heading**, and filled like the header's, since 2026-09-03 |
 
 - **Section 2 has no CTA.** `О платформе` was removed on 2026-09-02 once the frame got its
   tabs: the tabs are the thing to interact with there, and a second control next to them
@@ -249,13 +249,20 @@ The last section and the footer are a single 100vh block, not two. Title top-lef
 header, subtitle top-right, the footer's four columns along the bottom, and in the middle —
 where the frame stands on every other section — the call to action.
 
-Its heading carries `xxl`, and is allowed to run under the frame column
-(`grid-column: 1 / 3`) — one text column is too narrow at that size.
+Its heading carries `xxl`, and the heading and the button under it are wrapped in
+`.closer__lead`, which is what runs under the frame column (`grid-column: 1 / 3`) — one text
+column is too narrow at that size. The wrapper is there because `.closer__head` is a
+three-column grid with a `--col-gap` on both axes: a bare button beside the heading would
+auto-place into the free third column, and a second grid row would space it off the heading by
+the column gap. Stacked, it takes the 24 the section asides use between a text and their
+button.
 
-**The middle of this screen is currently empty.** The frame used to travel back down and
-shrink into a green `Начать бесплатно` button here; the client detached that while he
-redraws the footer, so the middle grid row is a bare spacer and the section has no call to
-action of its own. The closer's head gets 32px more air under the navbar than a normal
+**The middle of this screen is empty; the call to action moved under the heading.** The frame
+used to travel back down and shrink into a green `Начать бесплатно` button in the middle; the
+client detached that while he redraws the footer, so the middle grid row is a bare spacer. On
+2026-09-03 he asked for the button back — but under the heading, and **filled** like the
+header's (`.btn`, white plate, black label) rather than the stroke every section body uses.
+He was offered stroke / filled / green and took filled. The closer's head gets 32px more air under the navbar than a normal
 section's top padding gives.
 
 This also removed a standing problem. The old footer was ~344px tall, so it could never
