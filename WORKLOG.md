@@ -1,5 +1,60 @@
 # Worklog
 
+## 2026-09-03 — the wheel gets its own controller
+
+**What changed.** `assets/js/main.js` gains a `one gesture, one section` block at the
+bottom: `wheel` is taken with `{ passive: false }`, `preventDefault`ed, and one section per
+gesture is animated by hand with GSAP. Three constants in `WHEEL` hold the whole feel —
+`trip` 12px, `rearm` 90ms, `glide` 0.65s. The file's own header comment no longer claims
+"no wheel hijacking". `base.css`: the snapping comment now says what CSS still owns
+(keyboard, touch, scrollbar) and what it does not; the three declarations themselves are
+untouched. `CONTEXT.md` §5 gains "The wheel is ours, everything else is the browser's".
+
+**Why.** With a trackpad the page was fine; on a mouse the client got "один клик не
+двигает" and "вязко доезжает". A wheel click is ~100px against a 900px screen, so Chrome's
+mandatory snapping resolved the gesture to the *nearest* point — the one it started from —
+and `scroll-behavior: smooth` animated that round trip. He picked the unified controller
+over a wheel-only heuristic, so the trackpad goes through the same path now.
+
+**Two measured facts that shaped it.** (1) Mandatory snapping re-resolves any scripted
+scroll position — `scrollBy(0, 60)` from the top lands on 720 immediately — so the glide
+turns `scroll-snap-type` off for its duration and restores it on the exact snap point at
+the end. (2) cash.app has dropped CSS snapping entirely: `scroll-snap-type: none`, no
+`scroll-snap-align` anywhere, zero `scroll-snap` occurrences in all seven of its
+stylesheets, and `_scrollTop` / `_scrollLeft` on `window`.
+
+**How it was verified.** Emulated 1440×900, seven sections of exactly 900, GSAP on manual
+ticks with `lagSmoothing(0)` — the Browser pane is hidden in this session, so rAF is paused
+and trusted `wheel` events cannot be delivered at all. Synthetic `wheel` events exercise
+the whole controller, since it moves the page itself rather than relying on the browser's
+snap:
+
+```
+one click down (deltaY 100)   → prevented, snap off during, path
+                                59:3 119:22 179:74 239:177 299:347 359:574 419:737
+                                479:834 539:882 599:898 659:900 → landed 900, snap restored
+burst of eight clicks          → all prevented, landed 1800 — one section, not eight
+one click up                   → landed 900, --ground rgb(233,235,238) (smoke)
+three trackpad-sized deltas    → first two swallowed under the 12px trip, third advances
+  (deltaY 4)                      one section
+Firefox line mode (deltaY 3,   → landed 2700, exactly the next section top
+  deltaMode 1)
+at 2700, after a yield         → --ground rgb(0,0,0), --ink rgb(255,255,255), photo 1
+```
+
+The last line matters: colour, ink and the photographic ground all end the glide where the
+section change should leave them. Their *per-frame* coupling during the glide could not be
+sampled — ScrollTrigger updates off native scroll events, which are not delivered inside a
+synchronous tick loop, and rAF is paused in a hidden pane.
+
+**What is left undone.** Not tried on a real mouse or a real trackpad — that is the
+client's next test, and the three `WHEEL` numbers are what to turn. A continuous spin of
+the wheel deliberately moves one section only (`rearm` swallows the burst); if that reads
+as unresponsive, lower `rearm`. The keyboard is still on native snapping and was not
+touched, so a single arrow key may well have the same "nearest point" problem the wheel
+had — unmeasured. Nothing here was screenshotted: the change is input handling, the
+rendered page is identical.
+
 ## 2026-09-02 — the case cards grow to a 24px gap
 
 **What changed.** `assets/css/base.css`: `.cases__grid` takes a flat `gap: 24px` instead of

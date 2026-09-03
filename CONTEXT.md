@@ -197,6 +197,9 @@ is what cash.app actually does.
 
 ### What cash.app really does (verified 2026-09-02, second reading)
 
+Its scroll container is described here as it stood that day; the third reading, on
+2026-09-03, found a different DOM — see "The wheel is ours" below.
+
 An earlier reading of the page was wrong — it was taken with the nav overlay open, which
 locks the body and hides the machinery. Measured properly:
 
@@ -211,9 +214,10 @@ So: section-by-section, with a custom scroll container.
 
 ### Ours
 
-Same visible result, built on **native page scroll** — no wheel hijacking, no smooth-scroll
-library, nothing pinned. `assets/js/main.js`, GSAP 3.15 + ScrollTrigger vendored in
-`assets/vendor/`:
+Same visible result, built on **native page scroll** — no smooth-scroll library, nothing
+pinned. The wheel is the one input we take over, and only to decide *when* a section
+changes; see "The wheel is ours, everything else is the browser's" below.
+`assets/js/main.js`, GSAP 3.15 + ScrollTrigger vendored in `assets/vendor/`:
 
 1. **One frame for the whole page**, `position: fixed`, aligned with the middle grid column.
    The text columns scroll past it; it never moves. Each section keeps a
@@ -268,6 +272,61 @@ shorter than a screen; merging it into the closer removed that.)
 by its own docs does not coexist with CSS scroll snapping. Not worth the dependency for
 what native snapping does in three declarations. Do not re-litigate this without a new
 reason.
+
+#### The wheel is ours, everything else is the browser's
+
+CSS snapping still owns the keyboard, touch and the scrollbar. It no longer owns the mouse
+wheel — `main.js`, section `one gesture, one section`, takes `wheel` and animates one
+section per gesture.
+
+**Why it had to change.** The trackpad sends a stream of small deltas that add up to most
+of a screen inside one gesture, so mandatory snapping resolves it forwards and feels right.
+A mouse wheel sends one ~100px tick per click, far under half of a 900px screen, and Chrome
+then snaps to the *nearest* point — the one the click started from. So a click moved
+nothing, and `scroll-behavior: smooth` animated that round trip, which is what made it feel
+gummy. Client on 2026-09-03, on a mouse: "один клик не двигает", "вязко доезжает". He chose
+the unified controller over a wheel-only heuristic patch, so the trackpad now goes through
+the same path.
+
+**cash.app does the same thing, and no longer snaps at all** (measured 2026-09-03, third
+reading, and this supersedes the second): `scroll-snap-type: none` on `html`, not one
+element with `scroll-snap-align`, and **zero** occurrences of `scroll-snap` across all
+seven of its stylesheets. `_scrollTop` / `_scrollLeft` sit on `window` — their own scroll
+manager. The wheel and the trackpad are two delta sources feeding one animation of theirs.
+(The `smooth-scroll-manager` element from the second reading is gone from their DOM. Their
+layout could not be measured this time: the Browser pane was hidden, so `innerWidth` and
+`innerHeight` were 0, and a `preventDefault` probe on `wheel` came back negative in that
+state — inconclusive, not evidence that they leave the wheel alone.)
+
+**Mandatory snapping re-resolves any scroll position written from script.** Measured on our
+page: `scrollBy(0, 60)` from the top lands on 720 *immediately*, not on 60 —
+`scroll-snap-stop: always` sends it to the next point in the direction of travel. So an
+animation of the scroll position is impossible while snapping is on; the controller turns
+`scroll-snap-type` off for the length of the glide and restores it at the end, where the
+page is already on an exact snap point and restoring moves nothing. (Restoring it from a
+position *between* points snaps to the nearest, not forwards: from 300 of 720 it went back
+to 0.)
+
+`scroll-behavior: smooth` stays in the stylesheet for the logo's `#hero` link; the
+controller writes its own positions with `behavior: instant` so the two never stack.
+
+**The three numbers are the whole feel**, in `WHEEL` at the bottom of `main.js`:
+`trip` 12px of accumulated delta counts as a gesture (one wheel click is ~100px, the
+trackpad reaches 12 in two or three events, so both answer on the first movement),
+`rearm` 90ms of silence before the next gesture is allowed, `glide` 0.65s to cross one
+section.
+
+`rearm` is what drops the trackpad's inertia tail — it keeps firing for hundreds of
+milliseconds after the fingers lift — and what keeps a hard spin of the wheel from flying
+through three sections: every event arriving while the door is shut pushes the countdown
+out, so one burst is one section however long it runs. The other side of that coin: holding
+a continuous spin also moves exactly one section. If that ever reads as unresponsive, lower
+`rearm` rather than touch the rest.
+
+**The controller stands down on a section taller than the viewport** — such a section holds
+content that can only be reached by scrolling inside it, and hijacking the wheel would trap
+it. Re-checked on every `ScrollTrigger` refresh. The design keeps every section exactly one
+viewport tall, so this is a guard, not a mode.
 
 ### The photographic ground
 
@@ -596,9 +655,11 @@ rounded. On the 52×52 logo square the squircle corner shape absorbs the clamp a
 reads as a rounded square — but the `border-radius` fallback in Safari and Firefox clamps to
 26 and draws a full circle. Known divergence, raised with the client.
 
-The logo square is a **squircle with a fallback**: `border-radius` for Safari and Firefox,
-`corner-shape: squircle` inside `@supports` for Chrome 139+. It applies to **everything
-rounded** — the logo square, both buttons and the frame.
+**The logo square is the only squircle on the page** — `corner-shape: squircle` inside
+`@supports`, with `border-radius` as the fallback for Safari and Firefox. Everything else is
+plain: the frame, its slides and the cards are rounded rectangles at 32, and the buttons and
+the tabs are full pills (`--radius-pill: 999px`). The client narrowed it to the logo on
+2026-09-02 — do not spread it back without asking.
 
 ### Button styles
 
