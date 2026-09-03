@@ -132,6 +132,23 @@
   --tab-drop: 32px;
   --tab-elapsed: color-mix(in srgb, var(--ink) 78%, var(--ground));
 
+  /* The case stack. The ledge is the strip an inactive card shows, so it has to hold the
+     logo plus the card's top padding — `--case-pad + --case-logo-h` is its floor — and the
+     8 on top of that is the air between the logo and the edge of the card in front.
+     **All four numbers are mine, not the client's**, and 1440 is what sets them, not taste:
+
+       frame 390 = 3 ledges + the active card, and the active card needs
+       2 x pad + logo + pad of gap + 4 lines of lg = 40 + 32 + 20 + 96 = 188.
+
+     That leaves 202 for three ledges, so 60 is about the ceiling. Which is why the pad is
+     20 and the logo 32 rather than the 32 and 40 the single carousel card had: at those
+     numbers the ledge floor alone is 72, three of them leave the active card 174, and its
+     own text needs 208. At 1920 (frame 540) all of it has ~150px of slack. */
+  --case-pad: 20px;
+  --case-logo-h: 32px;
+  --case-ledge: calc(var(--case-pad) + var(--case-logo-h) + 8px);
+  --case-slide: 0.45s;
+
   /* The frame and its slides take the same radius, and the curtain's rounded leading edge
      is cut on it too. 24 since 2026-09-03 — client asked for slightly tighter corners; it
      was 32 all day before that. `--radius` is only the base it is derived from; nothing uses
@@ -1062,48 +1079,132 @@ img { display: block; max-width: 100%; height: auto; }
   overflow: hidden;
 }
 
-.case-deck__rail {
-  display: flex;
-  height: 100%;
+.case-deck__stack {
+  position: absolute;
+  inset: 0;
   margin: 0;
   padding: 0;
   list-style: none;
-  /* JS owns the transform. Nothing here may compete for it. */
-  will-change: transform;
+  /* Carries the frame's radius down to the cards — they take theirs with `inherit`, and
+     without this link in the chain every ledge came out square. Client caught it. */
+  border-radius: inherit;
 }
 
-/* One card fills the frame. The white plate and the black type are the card's own, as they
-   were in the grid: it does not follow --ink. */
+/* Every card is the same box, and only its `top` differs — which is what makes the stack
+   arithmetic exact. The height is `frame - (n - 1) ledges` for all of them, so the active
+   card's bottom edge lands **exactly** on the top edge of the first card collected below
+   it, whichever card is active. Nothing overlaps, and nothing is re-measured on a resize:
+   both positions are `calc()`s off the ledge, and `--slot` is all JS writes.
+
+   `top`, not a transform, deliberately: four boxes laying out on a click is nothing — this
+   is a discrete event, not a scrubbed one — and a transform would have to know the frame's
+   pixel height, which is exactly what the `calc()` avoids.
+
+   The count is hard-coded in the height because CSS cannot count children. Four cases; a
+   fifth means changing the 3 here. */
 .case {
-  flex: 0 0 100%;
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: calc(100% - 3 * var(--case-ledge));
+  /* Cards at or above the active one hang from the top of the frame... */
+  top: calc(var(--slot, 0) * var(--case-ledge));
+  transition: top var(--case-slide) cubic-bezier(0.32, 0.72, 0, 1);
   display: flex;
   flex-direction: column;
+  /* The logo strip at the top, the text at the bottom of what the card has left — the same
+     shape it had as a single carousel card. */
   justify-content: space-between;
-  gap: 32px;
-  padding: 32px;
+  gap: var(--case-pad);
+  padding: var(--case-pad);
   border-radius: inherit;
+  /* The plate and the type are the card's own and do not follow --ink — see the four tones
+     below. The white one is the fallback if a card ships without a tone. */
   background: var(--c-white);
   color: var(--c-black);
 }
 
-/* The partner logos ship white on transparent — there is no dark version of the source
-   artwork, so the three that are pure white are inverted to sit on a white card. M.Reason
-   is not: it is dark lettering on its own white plate and already reads correctly. */
+/* Four cards, four grounds — client, 2026-09-03: "давай сделаем их разноцветными — черная,
+   графитовая, красная и белая". **This is the only thing on the page using the brand red.**
+
+   The tones are also what forced the logos to be re-cut — see below. */
+.case[data-tone="black"] { background: var(--c-black); color: var(--c-white); }
+.case[data-tone="graphite"] { background: var(--c-graphite); color: var(--c-white); }
+.case[data-tone="red"] { background: var(--c-red); color: var(--c-white); }
+.case[data-tone="white"] { background: var(--c-white); color: var(--c-black); }
+
+/* ---------- the partner logos ----------
+   All four shipped as white artwork on an **opaque black rectangle**, not on transparency.
+   That was invisible while the card was white and the three white ones were inverted (the
+   invert turned their black box white, which is the only reason it worked), and it fell
+   apart the moment the cards took four colours: every logo showed its own black plate.
+   Client, 2026-09-03: "и другие логотипы тоже с черной подложкой теперь".
+
+   So the black was keyed out of all four for good, off the source files in `assets/logos`:
+   the artwork is greyscale white-on-black, so the luminance **is** the alpha — every pixel
+   becomes white with `alpha = value`, which is exact down to the anti-aliasing.
+
+   M.Reason needed one more step, and the client called it: "обрезать ровненько по его личной
+   плашке которая в картинку врисована и инвертировать". It is dark lettering on a light pill
+   inside that black box, so it was cropped to the pill's own rows (24-94 of 120, measured —
+   the pill runs the full width), inverted, and keyed like the others. The pill's soft edge
+   had to be flooded out with the background rather than keyed by value: left in, it drew a
+   faint rim around the lettering on the red card. It now behaves exactly like the other
+   three — white artwork on transparency.
+
+   Which means the **white** card is the one that inverts now, whichever brand sits on it. */
 .case__logo[data-invert="true"] { filter: invert(1); }
+
+/* ...and the ones after it are collected against the bottom instead. */
+.case[data-side="bottom"] { top: calc(100% - var(--slot) * var(--case-ledge)); }
+
+/* The tap target is the strip and nothing else. An inactive card's box runs the full card
+   height, but everything below its ledge is covered by the card in front of it, so a click
+   can only ever land on the strip — and the button *is* the strip. */
+.case__pick {
+  display: flex;
+  align-items: flex-start;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+/* The card in front is already where a click would send it. */
+.case__pick:disabled { cursor: default; }
+
+.case__pick:focus-visible {
+  /* The card's own type colour, not the ink: the ring has to read on four grounds. */
+  outline: 2px solid currentColor;
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .case { transition: none; }
+}
+
+/* Style lg, and one line longer than it was — client, 2026-09-03: "надо использовать в
+   карточке lg кегль + распиши поподробнее текст, на строку больше". Same style the growth
+   tiles use, and for the same reason: it is the only text on the card and md read too small
+   against a plate that size. */
+.case__text {
+  margin: 0;
+  font-size: var(--fs-lg);
+  line-height: var(--lh-lg);
+}
 
 .case__logo {
   /* Without this the flex column stretches the box to the card's width; the image would
      still be drawn correctly by object-fit, but the box would lie about its size. */
   align-self: flex-start;
   width: auto;
-  height: 40px;
+  /* The ledge is derived from this, so the two can never disagree. */
+  height: var(--case-logo-h);
   max-width: 100%;
   object-fit: contain;
 }
-
-/* The deck's drop clears its own stack of ledges; a carousel has none, so these sit where
-   the tab strip does. */
-.case-deck .deck-nav { margin-top: var(--tab-drop); }
 
 /* ---------- growth tiles ----------
    The black screen after the cases: the heading in the left column, six square tiles across

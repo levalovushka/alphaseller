@@ -98,45 +98,42 @@
     <div class="frame-chip" data-chip="ozon"></div>
     <div class="frame-chip" data-chip="megamarket"></div>
   </div>
-  <!-- The cases, in the frame: one card at a time, walked by the same two arrows the style
-       deck uses. Not aria-hidden — the arrows take clicks; JS makes the subtree inert while
-       the slide is off stage, exactly as it does for the deck and the tabs. -->
+  <!-- The cases are a stack, not a slider: Apple Wallet's mechanic, asked for on
+       2026-09-03 with a screenshot of it. Every card keeps its place in the reading order;
+       the active one is expanded and the ones after it collect at the bottom. The visible
+       strip of an inactive card is a real button — that is the whole tap target, and it is
+       disabled on the card already in front. Not aria-hidden — those buttons take clicks;
+       JS makes the subtree inert while the slide is off stage, as it does for the deck and
+       the tabs. -->
   <div class="stage-frame__slide" data-for="audience" data-filled="true">
     <div class="case-deck">
       <div class="case-deck__track">
-        <ul class="case-deck__rail">
-        <li class="case">
-          <img class="case__logo" data-invert="true" src="assets/logos/kinash.webp" alt="KINASH" width="120" height="40">
-          <p class="case__text">Нарастили продажи на&nbsp;40%, потому что смогли выйти из&nbsp;операционки</p>
+        <ul class="case-deck__stack">
+        <li class="case" data-tone="black">
+          <button class="case__pick" type="button">
+            <img class="case__logo" src="assets/logos/kinash.webp" alt="KINASH" width="120" height="40">
+          </button>
+          <p class="case__text">Нарастили продажи на&nbsp;40% за&nbsp;квартал: вышли из&nbsp;операционки и&nbsp;занялись новыми коллекциями вместо того, чтобы каждый вечер сводить остатки руками</p>
         </li>
-        <li class="case">
-          <img class="case__logo" data-invert="true" src="assets/logos/domodedovo.webp" alt="Домодедово" width="120" height="40">
-          <p class="case__text">Собрали витрину за&nbsp;выходные и&nbsp;в&nbsp;понедельник уже принимали заказы</p>
+        <li class="case" data-tone="graphite">
+          <button class="case__pick" type="button">
+            <img class="case__logo" src="assets/logos/domodedovo.webp" alt="Домодедово" width="120" height="40">
+          </button>
+          <p class="case__text">Собрали витрину за&nbsp;выходные, в&nbsp;понедельник уже принимали заказы, а&nbsp;через месяц открыли второй магазин&nbsp;— в&nbsp;том же кабинете и&nbsp;без нового подрядчика</p>
         </li>
-        <li class="case">
-          <img class="case__logo" data-invert="true" src="assets/logos/12mesyatsev.webp" alt="12 месяцев" width="120" height="40">
-          <p class="case__text">Свели пять маркетплейсов в&nbsp;один кабинет и&nbsp;перестали терять остатки</p>
+        <li class="case" data-tone="red">
+          <button class="case__pick" type="button">
+            <img class="case__logo" src="assets/logos/12mesyatsev.webp" alt="12 месяцев" width="120" height="40">
+          </button>
+          <p class="case__text">Свели пять маркетплейсов в&nbsp;один кабинет и&nbsp;перестали терять остатки: цены и&nbsp;склад обновляются везде сразу, а&nbsp;отчёт по&nbsp;каждой площадке собирается сам</p>
         </li>
-        <li class="case">
-          <img class="case__logo" src="assets/logos/mreason.webp" alt="M.Reason" width="120" height="40">
-          <p class="case__text">Запустили второй бренд, не&nbsp;нанимая ни&nbsp;одного разработчика</p>
+        <li class="case" data-tone="white">
+          <button class="case__pick" type="button">
+            <img class="case__logo" data-invert="true" src="assets/logos/mreason.webp" alt="M.Reason" width="357" height="71">
+          </button>
+          <p class="case__text">Запустили второй бренд, не&nbsp;нанимая ни&nbsp;одного разработчика: от&nbsp;домена до&nbsp;первой оплаты прошло четыре дня, а&nbsp;дизайн собрали сами из&nbsp;шаблона</p>
         </li>
         </ul>
-      </div>
-
-      <!-- Under the frame. Same markup and same styles as the deck's, with no stack to
-           clear, so it sits at the tab strip's drop. -->
-      <div class="deck-nav">
-        <button class="deck-arrow" type="button" data-dir="-1" aria-label="Предыдущий кейс">
-          <svg class="deck-arrow__icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
-            <path d="M13 8H3.5M7.5 3.5 3 8l4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
-        <button class="deck-arrow" type="button" data-dir="1" aria-label="Следующий кейс">
-          <svg class="deck-arrow__icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
-            <path d="M13 8H3.5M7.5 3.5 3 8l4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
       </div>
     </div>
   </div>

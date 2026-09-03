@@ -856,49 +856,71 @@ if (deck) {
   gate(currentSection().id === 'customization' ? 1 : 0);
 }
 
-/* ---------- the case carousel ----------
-   The cases live in the frame since 2026-09-03, one card at a time, walked by the same two
-   arrow buttons the style deck carries. No drag and no timer: the client asked for the
-   deck's arrows, not for the deck's physics — this is a list of quotes, not a thing to play
-   with. The rail wraps, so either arrow always has somewhere to go.
+/* ---------- the case stack ----------
+   Apple Wallet, in the frame. The client asked for it on 2026-09-03 with a screenshot of
+   Wallet's own stack, in place of the carousel that was here for a few hours: "давай вместо
+   слайдера сделаем как в эппл wallet механику... это должна стать стопка карточек, по клику
+   на верхнюю часть неактивной она выходит на первый план."
 
-   Only the rail's x is animated. The track above it clips, so a card never leaves the
-   frame, and the curtain clips the track the way it clips a picture. */
+   The model is an accordion, not a shuffle — every card keeps its place in the reading
+   order:
+
+     - cards before the active one hang from the top of the frame, one ledge apart,
+     - the active card sits at its own ledge and is the only one with room for its text,
+     - cards after it are collected against the bottom, one ledge apart.
+
+   So `--slot` is a card's distance from whichever edge it hangs from, `data-side` says
+   which edge, and CSS does the rest — see the geometry note in `base.css`. Both are written
+   only when they change.
+
+   The stacking order never changes: a card is always covered by the card after it, so the
+   z-index is just the DOM index, set once.
+
+   The visible strip is a real `<button>`, disabled on the card in front. That makes the
+   whole thing keyboard-operable for free and needs no key handling here. */
 
 const caseDeck = document.querySelector('.case-deck');
 
 if (caseDeck) {
-  const rail = caseDeck.querySelector('.case-deck__rail');
-  const cards = gsap.utils.toArray('.case', rail);
-  const WALK = 0.5;   /* s per step */
-  let at = 0;
+  const cards = gsap.utils.toArray('.case', caseDeck);
+  /* The last card is the one in front at rest, which is how Wallet's own stack reads: the
+     ledges run down from the top and the card at the bottom is open. */
+  const FIRST = cards.length - 1;
+  let active = FIRST;
 
-  const place = (animate) => {
-    const x = -at * caseDeck.clientWidth;
-    if (animate) {
-      gsap.to(rail, { x, duration: WALK, ease: 'power3.out', overwrite: true });
-      return;
-    }
-    gsap.set(rail, { x });
-  };
-
-  const walk = (direction) => {
-    at = (at + direction + cards.length) % cards.length;
-    place(true);
-  };
-
-  gsap.utils.toArray('.deck-arrow', caseDeck).forEach((button) => {
-    button.addEventListener('click', () => walk(Number(button.dataset.dir)));
+  cards.forEach((card, i) => {
+    card.style.zIndex = String(i);
   });
 
-  /* The frame's width comes from viewport-dependent custom properties, so a resize moves
-     the step. Re-place without animating — the card must not slide because a window did. */
-  ScrollTrigger.addEventListener('refresh', () => place(false));
+  function place() {
+    cards.forEach((card, i) => {
+      const below = i > active;
+      /* From the top: the card's own index. From the bottom: how many cards, counting
+         itself, are collected there. */
+      const slot = below ? cards.length - i : i;
 
-  /* Same gate as the tabs and the deck: a slide at opacity 0 still hit-tests, and these
-     buttons must not take a click or the focus from behind another section. Coming back on
-     stage the carousel starts from the first case again — a visitor who scrolls past and
-     returns should see the section as it was written, not where he left it. */
+      card.style.setProperty('--slot', String(slot));
+      if (below) card.dataset.side = 'bottom';
+      else if (card.dataset.side !== undefined) delete card.dataset.side;
+
+      const front = i === active;
+      card.dataset.active = String(front);
+      card.querySelector('.case__pick').disabled = front;
+    });
+  }
+
+  cards.forEach((card, i) => {
+    card.querySelector('.case__pick').addEventListener('click', () => {
+      if (i === active) return;
+      active = i;
+      place();
+    });
+  });
+
+  /* Same gate as the tabs and the style deck: a slide at opacity 0 still hit-tests, and
+     these buttons must not take a click or the focus from behind another section. Coming
+     back on stage the stack is dealt again from the top, so a visitor who scrolls past and
+     returns sees the screen as it was written rather than where he left it. */
   const caseSlide = caseDeck.closest('.stage-frame__slide');
   let caseLive = null;
 
@@ -910,19 +932,18 @@ if (caseDeck) {
     caseDeck.inert = !onStage;
     if (onStage) return;
 
-    at = 0;
-    gsap.killTweensOf(rail);
-    place(false);
+    active = FIRST;
+    place();
   });
 
-  place(false);
+  place();
 }
 
 /* One section has no frame: the growth tiles fill the screen on their own. Rather than
    fade the frame out there, it leaves the way everything else does — upward, at exactly the
    speed of the section it belonged to, so it reads as part of that screen departing. It
    does not come back: the closer draws its own call to action. (Until 2026-09-03 this was
-   the cases section, which now keeps the frame and puts a carousel in it.)
+   the cases section, which now keeps the frame and puts the case stack in it.)
 
    (It used to shrink into that button. The client detached the two while he redraws the
    footer — do not re-couple them without asking.) */

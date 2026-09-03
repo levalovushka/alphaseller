@@ -76,7 +76,8 @@ Header + 8 sections + footer.
 | 7 | Growth tiles | Black `#000000` — six tiles, no frame, added 2026-09-03, see below |
 | 8 | Closer + footer | Black `#000000` — one screen, see below |
 
-**Red is not used on this page at all** (for now). The three dark sections use pure
+**Red is on the page in two places** since 2026-09-03: the bank's first growth tile and one
+of the four case cards. The three dark sections use pure
 `#000000` and the hero uses graphite. Pure white is no longer a section ground either — the
 light sections are all smoky white, so the page reads **graphite** → smoke → black → black →
 smoke → smoke → black → black. **Green is now on the page nowhere at all** — it was only ever the
@@ -145,23 +146,62 @@ Section 6 went back to the ordinary three columns on 2026-09-03, on the client's
 - Title left (`xl` since 2026-09-03 — it was `xxl` while this screen was a card grid —
   two hand-set lines), the frame in the middle, subtitle and the
   `Все кейсы` button right — exactly like every other section.
-- **The frame is a carousel**: one case card at a time, white plate and black type of its
-  own, walked by the same two arrow buttons the style deck carries (`.deck-nav`,
-  `.deck-arrow` — one markup, one stylesheet, two users). No drag and no timer: these are
-  quotes, not a thing to play with. The rail wraps in both directions.
-- Leaving the section resets it to the first case, so a visitor who comes back sees the
-  screen as it was written.
-- What the curtain clips is the **track**, not the rail: the track fills the frame's box
-  exactly, so the wipe behaves like a picture's while the rail may be four cards wide, and
-  the arrows, which hang below the box, are untouched.
+- **The frame is a stack, on Apple Wallet's mechanic** — client, 2026-09-03, with a
+  screenshot of Wallet: "давай вместо слайдера сделаем как в эппл wallet механику… это должна
+  стать стопка карточек, по клику на верхнюю часть неактивной она выходит на первый план."
+  It replaced the arrow carousel that stood here for a few hours the same day.
+  - The model is an **accordion, not a shuffle**: every card keeps its place in the reading
+    order. Cards before the active one hang from the top of the frame a ledge apart, the
+    active one is the only one with room for its text, and the cards after it are collected
+    against the bottom.
+  - **The ledge is the tap target**, and it is a real `<button>` wrapping the logo, disabled
+    on the card in front. Everything below a card's ledge is covered by the card ahead of it,
+    so a click can only land on the strip; the keyboard gets the same thing for free.
+  - The geometry is exact rather than tuned: every card is the same box, `frame - 3 ledges`
+    tall, and only its `top` differs — so the active card's bottom edge lands on the top edge
+    of the first card collected below it, whichever card is active. JS writes one number
+    (`--slot`) and one attribute (`data-side`); `calc()` does the rest, so a resize needs no
+    re-measuring. The stacking order never changes — a card is always covered by the next —
+    so the z-index is the DOM index, set once.
+  - `--case-ledge` is `pad + logo + 8`, and **1440 is what sets all of it**: frame 390 = three
+    ledges + an active card that needs 188 for its own content, which leaves about 60 a ledge.
+    That is why the pad is 20 and the logo 32 rather than the 32 and 40 the single carousel
+    card had. At 1920 (frame 540) everything has ~150px of slack. **These numbers are mine.**
+- **Four grounds**: black, graphite, red, white, in that order down the stack — client,
+  2026-09-03 ("давай сделаем их разноцветными"). The type is white on the three dark ones and
+  black on the white one; none of it follows `--ink`.
+- The card text is **style `lg`, one line longer than it was** (client: "надо использовать в
+  карточке lg кегль + распиши поподробнее текст, на строку больше"). It sets in four lines at
+  1440 and three at 1920. **The copy is mine** — the detail and the numbers in it are invented
+  and want replacing with real ones.
+- Leaving the section deals the stack again from the top, so a visitor who comes back sees
+  the screen as it was written.
+- What the curtain clips is the **track**, not the stack: the track fills the frame's box
+  exactly, so the wipe behaves like a picture's.
 - The card grid, `.cases__head` and the frameless layout for this section are **gone**. If
   a grid is ever wanted again, `git show 48e3f11` has it.
 
 The partner logos (`assets/logos/`, from Figma node `32:29061` — KINASH, Домодедово,
-12 месяцев, M.Reason) ship **white on transparent**, and there is no dark version of the
-source artwork. Three of them are therefore inverted in CSS (`[data-invert="true"]`) to sit
-on a white card. M.Reason is not: it is dark lettering on its own white plate and already
-reads correctly. Proper dark exports would be better than the filter.
+12 месяцев, M.Reason) shipped as white artwork on an **opaque black rectangle**, not on
+transparency. That stayed invisible while the card was white — the three white ones were
+inverted, and the invert turning their black box white is the only reason it worked — and it
+fell apart the moment the cards took four grounds: every logo showed its own black plate.
+Client, 2026-09-03: "и другие логотипы тоже с черной подложкой теперь".
+
+**The black was keyed out of all four for good**, in place in `assets/logos`. The artwork is
+greyscale white-on-black, so the luminance *is* the alpha: every pixel becomes white with
+`alpha = value`, exact down to the anti-aliasing. M.Reason needed one more step, which the
+client also called ("обрезать ровненько по его личной плашке которая в картинку врисована и
+инвертировать"): it is dark lettering on a light pill inside that box, so it was cropped to
+the pill's own rows — 24-94 of 120, measured; the pill runs the full width — inverted, and
+then keyed like the others. Its file is therefore 357×71 while the other three are still
+120 tall. The pill's soft edge had to be flooded out along with the background rather than
+keyed by value: left in, it drew a faint rim around the lettering on the red card.
+
+All four are now white artwork on transparency, which means **the white card is the one that
+inverts** (`[data-invert="true"]`), whichever brand sits on it. The script that did this is
+not kept — a re-pull from Figma would have to redo it, or ask the client for exports with
+real alpha.
 
 **The card copy is placeholder written by me**, at the client's request, four sentences in
 the site's voice. Replace it with real cases before this goes anywhere near a customer.
@@ -862,7 +902,7 @@ before spending the columns again.
 | Ярко-зелёный | Bright green | `#A6ED00` | Brand accent: entrepreneurial freedom, growth. **Unused on this page since 2026-09-03** — the hero and the morph panel were its only users. |
 | Чистый чёрный | Pure black | `#000000` | Base of the visual system. Sections 4, 7, footer. |
 | Глубокий графит | Deep graphite | `#1A1817` | Warm neutral dark. The hero's ground and the morph panel since 2026-09-03, plus the cards in the cases section. |
-| Тициановый | Titian red | `#DC200C` | Action energy. **Unused on this page.** |
+| Тициановый | Titian red | `#DC200C` | Action energy. Two users since 2026-09-03: the bank's first growth tile and the third case card. |
 
 ### Logo
 
@@ -1222,7 +1262,7 @@ Verified with fontTools (2026-09-02):
 | Style | Cut | Size / leading | Tracking | Used for |
 |---|---|---|---|---|
 | `xxl` | Hyper Medium | 56 / 56 at 1440 → 64 / 64 at 1920 | normal | The closer heading — the only one left since the cases went back to `xl` on 2026-09-03 |
-| `lg` | Hyper Regular | 18 / 24 at 1440 → 22 / 28 at 1920 | `0.01em` | The growth tiles' text, and nothing else yet. Added 2026-09-03. **The sizes are the client's** ("18 на 1440 и 22 на 1920"); the leading is mine |
+| `lg` | Hyper Regular | 18 / 24 at 1440 → 22 / 28 at 1920 | `0.01em` | The growth tiles' text and the case cards'. Added 2026-09-03. **The sizes are the client's** ("18 на 1440 и 22 на 1920"); the leading is mine |
 | `xl` | Hyper Medium | 32 / 32 at 1440 → 40 / 40 at 1920 | normal | Section titles |
 | `md` | Hyper Regular | 14 / 18 at 1440 → 18 / 24 at 1920 | 1% (`0.01em`) | Everything else |
 

@@ -1,5 +1,58 @@
 # Worklog
 
+## 2026-09-03 — the cases become a Wallet stack, in four colours, and the logos get re-cut
+
+**What changed.**
+
+- `index.html`: the cases slide is a `.case-deck__stack` of four `.case` cards, each with a
+  `.case__pick` button wrapping its logo and a longer `.case__text`. `data-tone` per card;
+  `data-invert` moved to the white card's logo; the `.deck-nav` arrows are gone from this
+  slide (the style deck keeps its own).
+- `base.css`: the rail and the single full-frame card are replaced by the stack geometry —
+  four `--case-*` tokens, `top` off `--slot` and `data-side`, `border-radius: inherit` on the
+  stack so the ledges round like the frame, the four tones, `.case__text` in `lg`, and the
+  `.case__pick` rules.
+- `main.js`: the carousel controller is replaced by the stack controller — `--slot`,
+  `data-side`, `data-active`, the pick button's `disabled`, z-index once, and the same
+  on-stage gate, which now deals the stack again from the top.
+- `assets/logos/*.webp`: all four re-cut, in place. The baked-in black background is keyed
+  out (luminance as alpha, artwork forced white); M.Reason is additionally cropped to its own
+  pill (rows 24-94 of 120, measured) and inverted first, and its soft edge flooded out with
+  the background so it leaves no rim. M.Reason is now 357×71; the other three keep 120.
+- `CONTEXT.md`: §4's Cases section rewritten, the partner-logo paragraph rewritten, the red
+  and `lg` rows corrected.
+
+**Why.** Four client messages in one go on 2026-09-03: `lg` in the card and a longer text,
+Wallet's stack instead of the slider (with a screenshot of Wallet), four coloured cards
+("черная, графитовая, красная и белая"), the logos' black backing, and the ledges' rounding.
+
+**How it was verified.** In the live page at 1440 and at 1920.
+
+- Geometry at 1440 (frame 520×390): ledge 60, every card 210 tall, radius 24 on all four,
+  `scrollHeight - clientHeight` is 0 on every card — nothing overflows. Tops at rest
+  0/60/120/180 with the last card active.
+- The mechanic, with a real pointer click on the black card's ledge: `data-active` moved to
+  card 0, the other three took `data-side="bottom"` with slots 3/2/1 and tops 210/270/330 —
+  and 0 + 210 = 210 is exactly card 1's top, so the active card's bottom edge meets the
+  stack below it with no overlap. The picked card's button went `disabled`, the rest enabled.
+- At 1920 (frame 720×540): cards 360 tall, text 22px, three lines each, no overflow.
+- The logos were composited over all four grounds off the keyed PNGs and looked at before
+  installing — the first pass left a visible rim around M.Reason's lettering on red, which is
+  what the flood fill fixed.
+- Screenshotted the section at 1440 before and after the click.
+
+**Left undone / known.**
+
+- **The card copy is mine and its numbers are invented** — "40% за квартал", "четыре дня",
+  "пять маркетплейсов". Needs the client's real cases.
+- The text sets in **four** lines at 1440, not the three the "+1 line" implies; at 1920 it is
+  three. Trimming it to three everywhere is a copy edit away.
+- The keying script is not kept in the repo. A re-pull of these logos from Figma would have
+  to redo it — better would be exports with real alpha.
+- The pane's screenshot is black at any large scroll offset, so this section was captured the
+  same way the closer was: triggers killed, the other sections hidden, this section's own
+  state set by hand. Measurements were taken on the untouched page.
+
 ## 2026-09-03 — the cases heading gets its middle line
 
 **What changed.** `index.html`: `#audience`'s title from `Работают ⏎ с нами` to
