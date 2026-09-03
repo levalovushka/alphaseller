@@ -34,11 +34,12 @@
   /* Horizontal: the side margin, and therefore what is left for the frame. Split off
      from --page-pad on 2026-09-03, because the client wants the laptop side margin to pay
      for a bigger frame and the vertical rhythm to stay put. Same 4.4vw ramp as the
-     vertical one, now shifted down 36: the floor is what binds at 1440, and it is set so
-     the margin lands on exactly 40 there (76 → 52 → 40 across the day). At 1920 none of
-     this shows — the side margin there comes from --page-max and the frame is at its own
+     vertical one, shifted so it crosses the floor exactly at 1440: the margin lands on
+     **20** there (76 → 52 → 40 → 20 across the day). Note the header sits at 16
+     (--header-pad-side), so the two are 4px apart on a laptop — not aligned. At 1920 none
+     of this shows — the side margin there comes from --page-max and the frame is at its own
      cap — so the ceiling is only a guard for a screen wider than ~2700. */
-  --page-pad-x: clamp(40px, calc(4.4vw - 24px), 96px);
+  --page-pad-x: clamp(20px, calc(4.4vw - 43.36px), 96px);
 
   /* Header: full-bleed. Its height follows from the padding plus the 52px
      controls — nothing fixes it. */

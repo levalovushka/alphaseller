@@ -472,13 +472,16 @@ The page padding is **two tokens**, split on 2026-09-03:
 | Token | What | Value |
 |---|---|---|
 | `--page-pad` | vertical — the sections' bottom padding, and the frame's optical centre | `clamp(76px, calc(4.4vw + 12px), 96px)` |
-| `--page-pad-x` | horizontal — the side margin, and therefore what is left for the frame | `clamp(40px, calc(4.4vw - 24px), 96px)` |
+| `--page-pad-x` | horizontal — the side margin, and therefore what is left for the frame | `clamp(20px, calc(4.4vw - 43.36px), 96px)` |
 
 The same 4.4vw ramp, the horizontal one shifted down 36. They were one token until the client
 asked the laptop side margin to pay for a bigger frame — keeping them joined would have taken
 the same off the sections' bottom padding and moved the frame's centre with it, which nobody
 asked for. **Anything horizontal takes `--page-pad-x`; anything vertical takes `--page-pad`.**
-The side margin at 1440 went 76 → 52 → 40 across 2026-09-03, all three of them his.
+The side margin at 1440 went 76 → 52 → 40 → **20** across 2026-09-03, all four of them his.
+The ramp keeps its 4.4vw slope and is shifted to cross the floor exactly at 1440. Note the
+header sits at 16 (`--header-pad-side`), so on a laptop the two are 4px apart — raised with
+the client, not aligned.
 
 `--col-gap` is `clamp(52px, calc(5vw - 20px), 76px)` — 52 at 1440, 76 at 1920. It was raised
 +12 at both ends earlier the same day and then trimmed back at the laptop end only, which is
@@ -527,10 +530,14 @@ Measured:
 
 | viewport | xl | gap | frame | text column | side margin |
 |---|---|---|---|---|---|
-| 1440 | 32 / 32 | 52 | 544 | 356 (the floor) | 40 |
-| 1512 | 33.2 | 55.6 | 604 | 356 (the floor) | 43 |
-| 1680 | 36 | 64 | 720 (the cap) | 356 (the floor) | 50 |
+| 1440 | 32 / 32 | 52 | **584** | 356 (the floor) | **20** |
+| 1512 | 33.2 | 55.6 | **642** | 356 (the floor) | 23 |
 | 1920 | 40 / 40 | 76 | 720 (the cap) | 416 | 108 |
+
+Re-measured after the side margin went to 20 on 2026-09-03. The 40px it gave up went
+straight into the frame at the laptop end — the text columns are on their floor there, so
+they neither gain nor lose. At 1920 nothing moved: `--page-max` sets the margin and the
+frame is capped.
 
 **The frame is now at its cap from about 1655 up.** Below that it grows at 0.812px per px of
 viewport (`0.812vw - 624`, from the two ramps); above it, flat 720. The band where it still

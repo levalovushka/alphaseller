@@ -1,5 +1,36 @@
 # Worklog
 
+## 2026-09-03 — laptop side margin down to 20
+
+**What changed.** `assets/css/base.css`: `--page-pad-x` from
+`clamp(40px, calc(4.4vw - 24px), 96px)` to `clamp(20px, calc(4.4vw - 43.36px), 96px)`. The
+4.4vw slope is untouched; the intercept is shifted so the ramp crosses the floor exactly at
+1440, which is what makes the margin land on 20 there rather than on the old ramp value of
+39.4. `CONTEXT.md`: the token table, the "76 → 52 → 40" history line, and the measured
+layout table.
+
+**Why.** Client asked for ~20 at 1440.
+
+**How it was verified.** `localhost:4321`, measured at three widths after cache-busting the
+stylesheet:
+
+| viewport | side margin | gap | frame | text column | section 3's title |
+|---|---|---|---|---|---|
+| 1440 | **20** (was 40) | 52 | **584** (was 544) | 356, its floor | 3 lines |
+| 1512 | 23 | 55.6 | 642 | 356, its floor | 3 lines |
+| 1920 | 108, from `--page-max` | 76 | 720, its cap | 416 | 3 lines |
+
+The 40px given up went straight into the frame: the text columns sit on their `--col-min`
+floor at the laptop end, so they neither gain nor lose, and the client's hand-set third line
+in `и интернет магазин` still holds at three lines — that is the wrap CONTEXT warns about.
+At 1920 nothing moved at all: `--page-max` sets the margin there and the frame is capped.
+`.section__inner` measures 20px from both edges at 1440, no horizontal overflow, console
+clean.
+
+**Left undone.** The header sits at 16 (`--header-pad-side`) while the sections now sit at
+20, so the logo and the section content are 4px out of line on a laptop. Raised with the
+client, not changed — the header number is his.
+
 ## 2026-09-03 — logo down to 20, an 8px left margin, header items back on the centre line
 
 **What changed.** `assets/css/base.css`: `--logo-h` 24 → 20, `.header__logo` gains
