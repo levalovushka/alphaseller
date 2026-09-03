@@ -18,6 +18,21 @@ pane will not repaint below the top of the document.
 another session's working tree (an Apple-Wallet-style stack), so this heading will land on
 top of that.
 
+## 2026-09-03 — xl back to 32 at 1440
+
+**What changed.** `assets/css/base.css`: `--fs-xl` back to
+`clamp(32px, calc(8px + 1.6667vw), 40px)`, undoing the 28 of the entry below.
+`CONTEXT.md` §7 and §5: the same rows put back, and the ramp note rewritten to record the
+whole 36 → 32 → 28 → 32 run rather than just the last hop.
+
+**Why.** Client looked at 28 and went back to 32.
+
+**How it was verified.** Measured: 32 at 1440, 33.2 at 1512, 36 at 1680, 40 at 1920. No title
+or subtitle overflows at either end.
+
+**Worth noting.** 32 is the one value in that run that sits on xxl's own 1.6667vw ramp, so the
+two display sizes hold the same ratio across the window again; 28 had needed a 2.5vw ramp.
+
 ## 2026-09-03 — the orb moves 8px further off the corner
 
 **What changed.** `assets/js/tile-shader.js`: `MARGIN` 20 → 28, with the comment.

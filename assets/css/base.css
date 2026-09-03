@@ -57,9 +57,10 @@
      for the token before deciding where it goes. */
   --fs-xxl: clamp(56px, calc(32px + 1.6667vw), 64px);
   --lh-xxl: var(--fs-xxl);
-  /* xl's laptop end came down 36 → 32 → 28 across 2026-09-03 while 1920 stayed 40, so its
-     ramp is steeper than xxl's: 2.5vw against 1.6667vw. */
-  --fs-xl: clamp(28px, calc(2.5vw - 8px), 40px);
+  /* xl's laptop end went 36 → 32 → 28 → 32 across 2026-09-03; 1920 stayed 40 throughout.
+     Back on xxl's own 1.6667vw ramp at 32, which is where the two sizes hold the same
+     ratio across the whole window. */
+  --fs-xl: clamp(32px, calc(8px + 1.6667vw), 40px);
   --lh-xl: var(--fs-xl);
   --weight-xl: 500;  /* Hyper Medium, titles */
   /* Style md scales on the same window: 14/18 at 1440, 18/24 at 1920, held flat

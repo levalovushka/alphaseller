@@ -791,7 +791,7 @@ Measured:
 
 | viewport | xl | gap | frame | text column | subtitle | side margin |
 |---|---|---|---|---|---|---|
-| 1440 | 28 / 28 | 52 | **520** | 356 (the floor) | 356 | **52** = the gap |
+| 1440 | 32 / 32 | 52 | **520** | 356 (the floor) | 356 | **52** = the gap |
 | 1680 | 36 | 64 | 712 | 356 (the floor) | 356 | 64 = the gap |
 | 1920 | 40 / 40 | 76 | 720 (the cap) | 416 | 416 | 108, from `--page-max` |
 
@@ -1223,7 +1223,7 @@ Verified with fontTools (2026-09-02):
 |---|---|---|---|---|
 | `xxl` | Hyper Medium | 56 / 56 at 1440 → 64 / 64 at 1920 | normal | The closer heading — the only one left since the cases went back to `xl` on 2026-09-03 |
 | `lg` | Hyper Regular | 18 / 24 at 1440 → 22 / 28 at 1920 | `0.01em` | The growth tiles' text, and nothing else yet. Added 2026-09-03. **The sizes are the client's** ("18 на 1440 и 22 на 1920"); the leading is mine |
-| `xl` | Hyper Medium | 28 / 28 at 1440 → 40 / 40 at 1920 | normal | Section titles |
+| `xl` | Hyper Medium | 32 / 32 at 1440 → 40 / 40 at 1920 | normal | Section titles |
 | `md` | Hyper Regular | 14 / 18 at 1440 → 18 / 24 at 1920 | 1% (`0.01em`) | Everything else |
 
 "Hyper" is the `wdth 87` width; "Medium" is `wght 500`, "Regular" is `wght 400`. In CSS:
@@ -1234,13 +1234,14 @@ Verified with fontTools (2026-09-02):
 | Style | Size clamp | Leading clamp | 1440 | 1920 |
 |---|---|---|---|---|
 | `xxl` | `clamp(56px, calc(32px + 1.6667vw), 64px)` | = size | 56 / 56 | 64 / 64 |
-| `xl` | `clamp(28px, calc(2.5vw - 8px), 40px)` | = size | 28 / 28 | 40 / 40 |
+| `xl` | `clamp(32px, calc(8px + 1.6667vw), 40px)` | = size | 32 / 32 | 40 / 40 |
 | `md` | `clamp(14px, calc(2px + 0.8333vw), 18px)` | `clamp(18px, 1.25vw, 24px)` | 14 / 18 | 18 / 24 |
 
-**`xl` no longer shares xxl's ramp.** Its laptop end came down 36 → 32 → 28 across
-2026-09-03 while 1920 stayed 40, so it climbs at 2.5vw against xxl's 1.6667vw and the gap
-between the two sizes is much wider on a laptop (28 against 56) than at 1920 (40 against 64).
-Measured 2026-09-03: 28 at 1440 and below, 29.8 at 1512, 34 at 1680, 40 at 1920.
+`xl`'s laptop end moved four times on 2026-09-03 — 36 → 32 → 28 → **32** — while 1920 held
+at 40 throughout. At 32 it is back on xxl's own 1.6667vw ramp, and that is the only value in
+the run where the two display sizes keep the same ratio across the whole window; 28 needed a
+2.5vw ramp of its own. Measured at 32: 32 at 1440 and below, 33.2 at 1512, 36 at 1680, 40 at
+1920.
 
 The two display sizes keep leading equal to the size. `md` needs a **second clamp** for its
 leading: the ratio is not constant across the window — 18/14 = 1.286 at 1440 against
