@@ -645,13 +645,16 @@ default to bold — the title weight must be forced back to 500.
 | Logo — **mark only, no wordmark**, in a rounded square | 48×48 |
 | Header CTA button | 48 high |
 | Section CTA buttons (under the subtitle) | 40 high — was 44 until 2026-09-02 |
-| Corner radius — logo square, frame, slides, cards | 32 (`--radius-btn`) |
+| Corner radius — logo square, frame, slides | 32 (`--radius-btn`) |
+| Corner radius — case cards | 44 (`--radius-card`, `--radius-btn` + 12) |
 | Corner radius — buttons and tabs | full pill (`--radius-pill: 999px`) |
 | Button side padding — both sizes | 20 (`--btn-pad-x`) |
 
-**Two shapes, not one.** The frame, its slides, the cards and the logo square are rounded at
-32 (`--radius-btn`); the buttons and the tabs are full pills (`--radius-pill`). `--radius:
-16px` survives only as the base `--radius-btn` is derived from; nothing uses it directly.
+**Two shapes, three radii.** The frame, its slides and the logo square are rounded at 32
+(`--radius-btn`); the case cards at **44** — the client asked for +12 on them alone on
+2026-09-02, so they carry their own `--radius-card: calc(var(--radius-btn) + 12px)`; the
+buttons and the tabs are full pills (`--radius-pill`). `--radius: 16px` survives only as the
+base `--radius-btn` is derived from; nothing uses it directly.
 
 The logo square used to rely on the squircle to survive the 32 radius on a 48px box; that is
 still true, and in Safari and Firefox the `border-radius` fallback clamps to 24 and draws a
@@ -659,9 +662,9 @@ circle instead. Known divergence, raised with the client.
 
 **The logo square is the only squircle on the page** — `corner-shape: squircle` inside
 `@supports`, with `border-radius` as the fallback for Safari and Firefox. Everything else is
-plain: the frame, its slides and the cards are rounded rectangles at 32, and the buttons and
-the tabs are full pills (`--radius-pill: 999px`). The client narrowed it to the logo on
-2026-09-02 — do not spread it back without asking.
+plain: the frame and its slides are rounded rectangles at 32, the cards at 44, and the
+buttons and the tabs are full pills (`--radius-pill: 999px`). The client narrowed it to the
+logo on 2026-09-02 — do not spread it back without asking.
 
 ### Button styles
 

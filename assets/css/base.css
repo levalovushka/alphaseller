@@ -105,10 +105,12 @@
   --tab-drop: 32px;
   --tab-elapsed: color-mix(in srgb, var(--ink) 78%, var(--ground));
 
-  /* The frame, its slides, the cards and the logo square take the same 32. `--radius` is
-     only the base it is derived from; nothing uses it directly. */
+  /* The frame, its slides and the logo square take the same 32. `--radius` is only the
+     base it is derived from; nothing uses it directly. */
   --radius: 16px;
   --radius-btn: calc(var(--radius) * 2);
+  /* The case cards are the one thing rounded harder — client's call, +12 on 2026-09-02. */
+  --radius-card: calc(var(--radius-btn) + 12px);
   /* Buttons and tabs are full pills — any number past half their height does it. */
   --radius-pill: 999px;
 
@@ -200,9 +202,9 @@ img { display: block; max-width: 100%; height: auto; }
 }
 
 /* The logo square is the only squircle on the page. Everything else is either a plain
-   rounded rectangle (the frame, its slides, the cards) or a full pill (the buttons and the
-   tabs). `border-radius` above is the fallback for browsers without CSS corner shaping
-   (Safari, Firefox); Chromium takes this. */
+   rounded rectangle (the frame and its slides at 32, the cards at their own 44) or a full
+   pill (the buttons and the tabs). `border-radius` above is the fallback for browsers
+   without CSS corner shaping (Safari, Firefox); Chromium takes this. */
 @supports (corner-shape: squircle) {
   .header__logo { corner-shape: squircle; }
 }
@@ -555,7 +557,7 @@ img { display: block; max-width: 100%; height: auto; }
   /* The square is the point: never cap the height, or the ratio goes instead. */
   aspect-ratio: 1 / 1;
   padding: 28px;
-  border-radius: var(--radius-btn);
+  border-radius: var(--radius-card);
   /* The card keeps its own colours: white on the smoky section, whatever --ink is doing. */
   background: var(--c-white);
   color: var(--c-black);

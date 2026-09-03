@@ -1,5 +1,25 @@
 # Worklog
 
+## 2026-09-02 — case cards rounded 12 harder
+
+**What changed.** `assets/css/base.css`: new `--radius-card: calc(var(--radius-btn) + 12px)`
+= 44px, and `.case` reads it instead of `--radius-btn`. `CONTEXT.md`: the control-size table
+gains a row for it and the "two shapes" paragraph is now "two shapes, three radii".
+
+**Why.** Client asked for +12 on the cards. It is the first thing on the page to leave the
+shared 32, hence its own token rather than a literal.
+
+**How it was verified.** `localhost:4321` at 1440×900, live DOM: all **four** cards report
+`border-radius 44px`, the token resolves to `calc(calc(16px * 2) + 12px)`. Nothing else
+moved — frame 32, logo square 32, buttons still `999px` pills.
+
+**Watch out.** The first read came back 32 across the board: the browser was serving a
+cached `base.css`. Confirmed by fetching the file with `cache: 'reload'` (the new token was
+in it) and then cache-busting the `<link>`. Worth remembering for the next CSS check in this
+preview.
+
+**Left undone.** Nothing on this item.
+
 ## 2026-09-02 — squircle narrowed to the logo, buttons become pills
 
 **What changed.** `assets/css/base.css`: the `@supports (corner-shape: squircle)` block now
