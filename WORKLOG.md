@@ -1,5 +1,23 @@
 # Worklog
 
+## 2026-09-03 — the cases heading becomes "Работают с нами"
+
+**What changed.** `index.html`: `#audience`'s title from `С нами работают самые смелые` to
+`Работают<br>с нами`, with the break the client asked for after «Работают».
+`CONTEXT.md` §4: the copy table's row for section 6.
+
+**Why.** Client's copy. Note it drops «самые смелые» — I took his instruction literally
+("замени X на работают с нами") and flagged the reading back to him, since restoring the
+tail is one word either way.
+
+**How it was verified.** `localhost:4321` at 1440×900, live DOM on the title: exactly one
+`<br>`, **2 lines** at 56/56 xxl, 258px wide inside a 1400px column — no wrap of its own, so
+the break is doing all the work. No screenshot: the browser pane stopped repainting again
+after the first navigation, and the section's reveal sits at opacity 0 until a real scroll
+event, so a capture there is blank whatever the markup says.
+
+**Left undone.** Nothing on this item.
+
 ## 2026-09-03 — the deck gets a veil and a nudge, the photograph moves to the closer
 
 **What changed.** Three of the client's calls, in one pass.
