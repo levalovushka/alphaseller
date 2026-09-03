@@ -59,7 +59,23 @@
       <div class="style-card" data-card="fashion" role="img" aria-label="Магазин одежды и сумок"></div>
       <div class="style-card" data-card="care" role="img" aria-label="Магазин косметики и ухода"></div>
       <div class="style-card" data-card="furniture" role="img" aria-label="Магазин мебели"></div>
-    </div>
+
+      <!-- Under the frame, clear of the stack's own ledges. Inside `.style-deck` on purpose:
+           the deck's gate makes that subtree inert while the slide is off stage, so these
+           are covered by it and need no gate of their own. One arrow path, mirrored in CSS
+           for the other direction. -->
+      <div class="deck-nav">
+        <button class="deck-arrow" type="button" data-dir="-1" aria-label="Пролистать влево">
+          <svg class="deck-arrow__icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+            <path d="M13 8H3.5M7.5 3.5 3 8l4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <button class="deck-arrow" type="button" data-dir="1" aria-label="Пролистать вправо">
+          <svg class="deck-arrow__icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+            <path d="M13 8H3.5M7.5 3.5 3 8l4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
   </div>
   <div class="stage-frame__slide" data-for="marketplaces" aria-hidden="true"></div>
   <div class="stage-frame__slide" data-for="audience" aria-hidden="true"></div>

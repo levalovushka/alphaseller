@@ -819,6 +819,26 @@ call on 2026-09-03, chosen against the alternatives offered:
   неактивных вариантов по опасити — шумит. можем на них кидать оверлей 20% черного вместо
   этого." The reason it read as noise is that a faded card lets the section's ground through
   a screenshot that is mostly white; the overlay darkens the same pixels instead.
+- **The stack deals out on arrival.** The cards behind start tucked under the front one and
+  slide down into their slots, 0.55s on `power3.out`, staggered 0.08s. Client asked for it
+  on every entry ("при каждом заходе"), so it hangs off the slide's gate, and it is skipped
+  under `prefers-reduced-motion` — the stack is simply placed there.
+- **Two round buttons under the frame.** Client's ask on 2026-09-03: round, an arrow, a
+  stroke. They are a secondary button in the round — the site's control height, a pill
+  radius, a 1px inset ring in the ink, and they fill with the ink on hover while the arrow
+  swaps to the counter-ink. One arrow path in the markup, mirrored in CSS for the other
+  direction.
+
+  They hand `toss()` a **velocity**, not a distance — 1.2 px/ms, in the middle of a hand's
+  0.7–2 — so a click and a flick go through exactly the same physics. A press while a card
+  is in the air does nothing.
+
+  Their drop has to clear the stack rather than the frame: the third card's ledge hangs
+  29–34px below the frame's bottom edge across the frame sizes this design allows, so the
+  drop is the tab strip's plus 40. And they live **inside** `.style-deck`, so the deck's
+  gate makes them `inert` off stage along with the cards, with no gate of their own. They
+  fade in as part of the arrival rather than switching on: controls that appear at full
+  strength next to a stack that is still dealing read as a different screen.
 - **The front card twitches on arrival.** Nothing else on the page says it can be taken, so
   0.35s after the slide lands it pulls 18px left, 18px right and settles — 1.1s in all, on
   the drag's own rotation mapping so it is the gesture a hand would make. His ask, and it

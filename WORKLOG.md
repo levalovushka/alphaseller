@@ -1,5 +1,56 @@
 # Worklog
 
+## 2026-09-03 — the deck deals out on arrival and gets two arrow buttons
+
+**What changed.**
+
+- `main.js`: `enter()` replaces the bare `nudge()` on the slide's gate. The cards behind are
+  set to the front card's slot and slide down into their own, 0.55s `power3.out`, staggered
+  0.08s; the hint's wait moves 0.35 → 0.7s so it follows rather than overlaps. Skipped under
+  `prefers-reduced-motion`.
+- `index.html` + `base.css`: `.deck-nav` with two `.deck-arrow` buttons under the frame —
+  round at the site's control height, 1px inset ring in the ink, ink fill on hover with the
+  arrow in the counter-ink, one arrow path mirrored in CSS.
+- `main.js`: the buttons call `toss()` with a velocity (`push` 1.2 px/ms), so a click runs
+  the same physics as a flick; a press during a flight is ignored. The nav also fades in
+  (0.4s, from `opacity 0` and `y 8`) as part of the arrival.
+
+**Why.** Client: "при каждом заходе на секцию с свайпером не-фокусные плашки мягко выезжали
+вниз с ease out" and "добавим снизу посередине под свайпером кнопки вправо влево — круглые,
+со стрелочкой, со строуком."
+
+**A collision worth writing down.** While this was being built, another session replaced the
+slides' opacity cross-fade with a curtain wipe, and it clips `.style-deck` to the frame's box
+unless the deck carries `data-onstage="true"` — an attribute their code added to *my* gate.
+Two consequences: the buttons are hidden through a crossing (which is why they now fade in),
+and a hit-test at their centre returns the section underneath unless that attribute is set.
+The first screenshot attempt looked like the buttons were missing; they were clipped.
+
+**How it was verified.** Emulated 1440×900, stylesheet and script caches busted, GSAP on
+manual ticks primed *before* the gate fires.
+
+```
+arrival        y per 100ms: 0/16/9 → 0/24/35 → 0/27/49 → 0/28/54 → 0/28/56 by ~500ms
+               nav opacity/y alongside: 0@8 → 0.20@6 → 0.69@3 → 0.92@1 → 1@0 by ~600ms
+               then the hint: x 0 → -18 (≈1.0s) → +18 (≈1.45s) → 0 (≈1.8s)
+buttons        40×40, radius 999px, inset 0 0 0 1px white ring, 16px arrow, mirrored
+               scale -1 1 on the right one; nav centre 720 = frame centre 720;
+               nav top 743 against a frame bottom of 671
+right press    x +62 in 60ms, +163 by 240ms, rotation 1.3°, opacity 0.70 — decelerating,
+               ground switched to `care` on the press; front `care` when it settled
+left press     x -106 by 120ms, rotation -2.2°, ground and front both `furniture`
+guard          two presses during a flight changed nothing; the deck cycled back to
+               `fashion` after three
+hit test       with data-onstage="true" the topmost element at the button's centre is the
+               button; with it unset the clip hides it
+```
+
+Screenshotted: both buttons under the deck, centred, clear of the ledges. No console errors.
+
+**What is left undone.** The buttons take `--ink`, which is white on this section, and sit
+over the blurred ground — the same contrast question as the section's text, still the
+client's call (§11).
+
 ## 2026-09-03 — the hero headline goes to three hand-set lines
 
 **What changed.** `index.html`: the `<h1>` becomes

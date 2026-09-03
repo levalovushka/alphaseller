@@ -455,6 +455,7 @@ if (deck) {
   /* The blurred ground behind the whole screen: one layer per card, paired with it by
      `data-card`. The client shot the six images as pairs, so whichever card is in front
      decides what is behind the section. */
+  const nav = deck.querySelector('.deck-nav');
   const ground = document.querySelector('.deck-ground');
   const groundLayers = gsap.utils.toArray('.deck-ground__layer', ground || undefined);
 
@@ -468,7 +469,10 @@ if (deck) {
        `.style-card::after`. This is only the switch: 0 on the front card, 1 behind it. */
     veil: 1,
     hint: 18,       /* px the front card is pulled each way on arrival, as a "drag me" */
-    wait: 0.35,     /* s before that starts, so it does not collide with the section landing */
+    wait: 0.7,      /* s before that starts — after the cards behind have dealt out */
+    deal: 0.55,     /* s for a card behind to slide down into its slot on arrival */
+    stagger: 0.08,  /* s between them, so the stack deals rather than drops as a block */
+    push: 1.2,      /* px/ms a button gives a card — a hand's flick is 0.7 to 2 */
     catch: 0.26,    /* how much of the frame's width a slow drag must cover to let go */
     flick: 0.7,     /* px/ms — past this the card goes even if the drag was short */
     swing: 12,      /* deg the front card turns across a full-width drag — in flight the
@@ -568,6 +572,42 @@ if (deck) {
       .to(card, { x: -DECK.hint, rotation: turn(-DECK.hint), duration: 0.3 })
       .to(card, { x: DECK.hint, rotation: turn(DECK.hint), duration: 0.45 })
       .to(card, { x: 0, rotation: 0, duration: 0.35 });
+  }
+
+  /* On arrival the cards behind start tucked under the front one and slide down into their
+     slots, staggered, on an ease-out. The client asked for it on every entry ("при каждом
+     заходе"), so it hangs off the slide's gate next to the hint rather than running once.
+     Under `prefers-reduced-motion` the stack is simply placed — sliding it is decoration. */
+  function enter() {
+    if (stillness.matches) {
+      layout();
+      return;
+    }
+
+    /* Faded in rather than switched on: the deck's own arrival is a movement, and controls
+       that appear at full strength beside it read as a different screen. */
+    if (nav) {
+      gsap.fromTo(
+        nav,
+        { opacity: 0, y: 8 },
+        { opacity: 1, y: 0, duration: 0.4, delay: DECK.deal * 0.5, ease: 'power2.out', overwrite: true }
+      );
+    }
+
+    order.forEach((card, i) => {
+      if (i === 0) return;
+
+      gsap.set(card, { ...slot(i), y: slot(0).y });
+      gsap.to(card, {
+        y: slot(i).y,
+        duration: DECK.deal,
+        delay: (i - 1) * DECK.stagger,
+        ease: 'power3.out',
+        overwrite: true,
+      });
+    });
+
+    nudge();
   }
 
   function land() {
@@ -696,6 +736,21 @@ if (deck) {
   deck.addEventListener('pointerup', release);
   deck.addEventListener('pointercancel', release);
 
+  /* The buttons hand `toss()` a velocity instead of a distance, so a click and a flick go
+     through exactly the same physics — the card leaves at `push` and loses it to friction
+     like any other. Nothing here knows where the card ends up. */
+  gsap.utils.toArray('.deck-arrow', deck).forEach((button) => {
+    button.addEventListener('click', () => {
+      if (flight || drag) return;
+
+      hint?.kill();
+      hint = null;
+
+      const direction = Number(button.dataset.dir);
+      toss(order[0], direction * DECK.push, 0);
+    });
+  });
+
   /* Same gate as the tabs, and for the same reason: a slide at opacity 0 still hit-tests,
      and a card must not be draggable from behind another section. A crossing that starts
      mid-drag, or mid-flight, puts every card back where it belongs rather than leaving one
@@ -714,9 +769,8 @@ if (deck) {
     live = onStage;
 
     deck.inert = !onStage;
-
     if (onStage) {
-      nudge();
+      enter();
       return;
     }
 

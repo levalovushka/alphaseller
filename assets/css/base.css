@@ -719,6 +719,62 @@ img { display: block; max-width: 100%; height: auto; }
   pointer-events: none;
 }
 
+/* The deck's own controls: two round buttons under the frame, on the same stroke-and-fill
+   device as a secondary button — 1px inset ring in the ink, ink label, and it fills with the
+   ink on hover while the arrow swaps to the counter-ink. Client asked for round, arrow,
+   stroke, on 2026-09-03.
+
+   The drop has to clear the stack, not just the frame: the third card's ledge hangs 29-34px
+   below the frame's bottom edge across the frame sizes this design allows (the ledge is
+   `2 * drop - (1 - scale) * height / 2`), so this is the tab strip's drop plus 40. */
+.deck-nav {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  translate: -50% 0;
+  margin-top: calc(var(--tab-drop) + 40px);
+  display: flex;
+  gap: var(--tab-gap);
+  pointer-events: auto;
+}
+
+.deck-arrow {
+  /* Square box, pill radius — a circle at the site's own control height. */
+  width: var(--btn-h);
+  height: var(--btn-h);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  color: var(--ink);
+  background-color: transparent;
+  box-shadow: inset 0 0 0 1px var(--ink);
+  transition: background-color var(--hover) ease, color var(--hover) ease;
+}
+
+.deck-arrow:hover {
+  color: var(--ink-invert);
+  background-color: var(--ink);
+}
+
+.deck-arrow__icon {
+  width: 16px;
+  height: 16px;
+  /* The markup carries one arrow, pointing left. */
+  display: block;
+  /* The button is the target, not the path inside it. */
+  pointer-events: none;
+}
+
+.deck-arrow[data-dir="1"] .deck-arrow__icon { scale: -1 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .deck-arrow { transition: none; }
+}
+
 /* One file per card, named after the shop it shows. From the client's Figma section
    `275:39451` ("tinder"), which holds three pairs: a photograph for the ground and the shop
    screen that goes with it. The screens came in at 2448x1740, were cropped to the frame's
