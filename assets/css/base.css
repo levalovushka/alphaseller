@@ -357,11 +357,16 @@ img { display: block; max-width: 100%; height: auto; }
 }
 
 /* ---------- photographic ground ----------
-   One section (customization) is backed by a photograph instead of a flat colour. It
-   sits above the page's painted ground and below everything else, its opacity is
-   interpolated by the same scroll that mixes the colours, and it drifts vertically a
-   little slower than the content. Taller than the viewport so the drift never exposes
-   an edge. */
+   One section is backed by a photograph instead of a flat colour — whichever one carries
+   `data-photo="true"`. It sits above the page's painted ground and below everything else,
+   its opacity is interpolated by the same scroll that mixes the colours, and it drifts
+   vertically a little slower than the content. Taller than the viewport so the drift never
+   exposes an edge.
+
+   It belongs to the **closer** since 2026-09-03. It was the customization section's until
+   the client moved it: that screen is now flat black so the deck of shop screens is the
+   only thing on it, and the photograph closes the page instead. Hence the file name — it
+   is the same export, renamed from `customization.webp`. */
 .stage-photo {
   position: fixed;
   inset: -12vh 0;
@@ -370,7 +375,7 @@ img { display: block; max-width: 100%; height: auto; }
      subtle a thing to rest the whole page on. */
   z-index: 0;
   opacity: 0;
-  background: url("../images/customization.webp") center / cover no-repeat;
+  background: url("../images/closer.webp") center / cover no-repeat;
   will-change: opacity, transform;
 }
 
@@ -599,6 +604,23 @@ img { display: block; max-width: 100%; height: auto; }
 }
 
 .style-card[data-drag="true"] { cursor: grabbing; }
+
+/* The cards behind are veiled, not faded. Fading them (35% of the card gone per step) let
+   the section's ground through a screenshot that is mostly white and read as noise — the
+   client's word, 2026-09-03: "убираем приглушение неактивных вариантов по опасити — шумит.
+   можем на них кидать оверлей 20% черного вместо этого." So `opacity` on a card now means
+   one thing only, the dissolve of a card being thrown, and the stack's own shading is this
+   overlay: 0 on the front card, 1 behind it, interpolated by JS with the rest of the stack
+   (`--veil` is the only thing about the deck that CSS and JS share). */
+.style-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: rgb(0 0 0 / 20%);
+  opacity: var(--veil, 0);
+  pointer-events: none;
+}
 
 /* One file per card, named after the shop it shows. Cropped to the frame's 4:3 out of the
    client's 16:9 screens, `cwebp -q 90`: furniture 836x627 / 48 KB, bags 800x601 / 28 KB,

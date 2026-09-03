@@ -337,13 +337,24 @@ viewport tall, so this is a guard, not a mode.
 
 ### The photographic ground
 
-The customization section is backed by a photograph instead of a flat colour —
-`assets/images/customization.webp`, from Figma node `201:56528`, 1858×2000, 75 KB.
+**It backs the closer** — the last screen of the page — since 2026-09-03.
+`assets/images/closer.webp`, from Figma node `201:56528`, 1858×2000, 75 KB.
 `.stage-photo` is a fixed layer that covers the viewport with `background-size: cover`,
-its opacity interpolated by the same scroll that mixes the colours (0 → 1 → 0 across the
-two neighbouring transitions), drifting ±60px against the scroll so it sits further back
-and dissolves rather than leaves. The section keeps `data-theme="black"`, so the colour
-underneath the photo is black and the ink stays white.
+its opacity interpolated by the same scroll that mixes the colours, drifting ±60px against
+the scroll so it sits further back and dissolves rather than leaves. The section keeps
+`data-theme="black"`, so the colour underneath the photo is black and the ink stays white.
+
+**It was the customization section's until the client moved it** on 2026-09-03: "убираем
+фото девушки с фона, делаем слайд пока что черным. фото девушки ставим на последний самый
+слайд закрывашку." That screen is now flat black, so the deck of shop screens is the only
+thing on it. The file is the same export, renamed from `customization.webp` — the old name
+would have been a lie about which section it serves.
+
+Being the last section changes one thing: the photograph fades in across the crossing into
+the closer and then stays, because there is no section after it to cross away to. The ±60px
+drift also never completes — its trigger ends at `bottom top`, which is past the end of the
+document — so it only travels part of its range. Neither is a defect; both were a fade
+in-and-out and a full drift while this sat mid-page.
 
 Layering is explicit — photo on `z-index: 0`, sections and footer on `1`, frame on `5`,
 header on `10`. A negative z-index would also work, but only by relying on the body's
@@ -351,8 +362,8 @@ background propagating to the canvas; too subtle to rest the page on.
 
 **Kept.** Proposed as a test, approved by the client on 2026-09-02 after seeing it. The
 mechanism is generic: any section can take a photographic ground by getting
-`data-photo="true"` and its own image — nothing in the JS is specific to this one section
-beyond the single image url in the CSS.
+`data-photo="true"` and its own image — nothing in the JS is specific to one section beyond
+the single image url in the CSS.
 
 ### The three live colours
 
@@ -761,12 +772,24 @@ call on 2026-09-03, chosen against the alternatives offered:
   quarter of each one's width is cropped away — which takes the shop logo on the left and
   the cart on the right out of every screenshot's header. He picked that over fitting the
   whole screen inside the card.
-- **A stack, not a fan.** Each card behind sits 22px lower, 5% smaller and 35% less
-  opaque, with no rotation at all. A fan of ±3.2° was built first and he dropped it the
-  same day: "не веер, а как у тиндера, неактивные меньше и ниже", plus dim them so the
-  front screen carries the section. Watch the interaction between the two numbers —
-  shrinking a card pulls its own bottom edge up by 8px here, so the drop has to beat that
-  before anything peeks out. At 22 the ledges under the front card measure 14px and 28px.
+- **A stack, not a fan.** Each card behind sits 28px lower and 5% smaller, with no
+  rotation at all. A fan of ±3.2° was built first and he dropped it the same day: "не веер,
+  а как у тиндера, неактивные меньше и ниже". Watch the interaction between the two
+  numbers — shrinking a card pulls its own bottom edge up by half the height it loses, so
+  the drop has to beat that before anything peeks out at all. Measured at a 584×438 frame,
+  the ledges under the front card are 17px and 34px.
+- **The cards behind are veiled, not faded.** 20% black over each of them, `--veil` 0 in
+  front and 1 behind, and `opacity` on a card now means the dissolve of a throw and nothing
+  else. Fading them 35% a step was the first cut and he rejected it: "убираем приглушение
+  неактивных вариантов по опасити — шумит. можем на них кидать оверлей 20% черного вместо
+  этого." The reason it read as noise is that a faded card lets the section's ground through
+  a screenshot that is mostly white; the overlay darkens the same pixels instead.
+- **The front card twitches on arrival.** Nothing else on the page says it can be taken, so
+  0.35s after the slide lands it pulls 18px left, 18px right and settles — 1.1s in all, on
+  the drag's own rotation mapping so it is the gesture a hand would make. His ask, and it
+  runs on every arrival: the visitor may reach this screen first on the way back up. It is
+  the one part of the deck that goes under `prefers-reduced-motion: reduce` — a hint is
+  decoration, the drag is the content. A hand on the card kills it outright.
 
 **The travel is integrated; only the dissolve is on a clock.** Two cuts were wrong before
 this one, both caught the same day, and the reason is worth keeping:

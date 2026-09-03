@@ -455,11 +455,15 @@ if (deck) {
 
   const DECK = {
     /* Shrinking a card also pulls its bottom edge up — 8px at this size — so the drop has
-       to beat that before anything peeks out at all. 22 leaves 14px of the second card
-       showing under the front one and 28 of the third. */
-    drop: 22,       /* px each card behind sits lower than the one in front */
+       to beat that before anything peeks out at all. 28 leaves 20px of the second card
+       showing under the front one and 40 of the third. */
+    drop: 28,       /* px each card behind sits lower than the one in front */
     shrink: 0.05,   /* and this much smaller */
-    dim: 0.35,      /* and this much less opaque, so the front card carries the screen */
+    /* The shading of the cards behind is an overlay, not their opacity — see
+       `.style-card::after`. This is only the switch: 0 on the front card, 1 behind it. */
+    veil: 1,
+    hint: 18,       /* px the front card is pulled each way on arrival, as a "drag me" */
+    wait: 0.35,     /* s before that starts, so it does not collide with the section landing */
     catch: 0.26,    /* how much of the frame's width a slow drag must cover to let go */
     flick: 0.7,     /* px/ms — past this the card goes even if the drag was short */
     swing: 12,      /* deg the front card turns across a full-width drag — in flight the
@@ -480,13 +484,20 @@ if (deck) {
   let order = cards.slice();
   let flight = null;
   let drag = null;
+  let hint = null;
+
+  /* The arrival hint is decoration — it goes when the visitor asks for less motion. The
+     drag itself stays: it is the content, not an effect. */
+  const stillness = window.matchMedia('(prefers-reduced-motion: reduce)');
 
   const slot = (i) => ({
     x: 0,
     y: i * DECK.drop,
     scale: 1 - i * DECK.shrink,
-    opacity: Math.max(0, 1 - i * DECK.dim),
     rotation: 0,
+    /* Full opacity at rest, always: a card only loses it on the way out. */
+    opacity: 1,
+    '--veil': i === 0 ? 0 : DECK.veil,
   });
 
   const mix = (from, to, t) => from + (to - from) * t;
@@ -520,8 +531,30 @@ if (deck) {
     gsap.set(next, {
       y: mix(home.y, near.y, t),
       scale: mix(home.scale, near.scale, t),
-      opacity: mix(home.opacity, near.opacity, t),
+      '--veil': mix(home['--veil'], near['--veil'], t),
     });
+  }
+
+  /* Nothing on the page says the front card can be taken, so on arrival it takes itself a
+     little way each way and settles — the client's ask, 2026-09-03: "при заходе на слайд
+     активная картинка должна показать что её можно двигать — должна дернуться влево и
+     вправо". It runs on every arrival, not once per page: the visitor may reach this screen
+     for the first time on the way back up. It turns as it goes, on the drag's own mapping,
+     so it is the same gesture the hand would make and not a slide. */
+  function nudge() {
+    hint?.kill();
+    hint = null;
+
+    if (stillness.matches || flight || drag) return;
+
+    const card = order[0];
+    const turn = (x) => (x / deck.clientWidth) * DECK.swing;
+
+    hint = gsap
+      .timeline({ delay: DECK.wait, defaults: { ease: 'power2.inOut' } })
+      .to(card, { x: -DECK.hint, rotation: turn(-DECK.hint), duration: 0.3 })
+      .to(card, { x: DECK.hint, rotation: turn(DECK.hint), duration: 0.45 })
+      .to(card, { x: 0, rotation: 0, duration: 0.35 });
   }
 
   function land() {
@@ -589,6 +622,8 @@ if (deck) {
 
     card.setPointerCapture(e.pointerId);
     card.dataset.drag = 'true';
+    hint?.kill();
+    hint = null;
     gsap.killTweensOf(card);
 
     drag = {
@@ -662,15 +697,20 @@ if (deck) {
 
     deck.inert = !onStage;
 
-    if (!onStage) {
-      stopDrag();
-      if (flight) {
-        gsap.ticker.remove(flight.step);
-        flight = null;
-      }
-      gsap.killTweensOf(cards);
-      layout();
+    if (onStage) {
+      nudge();
+      return;
     }
+
+    stopDrag();
+    hint?.kill();
+    hint = null;
+    if (flight) {
+      gsap.ticker.remove(flight.step);
+      flight = null;
+    }
+    gsap.killTweensOf(cards);
+    layout();
   };
 
   gates.set(deckSlide, gate);

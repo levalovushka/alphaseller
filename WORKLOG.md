@@ -1,5 +1,59 @@
 # Worklog
 
+## 2026-09-03 — the deck gets a veil and a nudge, the photograph moves to the closer
+
+**What changed.** Three of the client's calls, in one pass.
+
+- `base.css`: `.style-card::after` — 20% black over each card, `opacity: var(--veil)`.
+  `main.js`: `--veil` replaces the per-step opacity in `slot()` and in `lead()`, so a card's
+  `opacity` now means the dissolve of a throw and nothing else. Drop raised 22 → 28.
+- `main.js`: `nudge()`, an arrival hint — the front card pulls 18px each way and settles,
+  0.35s after the slide lands, on the drag's own rotation mapping. Runs from the slide's
+  gate on every arrival, skipped under `prefers-reduced-motion`, killed by a hand on the
+  card or by leaving the section.
+- `index.html`: `data-photo="true"` moves from `#customization` to `#closer`.
+  `assets/images/customization.webp` → `closer.webp` (`git mv`), url updated in `base.css`.
+  The customization screen is flat black now.
+
+**Why.** His words: the opacity dimming "шумит" and should be an overlay instead; the drop
+could be stronger; "при заходе на слайд активная картинка должна показать что её можно
+двигать — должна дернуться влево и вправо"; and "убираем фото девушки с фона... фото
+девушки ставим на последний самый слайд закрывашку".
+
+**How it was verified.** Emulated 1440×900 — note the frame is 584×438 there now, not the
+424×318 of this morning; another session widened the text columns. GSAP on manual ticks,
+synthetic pointer events, `setPointerCapture` stubbed.
+
+```
+stack at rest   y 0 / 28 / 56, scale 1 / 0.95 / 0.90, opacity 1 / 1 / 1,
+                --veil 0 / 1 / 1 and ::after paints at exactly those, ledges 17px / 34px
+arrival hint    x per 100ms: 0 0 0 0 -9 -18 -18 -13 5 16 18 16 6 0 0 0
+                rotation follows, ±0.4° at this frame width; settles at x 0 rot 0;
+                the second card does not move (y 28, veil 1) while it plays
+throw           mid-drag the next card's veil interpolates to 0.69; mid-flight x 267 with
+                opacity 0.77; after landing y 56, veil 1, opacity back to 1
+customization   data-photo gone, .stage-photo opacity 0, --ground rgb(0,0,0)
+closer          data-photo true, .stage-photo opacity 1, background closer.webp
+requests        closer.webp 200, three deck cards 200, no 4xx anywhere
+```
+
+Screenshotted the stack at 1440×900. No console errors.
+
+**A test trap worth remembering** (added to CONTEXT §11 earlier today, and I still fell for
+it): prime `gsap.ticker.tick()` *before* the action that schedules a tween, not after. The
+first tick after an `await` carries the whole paused interval as one frame — it swallowed
+the hint's 0.35s delay and its 1.1s of movement in one step, and the first run looked like
+the hint had never fired.
+
+**What is left undone.**
+- The photograph's fade now only happens on the way in, and its drift never completes,
+  because the closer is the last section. Documented in §5; nothing to fix unless the page
+  grows a section after it.
+- Still no trusted pointer input in this session; the stack is still only ever seen over the
+  hero's ground in screenshots.
+- The deck's sources are unchanged and now render smaller relative to a 584px frame: 836×627
+  is 1.43x there, and 1.16x at a 720px frame.
+
 ## 2026-09-03 — laptop side margin down to 20
 
 **What changed.** `assets/css/base.css`: `--page-pad-x` from
