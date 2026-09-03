@@ -1,5 +1,28 @@
 # Worklog
 
+## 2026-09-02 — the case cards grow to a 24px gap
+
+**What changed.** `assets/css/base.css`: `.cases__grid` takes a flat `gap: 24px` instead of
+`--col-gap`, and `.case` lost its `max-height: 100%`. `CONTEXT.md` records the sizes.
+
+**Why the max-height went.** With the width coming from the grid and the height from
+`aspect-ratio: 1 / 1`, a height cap can only be paid for out of the ratio — the cards would
+stop being square exactly when the screen is short. The client asked for the square, so the
+cap had to go.
+
+**How it was verified.** Freshly loaded stylesheet at each size. Cards are square at every
+width and the measured gaps between all four are 24 (one reads 23 at 1512 — subpixel
+rounding on a fractional container):
+
+| viewport | card |
+|---|---|
+| 1440×900 | 304×304 |
+| 1512×830 | 321×321 |
+| 1920×1080 | 408×408 |
+
+The grid still fits its screen at all of them, and at a deliberately short 1440×780 as well —
+head ends at 300, grid runs 340–704 inside 780, no overlap. No horizontal overflow.
+
 ## 2026-09-02 — wider column gap, and the frame cap follows it down
 
 **What changed.** `assets/css/base.css`: `--col-gap` `clamp(24px, 2.5vw, 48px)` →

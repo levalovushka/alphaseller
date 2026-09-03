@@ -135,6 +135,12 @@ reads correctly. Proper dark exports would be better than the filter.
 
 The heading here is one of the two that carry the `xxl` size.
 
+**The cards are as large as a 24px gap between them allows**, and always square. Their gap
+is a flat 24 rather than `--col-gap`: the client wants them big, and the three-column gap has
+nothing to do with this grid. Width comes from the grid, height from the ratio — nothing caps
+the height, because a cap would take the square instead. Card sizes: 304 at 1440, 321 at
+1512, 408 at 1920.
+
 No subtitle column, so the subtitle that section used to have is currently unused.
 
 **The frame does not appear here, and does not come back.** The section carries

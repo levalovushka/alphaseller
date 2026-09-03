@@ -1,8 +1,10 @@
 /* Motion for the landing demo.
-   Native page scroll, snapped section by section in CSS. No wheel hijacking and no
-   smooth-scroll library. The effect copied from cash.app is the one that matters:
-   the frame in the middle stays put while the two text columns scroll past it, and
-   what the frame holds changes as the section changes.
+   Native page scroll, snapped section by section in CSS, and no smooth-scroll library.
+   The wheel is the one input this file takes over — see `one gesture, one section` at
+   the bottom for why the browser's own snapping could not be left to handle it. The
+   effect copied from cash.app is the one that matters: the frame in the middle stays put
+   while the two text columns scroll past it, and what the frame holds changes as the
+   section changes.
      1. the ground colour, the ink and the frame's slides are all interpolated against
         the same scroll, so a section change lands as one movement,
      2. the frame leaves upward on the one section that has none,
@@ -409,3 +411,128 @@ function catchUpReveals() {
 catchUpReveals();
 ScrollTrigger.addEventListener('refresh', catchUpReveals);
 document.addEventListener('section:change', catchUpReveals);
+
+/* ---------- one gesture, one section ----------
+   The wheel no longer reaches the browser's own snapping. CSS snapping stays on and still
+   owns the keyboard, touch and the scrollbar; this owns the wheel, and both land on the
+   same points, so nothing here is a second source of truth about where a section starts.
+
+   Why it had to be taken over. The trackpad produces a stream of small deltas that adds up
+   to most of a screen inside one gesture, so mandatory snapping resolves it forwards and
+   feels right. A mouse wheel produces one ~100px tick per click — well under half a 720px
+   screen — and Chrome then snaps to the *nearest* point, which is the one the click started
+   from. So a click moved nothing and, with `scroll-behavior: smooth` animating the round
+   trip, moved nothing slowly. Client's words on 2026-09-03: "один клик не двигает",
+   "вязко доезжает". cash.app has the same answer: measured the same day, its stylesheets
+   contain no `scroll-snap` at all — the wheel and the trackpad are two delta sources
+   feeding one animation of their own.
+
+   The three numbers below are the whole feel of it; they are the only things to tune. */
+
+const WHEEL = {
+  trip: 12,     /* px of accumulated delta that counts as a gesture — one wheel click is
+                   ~100px and the trackpad reaches it in two or three events, so both
+                   answer on the first movement */
+  rearm: 90,    /* ms of silence before the next gesture is allowed */
+  glide: 0.65,  /* s to cross one section */
+};
+
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+/* A section taller than the viewport holds content that can only be reached by scrolling
+   inside it, so the controller stands down there rather than trap it. The design keeps
+   every section exactly one viewport tall — this is a guard, not a mode. */
+const oneScreenEach = () =>
+  grounds.every((s) => s.getBoundingClientRect().height <= window.innerHeight + 1);
+
+let wheelOwned = oneScreenEach();
+
+/* deltaMode: 0 px, 1 lines, 2 pages. Firefox reports lines. */
+const pixelsOf = (e) =>
+  e.deltaMode === 1 ? e.deltaY * 16 : e.deltaMode === 2 ? e.deltaY * window.innerHeight : e.deltaY;
+
+let travel = 0;
+let locked = false;
+let rearmTimer = null;
+
+/* Every event arriving while the door is shut pushes the countdown out, so one burst is one
+   gesture however long it runs. That is what drops the trackpad's inertia tail, which keeps
+   firing for hundreds of milliseconds after the fingers lift, and what keeps a hard spin of
+   the wheel from flying through three sections. */
+function holdLock() {
+  clearTimeout(rearmTimer);
+  rearmTimer = setTimeout(() => {
+    locked = false;
+    travel = 0;
+  }, WHEEL.rearm);
+}
+
+function nearestIndex() {
+  let best = 0;
+  grounds.forEach((section, i) => {
+    const closer = Math.abs(section.offsetTop - window.scrollY);
+    if (closer < Math.abs(grounds[best].offsetTop - window.scrollY)) best = i;
+  });
+  return best;
+}
+
+function glide(direction) {
+  const next = Math.min(Math.max(nearestIndex() + direction, 0), grounds.length - 1);
+  const to = grounds[next].offsetTop;
+  const from = window.scrollY;
+
+  locked = true;
+
+  if (to === from) {
+    holdLock();
+    return;
+  }
+
+  /* Mandatory snapping re-resolves *any* scroll position written from script — measured on
+     this page: `scrollBy(0, 60)` from the top lands on 720 immediately — so the movement
+     can only be animated with snapping off. It goes back on at the end, where the page is
+     already on an exact snap point and restoring it therefore moves nothing. */
+  root.style.scrollSnapType = 'none';
+
+  const at = { y: from };
+
+  gsap.to(at, {
+    y: to,
+    duration: reducedMotion.matches ? 0 : WHEEL.glide,
+    ease: 'power2.inOut',
+    /* `behavior: instant` and not the stylesheet's `scroll-behavior: smooth`, which is
+       still there for the logo's `#hero` link and would put a second animation on top. */
+    onUpdate: () => window.scrollTo({ top: at.y, behavior: 'instant' }),
+    onComplete: () => {
+      window.scrollTo({ top: to, behavior: 'instant' });
+      root.style.removeProperty('scroll-snap-type');
+      holdLock();
+    },
+  });
+}
+
+window.addEventListener(
+  'wheel',
+  (e) => {
+    if (!wheelOwned) return;
+    if (e.ctrlKey) return;                                /* pinch zoom */
+    if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;  /* a sideways gesture is not ours */
+
+    e.preventDefault();
+
+    if (locked) {
+      holdLock();
+      return;
+    }
+
+    travel += pixelsOf(e);
+    if (Math.abs(travel) < WHEEL.trip) return;
+
+    const direction = Math.sign(travel);
+    travel = 0;
+    glide(direction);
+  },
+  { passive: false }
+);
+
+ScrollTrigger.addEventListener('refresh', () => { wheelOwned = oneScreenEach(); });

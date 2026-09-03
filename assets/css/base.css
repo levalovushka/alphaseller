@@ -124,7 +124,17 @@
    library: the page can never come to rest between two sections, and one gesture
    moves one section (`scroll-snap-stop: always`). Lenis has a snap addon, but it
    replaces native scrolling wholesale and does not coexist with CSS snapping —
-   not worth the dependency for what this does in three declarations. */
+   not worth the dependency for what this does in three declarations.
+
+   This still owns the keyboard, touch and the scrollbar. It no longer owns the wheel:
+   a single wheel click is well under half a screen, so mandatory snapping resolved it
+   back to the section it started from and nothing moved. `main.js` intercepts `wheel`
+   and animates one section per gesture, landing on these same snap points — and it
+   turns `scroll-snap-type` off for the length of that animation, because mandatory
+   snapping re-resolves every scroll position written from script.
+
+   `scroll-behavior: smooth` is here for the logo's `#hero` link only; the wheel
+   controller writes its positions with `behavior: instant` to stay clear of it. */
 html {
   scroll-behavior: smooth;
   scroll-snap-type: y mandatory;
@@ -532,10 +542,13 @@ img { display: block; max-width: 100%; height: auto; }
 
 /* Four equal cards along the bottom of the screen. Their width comes from the grid and
    their height from the ratio, capped by whatever the row actually has. */
+/* The cards take the whole width and are only separated by 24 — the client wants them as
+   large as that leaves room for, not tied to the three-column gap. Their height follows
+   from the ratio, so the row grows with them. */
 .cases__grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: var(--col-gap);
+  gap: 24px;
   align-content: end;
 }
 
@@ -544,8 +557,8 @@ img { display: block; max-width: 100%; height: auto; }
   flex-direction: column;
   justify-content: space-between;
   gap: 32px;
+  /* The square is the point: never cap the height, or the ratio goes instead. */
   aspect-ratio: 1 / 1;
-  max-height: 100%;
   padding: 28px;
   border-radius: var(--radius-btn);
   /* The card keeps its own colours: white on the smoky section, whatever --ink is doing. */
