@@ -810,6 +810,7 @@ Figma's own `#1E1E1E` canvas in as a full-bleed `<rect>`.
 | 4 — deck ground | `assets/images/customization-fashion-ground.webp` | `275:39455` | the photograph that pairs with the fashion card. Node export 1222×824 → 900×606, `-q 60`, 34 KB |
 | 4 — deck ground | `assets/images/customization-care-ground.webp` | `275:39458` | pairs with the care card. 900×600, `-q 60`, 19 KB |
 | 4 — deck ground | `assets/images/customization-furniture-ground.webp` | `275:39467` | pairs with the furniture card. 900×600, `-q 60`, 12 KB |
+| 3 — speed | `assets/images/speed.webp` | `276:54234` (tablet inside it, `276:54238`) | the catalogue on an iPad. Instance export @3x, 2154×1641 (1.31:1). Figma paints its own `#1E1E1E` canvas behind the device, so the export was keyed on that colour and flattened onto black (`ffmpeg colorkey` + `overlay` on `color=black`) — the key also blackens the `#1E1E1E` text inside the screenshot, which at 520px wide is invisible. `cwebp -q 90`, 127 KB. **`contain`**, not cover |
 | 5 — marketplaces | `assets/images/marketplaces.webp` | `206:60376` | a woman in red on a street of falling paper. Node export 2298×1635 (1.41:1) → `cwebp -q 82 -resize 2236 0`, 2236×1591, 163 KB. Against the 4:3 frame `cover` trims about 6% off each side |
 
 `209:35586` was on the `promotion` pane first; the client then said that screen is
@@ -1220,6 +1221,7 @@ Known nodes:
 | `206:62480` | "Продвижение — 4×3 / content" — the capabilities frame's `promotion` pane. |
 | `223:37237` | «Товары и остатки» screen, 4:3 — the capabilities frame's `logistics` pane. |
 | `206:60376` | Street photograph, woman in red — the marketplaces frame. |
+| `276:54234` | Full mockup of the speed section — tablet between the two text columns. `276:54236` is the tablet's own frame, `276:54238` the iPad instance that was exported. |
 | `275:39451` | Section "tinder" — the style deck's six images, as three pairs. Children `275:39475` / `39476` / `39477` are the pairs; in each, the upper rectangle is the ground and the lower one the shop screen. |
 | `275:39455` / `275:39469` | Pair 1 — fashion shoot ground, POLENE shop screen. |
 | `275:39458` / `275:39470` | Pair 2 — skincare ground, "Bed Intentions" shop screen. |

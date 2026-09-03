@@ -714,6 +714,15 @@ img { display: block; max-width: 100%; height: auto; }
   background-image: url("../images/marketplaces.webp");
 }
 
+/* The tablet is `contain`, not `cover`: it is a device with edges, and a crop would eat
+   its corners. The source is 1.31:1 against a 4:3 frame, so `contain` leaves about 4px of
+   ground down each side at 1440 — invisible, because the picture's own ground is #000 and
+   so is the section's. */
+.frame-photo[data-photo="speed"] {
+  background-image: url("../images/speed.webp");
+  background-size: contain;
+}
+
 /* Under the frame, not inside it: the slide does not clip its children. The strip takes
    clicks even though the frame does not, and JS makes it inert while this slide is off
    stage — an opacity of 0 still hit-tests. */

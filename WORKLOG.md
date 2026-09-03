@@ -1,5 +1,26 @@
 # Worklog
 
+## 2026-09-03 — the tablet in the speed frame
+
+**What changed.** `assets/images/speed.webp` added. `index.html`: the speed slide carries
+`data-filled="true"` and one `.frame-photo`. `assets/css/base.css`: that layer's file, and
+`background-size: contain` for it alone. `CONTEXT.md`: file and nodes recorded.
+
+**Why.** Client sent the mockup `276:54234` and asked for that slide. `contain` because the
+tablet is a device with edges — `cover` would crop its corners. The export needed keying:
+Figma paints `#1E1E1E` behind the instance, which on a `#000` section would read as a grey
+slab. Keyed on that colour and flattened onto black, so the picture's ground and the
+section's ground are the same #000 and the frame never shows.
+
+**How verified.** Live page at 1440×900 with a freshly loaded stylesheet, `#speed` on stage:
+slide `data-active=true`, `--t` 1, layer 520×390 (the frame's box), `background-size:
+contain`, `clip-path inset(0% …)`, page `--ground` `rgb(0, 0, 0)` — same black as the
+picture's corners, sampled on a canvas at `[0,0,0,255]`. File returns 200 / 130250 bytes;
+no 4xx. Screenshot not possible — the Browser pane is hidden and composites nothing.
+
+**Left undone.** The tablet's UI is a still. If the client wants the catalogue to move, it
+needs a recording like the hero's.
+
 ## 2026-09-03 — a photograph in the marketplaces frame
 
 **What changed.** `assets/images/marketplaces.webp` added (Figma `206:60376`, node export

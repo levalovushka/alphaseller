@@ -52,7 +52,12 @@
       <button class="frame-tab" type="button" role="tab" data-pane="logistics" aria-selected="false">Логистика</button>
     </div>
   </div>
-  <div class="stage-frame__slide" data-for="speed" aria-hidden="true"></div>
+  <!-- Speed: the catalogue on a tablet, Figma `276:54234`. The picture is already black
+       around the device, so the frame itself never shows — the tablet stands on the
+       section's own ground, which is what the mockup does. -->
+  <div class="stage-frame__slide" data-for="speed" data-filled="true" aria-hidden="true">
+    <div class="frame-photo" data-photo="speed"></div>
+  </div>
   <!-- The second slide that holds more than a picture: a deck of store screens, thrown
        away by hand. Not aria-hidden — the top card takes a pointer; JS makes the deck
        inert while this slide is off stage. The cards themselves carry no text, so each
