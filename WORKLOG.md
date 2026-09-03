@@ -1,5 +1,55 @@
 # Worklog
 
+## 2026-09-03 — the hero frame plays a looping screen recording
+
+**What changed.** New `assets/video/hero.mp4` (933 KB) and `assets/images/hero-poster.webp`
+(40 KB). `index.html`: the hero slide holds a `<video autoplay muted loop playsinline
+preload="auto">` and is marked `data-filled="true"`. `base.css`: new `.stage-frame__video`
+— absolute, `object-fit: cover`, `border-radius: inherit`, `pointer-events: none`.
+`main.js`: a hero-video block that registers a `--t` gate so playback stops off stage, and
+pauses outright under `prefers-reduced-motion`. `CONTEXT.md` §7: new "The hero video"
+subsection, and the frame-content table now lists the video plus the old photograph as kept
+but unused.
+
+**Why.** Client asked for that Figma node as the hero, looping, "for now".
+
+**Figma cannot hand over the video.** `download_assets` on `247:42060` returns only PNGs —
+a node render and a 1108×720 poster — because it is a video *fill*. `export_video` refuses:
+"Export root must be a top-level frame. Sub-clips cannot be exported directly"; that tool
+renders Figma timelines. The client supplied the file by hand after I said so.
+
+**Encoding.** Source 1108×720, 60fps, 14s, 1.93 MB, no audio. Shipped at 1000×650, 30fps,
+x264 `-crf 30 -preset slow -tune animation`, `+faststart` → 933 KB. Measured alternatives:
+`-crf 28` 1.25 MB, `-crf 32` 720 KB (checked a frame at true display size — still legible),
+and VP9 `-crf 36` **2.0 MB**, which is why there is no webm at all. 1000px wide is chosen
+off the real box: the frame is 424×318, so 848×636 at 2×.
+
+**How it was verified.** `localhost:4321` at 1440×900. Live DOM on the video: `currentSrc`
+the mp4, `object-fit cover`, `border-radius 32px`, box 424×318 exactly matching the frame,
+`loop`/`muted`/`autoplay` all true, `readyState 4`, intrinsic 1000×650. Gate driven by hand
+with `ScrollTrigger.update()`:
+
+| scrollY | slide `--t` | video |
+|---|---|---|
+| 0 | 1 | playing |
+| 450 | 0.5 | paused |
+| 900 | 0 | paused |
+| 0 | 1 | playing again |
+
+`play()` resolves, so autoplay is permitted; frames do not advance because the browser pane
+is hidden (`document.hidden` is true) — that part is unobservable here, not broken.
+
+**Watch out.** The console showed `Cannot read properties of null (reading 'style')` at
+`main.js:255`. Not a live fault: the browser was holding a cached `index.html` from before
+another session added `.stage-morph`, against the current `main.js`. Confirmed by wiping
+`--t` and forcing `ScrollTrigger.refresh()` — the listener on the last line of `main.js`
+restored it, so the file runs to the end. A cache-busted load has no error.
+
+**Left undone.** The 4:3 crop eats into the left column of the recording — flagged for the
+client, `contain` or a 4:3 recrop are the ways out. `preload="auto"` means the 933 KB is
+fetched on load; if that matters for the board demo, `preload="metadata"` plus the poster is
+the trade. `assets/images/hero.webp` is now referenced by nothing.
+
 ## 2026-09-03 — a Tinder deck in the frame on section 4
 
 **What changed.** `index.html`: the `customization` slide stops being empty — it gets

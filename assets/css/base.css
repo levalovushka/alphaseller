@@ -430,6 +430,20 @@ img { display: block; max-width: 100%; height: auto; }
   background-image: url("../images/capabilities-logistics.webp");
 }
 
+/* The hero's screen recording fills its slide edge to edge, cropped like a `cover`
+   background: the source is 1000×650 (1.54:1) against a 4:3 frame, so about 74px comes off
+   each side at source scale. `border-radius: inherit` clips it to the frame. */
+.stage-frame__video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+  /* Decorative and silent — it never takes a pointer. */
+  pointer-events: none;
+}
+
 /* Under the frame, not inside it: the slide does not clip its children. The strip takes
    clicks even though the frame does not, and JS makes it inert while this slide is off
    stage — an opacity of 0 still hit-tests. */

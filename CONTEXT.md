@@ -526,7 +526,8 @@ Figma's own `#1E1E1E` canvas in as a full-bleed `<rect>`.
 
 | Section | File | Figma node | Source |
 |---|---|---|---|
-| 1 — hero | `assets/images/hero.webp` | `196:53708` | 1118×789, exported @2x → 2236×1578, cwebp `-q 82`, 101 KB |
+| 1 — hero | `assets/video/hero.mp4` + `assets/images/hero-poster.webp` | `247:42060` | screen recording, on a loop. See below |
+| 1 — hero, unused | `assets/images/hero.webp` | `196:53708` | the photograph the hero had before; kept, wanted again later |
 | 2 — capabilities, `promotion` pane | `assets/images/capabilities-promotion.webp` | `206:62480` | node is named "Продвижение — 4×3 / content". 1118×838.5, @2x → 2236×1677, cwebp **`-lossless`**, 172 KB |
 | 2 — `orders` pane | `assets/images/capabilities-orders.webp` | `209:35586` | same size and export, 188 KB. Re-pulled once after the client edited the node — the file name stays, so a re-pull is a byte swap and nothing else |
 | 2 — `logistics` pane | `assets/images/capabilities-logistics.webp` | `223:37237` | same size and export, but **`-q 90`**, 167 KB |
@@ -543,6 +544,36 @@ client assigned it to that tab anyway. Flagged — the tab may want renaming.
 
 One file per pane, named after it. `206:58220` was the previous cut of the same screen and
 is superseded; `204:51472` before that was the 1.42:1 one.
+
+### The hero video
+
+The hero frame holds a screen recording of the dashboard, looping, silent — Figma node
+`247:42060`, "Built-in Retina Display 1". **The video cannot be pulled out of Figma:**
+`download_assets` returns only a poster frame for a video fill, and `export_video` refuses
+with "Export root must be a top-level frame. Sub-clips cannot be exported directly" — it
+renders Figma timelines, not video fills. The client supplied the file by hand.
+
+| | |
+|---|---|
+| Source | 1108×720, 60fps, 14s, H.264, 1.93 MB, no audio track |
+| Shipped | `assets/video/hero.mp4` — 1000×650, 30fps, 14s, x264 `-crf 30 -preset slow -tune animation`, `+faststart`, **933 KB** |
+| Poster | `assets/images/hero-poster.webp` — its own first frame, cwebp `-q 80`, 40 KB |
+
+Why those numbers: the frame renders at 424×318, so ~848×636 at 2× — 1000px wide leaves
+headroom and nothing more. 60 → 30fps costs nothing on a UI recording and saves most of the
+bytes. `-crf 32` was 720 KB and still legible at that scale; 30 is one notch of headroom on
+the page's most-seen asset. **VP9 was tried and dropped** — 2.0 MB at `-crf 36` against
+933 KB for H.264 on the same input, so there is no webm and no `<source>` list: H.264 in MP4
+plays everywhere.
+
+The markup carries `autoplay muted loop playsinline preload="auto"`, so it runs with no JS.
+JS only ever stops it: paused off stage (via the slide's `--t` gate, edge-triggered) and
+outright under `prefers-reduced-motion: reduce`, where the poster stays instead.
+
+`object-fit: cover` crops it like a background: 1000×650 is 1.54:1 against a 4:3 frame, so
+about 74px comes off each side at source scale. On this recording that eats into the left
+column of the UI — **raised, not resolved**; `contain` or a 4:3 recrop in Figma are the
+alternatives.
 
 Slides are filled with a CSS `background-image` on
 `.stage-frame__slide[data-for="…"]`, `center / cover`.

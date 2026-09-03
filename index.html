@@ -28,7 +28,14 @@
 <!-- The frame stays put while the text columns scroll past it. One slide per section;
      the active one is swapped as the section under the header changes. -->
 <div class="stage-frame" data-ink="dark" aria-hidden="true">
-  <div class="stage-frame__slide" data-for="hero" aria-hidden="true"></div>
+  <!-- Hero: a screen recording on a loop. Silent and decorative, so it autoplays; JS
+       pauses it while the slide is off stage and for a visitor who asked for less motion.
+       The poster is its own first frame, so nothing flashes before playback starts. -->
+  <div class="stage-frame__slide" data-for="hero" data-filled="true" aria-hidden="true">
+    <video class="stage-frame__video" src="assets/video/hero.mp4"
+           poster="assets/images/hero-poster.webp"
+           autoplay muted loop playsinline preload="auto"></video>
+  </div>
   <!-- The one slide that holds more than a picture: three panes and a tab strip under the
        frame. The strip is real markup, not aria-hidden, because it takes clicks; JS makes
        it inert while this slide is off stage. -->

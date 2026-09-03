@@ -298,6 +298,37 @@ if (tabStrip) {
   gate(currentSection().id === 'capabilities' ? 1 : 0);
 }
 
+/* ---------- the hero video ----------
+   A silent screen recording on a loop. It autoplays from the markup, so it runs with no JS
+   at all; JS only ever stops it — off stage, because there is no reason to decode frames
+   nobody is looking at, and outright for a visitor who asked for less motion, who then
+   keeps the poster. */
+
+const heroVideo = document.querySelector('.stage-frame__video');
+
+if (heroVideo) {
+  const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (still) heroVideo.pause();
+
+  const heroSlide = heroVideo.closest('.stage-frame__slide');
+  let playing = null;
+
+  /* Same edge-triggered shape as the tabs: `--t` is written on every frame of a crossing,
+     and there is nothing to gain from calling play() sixty times a second. */
+  const gate = (t) => {
+    if (still) return;
+    const onStage = Number(t) > 0.99;
+    if (onStage === playing) return;
+    playing = onStage;
+
+    if (onStage) heroVideo.play().catch(() => {});
+    else heroVideo.pause();
+  };
+
+  gates.set(heroSlide, gate);
+  gate(currentSection().id === 'hero' ? 1 : 0);
+}
+
 /* ---------- the style deck ----------
    Tinder, in the frame: three store screens, the front one filling the frame exactly and
    the rest fanned out behind it. Thrown by hand only — the client asked for no timer and
