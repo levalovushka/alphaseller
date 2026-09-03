@@ -1,5 +1,107 @@
 # Worklog
 
+## 2026-09-03 — the deck's throw is integrated, not tweened
+
+**What changed.** `main.js`, `the style deck`: the exit tween is gone. A card that is let go
+of now has its position integrated per frame from the release velocity against exponential
+friction (`v *= e^(-dt/tau)`, tau 190ms) on a `gsap.ticker` callback, with nowhere it has to
+end up; the only fixed animation is opacity — 0.42s `power1.in` — and its completion is what
+retires the card to the back of the deck. It also leaves the deck's order at release, so the
+stack closes up while it is still dissolving above it; `layout()` skips whatever is in the
+air, and the gate cancels a flight if the section is left mid-throw. `CONTEXT.md` §7 rewritten
+to match: the two wrong cuts and why.
+
+**Why.** Client's diagnosis, and it was the right one: "может это надо через физику как-то
+делать? конкретно перемещение. а уход в нулевой опасити хардкодить. то есть если я увел
+карточку и оставил сбоку — она на месте растворится. если я выкинул её драгом — улетит
+растворяясь." The previous cut was honest about acceleration but still forced every card to
+cross the whole frame inside its tween, so a slow release exited faster than the hand.
+
+**How it was verified.** Emulated 1440×900 (frame 424×318), GSAP on manual ticks with
+`lagSmoothing(0)`, synthetic `PointerEvent`s at ~16ms spacing, `setPointerCapture` stubbed —
+the pane is hidden here, so trusted pointer events cannot be delivered.
+
+```
+slow release   20 × 6px at 16ms → released at x 120, ~0.375 px/ms
+  x/opacity      139/0.98  152/0.93  163/0.82  171/0.68  176/0.49  180/0.27  183/0
+               63px of travel — it dissolves where it stands, decelerating throughout
+flick          3 × 26px at 16ms = 78px (under the 110px catch) at ~1.6 px/ms
+  x/rot/op       155/4°/0.98  214/6°/0.92  257/7°/0.82  288/8°/0.68  311/9°/0.50
+                 328/9°/0.27  340/10°/0.01
+               262px of travel in the same 0.42s, still turning as it goes
+landing        both cases: back slot, x 0, y 44, opacity faded up to 0.30, z 1, top false;
+               order rotated, deck closed up
+short + slow   4 × 6px = 24px released still → x 0, rotation 0, opacity 1, order unchanged,
+               card behind sank back to y 22 / opacity 0.65
+mid-flight     the thrown card sits at z4 above the deck while the next one is already
+               rising into the frame's box behind it
+left mid-air   scrolled away during a flight → every card back at its slot
+               (x 0, y 0/22/44, op 1/0.65/0.30, z 3/2/1), deck inert, and it stays put
+               under another 300ms of ticks: the ticker callback was removed, no drift
+```
+
+Screenshotted mid-flight at 1440×900: the card at x 238, ~7°, opacity 0.87 — the page's
+right-hand column reads through it — with the next card already full-size in the frame.
+No console errors. The resting geometry is unchanged from the last entry, so nothing new to
+look at there.
+
+**What is left undone / known soft.**
+- **Not committed.** A parallel session's uncommitted `.stage-morph` work sits in the same
+  four files, and in `WORKLOG.md` our two entries land in one hunk, so there is no clean
+  file-level commit to make. Waiting on Levon.
+- A card in the air blocks a new drag for 0.42s; several cards in flight would need a set,
+  not a single `flight`.
+- Still no trusted pointer input in this session, and the stack has still only been seen
+  over the hero's green ground — a hidden pane does not repaint after a scroll.
+- Sources unchanged: 836×627 is 2.0x at a 1440 frame, 1.16x at 1920.
+
+## 2026-09-03 — the deck's throw made physical, and the fan replaced by a stack
+
+**What changed.** `main.js`, `the style deck`: the exit tween is now an ease-**out** whose
+duration is derived from the release speed, the drag keeps a smoothed velocity, a fast
+flick throws a card that never reached the catch distance, and the card behind rises
+towards the front slot while the front one is dragged. `slot()` lost its rotation and
+gained opacity, so the stack is smaller-lower-dimmer instead of a fan. `base.css` and
+`CONTEXT.md` updated to match.
+
+**Why.** Client, after seeing it: the animations lacked finish, and one thing was plainly
+wrong — "отвел карточку в сторону с драгом, отпустил, а она начинает ускоряться вбок.
+антифизично". That was `power2.in` on the exit: an ease that starts from a standstill. He
+also dropped the fan for a Tinder stack and asked for the off-cards to be dimmed.
+
+**Numbers now.** drop 22px, shrink 5%, dim 35%, catch 26% of the frame's width, flick
+0.7 px/ms, swing 12°, exit clamped to 0.26–0.5s, return 0.5s `power3.out`.
+
+**How it was verified.** Emulated 1440×900 (frame 424×318), GSAP on manual ticks with
+`lagSmoothing(0)`, synthetic `PointerEvent`s at ~16ms spacing with `setPointerCapture`
+stubbed — the pane is hidden here, so trusted pointer events cannot be delivered.
+
+```
+at rest        1 / 0.95 / 0.90 scale, y 0 / 22 / 44, opacity 1 / 0.65 / 0.30, rotation 0
+               ledges under the front card measure 14px and 28px; widths 424 / 403 / 382
+slow drag      20 × 6px at 16ms → x 120, rotation 3.40° (120/424 × 12° — to spec)
+  (past 110px)   card behind came up: y 22→5.6-equivalent, scale 0.98, opacity 0.86
+release        step sizes per 40ms: 64 58 52 46 41 35 29 23 18 12 6 — monotonically
+               DECELERATING from the first frame. This is the bug the client caught.
+flick          3 × 26px at 16ms = 78px, under the 110px catch, but 1.6 px/ms → flew;
+               x kept going 78 → 190 in the first 60ms
+short + slow   4 × 6px = 24px released still → returned to x 0, rotation 0, order
+               unchanged, and the card behind sank back to y 22 / opacity 0.65
+```
+
+No console errors. Screenshotted at 1440×900: the front card fills the frame, two dimmed
+ledges under it, no rotation anywhere.
+
+**What is left undone / known soft.**
+- A deliberately slow release still hands off to a quicker exit — continuing 0.4 px/ms
+  honestly would need ~2s to clear the frame, so the speed floor and the 0.5s clamp bite.
+  The acceleration is gone; the speed step is not. Written up in CONTEXT with the fix to
+  reach for if it shows (fade the card out mid-flight, do not lengthen the tween).
+- Still not touched by a real mouse or trackpad, and the stack has still only been seen
+  over the hero's green ground: a hidden pane does not repaint after a scroll, so captures
+  at the section's own black ground come back solid black.
+- Sources unchanged and still short — 836×627 is 2.0x at a 1440 frame, 1.16x at 1920.
+
 ## 2026-09-03 — the hero frame plays a looping screen recording
 
 **What changed.** New `assets/video/hero.mp4` (933 KB) and `assets/images/hero-poster.webp`

@@ -643,15 +643,58 @@ Section 4 holds a deck of three shop screens in the frame — Tinder, thrown by 
 front card *is* the frame: same size, same 32px radius. Everything about it is the client's
 call on 2026-09-03, chosen against the alternatives offered:
 
-- **By hand only.** No 5s carousel like the tabs, and no buttons under the frame. A card
-  that clears 28% of the frame's width flies out; one that does not falls back.
-- **The deck fans.** Each card behind sits 10px lower, 1.5% smaller and turned 3.2° to
-  alternating sides. Rejected: a straight ladder, and a stack with only its bottom edge
-  showing.
+- **By hand only.** No 5s carousel like the tabs, and no buttons under the frame.
 - **`cover`, not letterboxed.** The screens are 16:9 and the frame is 4:3, so about a
   quarter of each one's width is cropped away — which takes the shop logo on the left and
   the cart on the right out of every screenshot's header. He picked that over fitting the
   whole screen inside the card.
+- **A stack, not a fan.** Each card behind sits 22px lower, 5% smaller and 35% less
+  opaque, with no rotation at all. A fan of ±3.2° was built first and he dropped it the
+  same day: "не веер, а как у тиндера, неактивные меньше и ниже", plus dim them so the
+  front screen carries the section. Watch the interaction between the two numbers —
+  shrinking a card pulls its own bottom edge up by 8px here, so the drop has to beat that
+  before anything peeks out. At 22 the ledges under the front card measure 14px and 28px.
+
+**The travel is integrated; only the dissolve is on a clock.** Two cuts were wrong before
+this one, both caught the same day, and the reason is worth keeping:
+
+1. `power2.in` on the way out — an ease that *starts from a standstill*. A card dragged
+   aside and released came to a halt under the hand and then accelerated sideways on its
+   own. "Антифизично".
+2. Then an ease-**out** whose duration came from the release speed. The acceleration was
+   gone, but a tween still has to cover the whole distance out of the frame within its
+   duration, so a slow release handed off to an exit faster than the hand.
+
+Both faults come from treating the card's *travel* as the thing that has to complete. It
+does not. What has to complete is the card leaving the deck, and that is the dissolve. So:
+
+- **Position is integrated per frame** off the release velocity against exponential
+  friction — `v *= e^(-dt/tau)`, `tau` 190ms — on a `gsap.ticker` callback, and is never
+  told where to end up. The card carries about `v0 × 170` px past the release point.
+- **Opacity is a fixed 0.42s** `power1.in` tween, whatever the card is doing. It is the one
+  thing that decides the card is gone, and its `onComplete` puts the card at the back of
+  the deck, invisible, then fades it up into its slot.
+- Measured, at a 424px frame: released at 0.375 px/ms it travels **63px** and dissolves
+  essentially where it stands; flicked at 1.6 px/ms it travels **262px** in the same 0.42s.
+  The client asked for exactly this shape — "если я увел карточку и оставил сбоку — она на
+  месте растворится. если я выкинул её драгом — улетит растворяясь."
+- Rotation needs nothing of its own: in flight it keeps the drag's own mapping,
+  `x / width × 12°`, so it goes on turning as it goes on moving.
+- The drag's speed is a smoothed reading (exponential average, 0.7 on the newest sample) in
+  px/ms. One raw frame is far too jumpy to throw a card with, and a heavier average would
+  read a pause before release as a throw.
+- **Two ways to send a card.** 26% of the frame's width, or 0.7 px/ms in the direction the
+  drag is already going. A flick that covers 40px and stops is not a throw; one that covers
+  40px and is still moving is.
+- **The next card answers the drag.** It rises 60% of the way towards the front slot —
+  position, scale and opacity together — as the front card is pulled past the catch
+  distance, and sinks back with it if the throw does not happen. An undecided card returns
+  on `power3.out` over 0.5s, and the whole stack goes home in the same pass. Once a card is
+  let go of, the deck closes up *while* it is still dissolving on top of it: the card leaves
+  the order immediately, keeps the top of the pile, and `layout()` skips it until it lands.
+
+A card in the air blocks a new drag until it dissolves — 0.42s. With three cards nobody has
+asked to swipe faster than that; allowing it would mean tracking several cards in flight.
 
 **A thrown card rejoins the deck at the back, so it never runs out.** Mine, not his — three
 cards would otherwise leave an empty frame after three throws.
@@ -660,9 +703,10 @@ cards would otherwise leave an empty frame after three throws.
 tops out at 836×627. The frame is 424px wide at a 1440 viewport (2.0x — fine) but 720 at
 1920 (1.16x — soft). Ask for taller sources before this goes anywhere near production.
 
-**No shadow and no hairline between the cards.** The fan's slivers read against this
-section's black ground on their own. If they ever sit on a light ground they will need
-something — flagged, not decided.
+**No shadow and no hairline between the cards.** The dimmed ledges read against this
+section's black ground on their own — the dimming is plain `opacity`, so on black it lands
+as darkening. On a light ground it would land as washing out instead, and the stack would
+need something else — flagged, not decided.
 
 The transforms are written by JS only (`main.js`, section `the style deck`); `base.css`
 sets none. A card being dragged has to be moved from the same place its resting position

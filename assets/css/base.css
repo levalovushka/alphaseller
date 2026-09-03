@@ -499,14 +499,14 @@ img { display: block; max-width: 100%; height: auto; }
 
 /* ---------- the style deck ----------
    Tinder, in the frame. The top card *is* the frame — same size, same 32px radius — and
-   the rest of the deck fans out behind it, turned a few degrees to alternating sides.
-   Thrown by hand only: no timer, no buttons. Client's call on 2026-09-03, along with the
-   fan and the crop.
+   the two behind it are smaller, lower and dimmed, so the front screen is the only one
+   fully lit. Thrown by hand only: no timer, no buttons. Client's calls on 2026-09-03: the
+   crop, then the stack (a fan was tried first and dropped) and the dimming.
 
-   The fan is laid out by JS rather than here. A card being dragged has to be moved from
-   the same place its resting position comes from, and two writers on one `transform`
-   is how a card ends up stuck mid-throw. `main.js`, section `the style deck`, holds the
-   numbers. */
+   The stack is laid out by JS rather than here — position, scale *and* opacity. A card
+   being dragged has to be moved from the same place its resting position comes from, and
+   two writers on one `transform` is how a card ends up stuck mid-throw. `main.js`,
+   section `the style deck`, holds the numbers. */
 
 .style-deck {
   position: absolute;

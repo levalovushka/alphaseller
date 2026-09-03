@@ -331,13 +331,32 @@ if (heroVideo) {
 
 /* ---------- the style deck ----------
    Tinder, in the frame: three store screens, the front one filling the frame exactly and
-   the rest fanned out behind it. Thrown by hand only — the client asked for no timer and
-   no buttons here, unlike the tabs above. A card that clears the catch distance flies out
-   and rejoins the deck at the back, so the deck never runs out; one that does not falls
-   back into place.
+   the two behind it smaller, lower and dimmed. Thrown by hand only — the client asked for
+   no timer and no buttons here, unlike the tabs above. A card that clears the catch
+   distance, or is flicked fast enough over a shorter one, is let go of; it rejoins the
+   deck at the back, so the deck never runs out. One that does not falls back into place.
 
    JS owns the cards' transforms outright (`base.css` sets none), because a card being
-   dragged has to be moved from the same place its resting position comes from. */
+   dragged has to be moved from the same place its resting position comes from.
+
+   **Movement is integrated, not tweened; only the dissolve is a fixed animation.** Two
+   earlier cuts were wrong, both caught by the client on 2026-09-03:
+
+     1. `power2.in` on the way out — an ease that starts from a standstill, so a card
+        dragged aside and released stopped under the hand and then accelerated sideways on
+        its own. "Антифизично".
+     2. Then an ease-*out* whose duration came from the release speed. No acceleration, but
+        a tween has to cover the whole distance out of the frame in its allotted time, so a
+        slow release still handed off to an exit faster than the hand.
+
+   Both come from making the card's *travel* the thing that has to finish. It does not: what
+   has to finish is the card leaving the deck, and that is the dissolve. So the position is
+   integrated per frame from the release velocity against exponential friction and is never
+   told where to end up, while the opacity runs a fixed 0.42s regardless of how far the card
+   gets. Let go of a card at rest off to one side and it dissolves where it stands; flick it
+   and it is most of a screen away by the time it goes. His call, in his words: "если я увел
+   карточку и оставил сбоку — она на месте растворится. если я выкинул её драгом — улетит
+   растворяясь." */
 
 const deck = document.querySelector('.style-deck');
 
@@ -345,61 +364,124 @@ if (deck) {
   const cards = gsap.utils.toArray('.style-card', deck);
 
   const DECK = {
-    drop: 10,       /* px each card sits below the one in front of it */
-    shrink: 0.015,  /* how much smaller each card behind is */
-    tilt: 3.2,      /* deg, to alternating sides — a deck, not a ladder */
-    catch: 0.28,    /* how much of the frame's width a drag must cover to throw the card */
-    swing: 14,      /* deg the front card turns across a full-width drag */
-    close: 0.35,    /* s for the deck to close up behind a card that left */
-    fly: 0.45,      /* s for a thrown card to clear the frame */
-    fall: 0.4,      /* s for an undecided card to drop back into place */
+    /* Shrinking a card also pulls its bottom edge up — 8px at this size — so the drop has
+       to beat that before anything peeks out at all. 22 leaves 14px of the second card
+       showing under the front one and 28 of the third. */
+    drop: 22,       /* px each card behind sits lower than the one in front */
+    shrink: 0.05,   /* and this much smaller */
+    dim: 0.35,      /* and this much less opaque, so the front card carries the screen */
+    catch: 0.26,    /* how much of the frame's width a slow drag must cover to let go */
+    flick: 0.7,     /* px/ms — past this the card goes even if the drag was short */
+    swing: 12,      /* deg the front card turns across a full-width drag — in flight the
+                       same mapping keeps turning it, so the spin costs nothing */
+    lead: 0.6,      /* how far the next card comes up while the front one is dragged */
+    /* Friction, as the time constant of `v *= e^(-dt/tau)`. A card carries roughly
+       `v0 × tau × (1 - e^(-dissolve/tau))` px past the release point: at 190ms and a 0.42s
+       dissolve that is ~170px per px/ms of release speed. Lower it and throws stop short;
+       raise it and a nudge sails across the frame. */
+    tau: 190,
+    dissolve: 0.42, /* s, fixed — the one thing that decides when a card is gone */
+    close: 0.4,     /* s for the deck to close up behind it */
+    fall: 0.5,      /* s for an undecided card to drop back into place */
   };
 
-  /* Front to back. A thrown card moves to the end of this and the fan is re-read from it,
-     so the deck's order is the only state here. */
+  /* Front to back. A card that is let go of moves to the end of this straight away, so the
+     deck can start closing up while it is still dissolving on top. */
   let order = cards.slice();
-  let flying = false;
+  let flight = null;
   let drag = null;
 
   const slot = (i) => ({
     x: 0,
     y: i * DECK.drop,
-    rotation: i === 0 ? 0 : i % 2 ? DECK.tilt : -DECK.tilt,
     scale: 1 - i * DECK.shrink,
+    opacity: Math.max(0, 1 - i * DECK.dim),
+    rotation: 0,
   });
 
-  function layout(animate) {
+  const mix = (from, to, t) => from + (to - from) * t;
+
+  function layout({ duration = 0, ease = 'power2.out' } = {}) {
     order.forEach((card, i) => {
+      /* The one in the air owns its position, its opacity and its place in the pile until
+         it lands — it has to dissolve over the deck, not under it. */
+      if (flight && flight.card === card) return;
+
       card.dataset.top = String(i === 0);
       /* Stacking order cannot be interpolated — it is set, never tweened. */
       gsap.set(card, { zIndex: order.length - i });
 
-      const to = { ...slot(i), opacity: 1 };
-      if (animate) gsap.to(card, { ...to, duration: DECK.close, ease: 'power2.out', overwrite: true });
+      const to = slot(i);
+      if (duration) gsap.to(card, { ...to, duration, ease, overwrite: true });
       else gsap.set(card, to);
     });
   }
 
-  function fly(card, direction) {
-    flying = true;
+  /* The card behind rises towards the front slot as the front one is pulled away, and sinks
+     back if it returns. It is what makes the drag feel answered before it is finished. */
+  function lead(progress) {
+    const next = order[1];
+    if (!next) return;
 
+    const near = slot(0);
+    const home = slot(1);
+    const t = Math.min(1, progress) * DECK.lead;
+
+    gsap.set(next, {
+      y: mix(home.y, near.y, t),
+      scale: mix(home.scale, near.scale, t),
+      opacity: mix(home.opacity, near.opacity, t),
+    });
+  }
+
+  function land() {
+    if (!flight) return;
+
+    const { card, step } = flight;
+    gsap.ticker.remove(step);
+    flight = null;
+
+    /* Back of the deck, still invisible, then faded up into its slot. Sliding it back
+       across the frame would read as the card returning. */
+    const i = order.indexOf(card);
+    const home = slot(i);
+    gsap.set(card, { ...home, zIndex: order.length - i, opacity: 0 });
+    gsap.to(card, { opacity: home.opacity, duration: DECK.close, ease: 'power1.out' });
+  }
+
+  function toss(card, vx, vy) {
+    /* Out of the deck's order immediately: the cards behind start closing up while this one
+       is still in the air. */
+    order = order.filter((c) => c !== card).concat(card);
+
+    let x = Number(gsap.getProperty(card, 'x'));
+    let y = Number(gsap.getProperty(card, 'y'));
+    let sx = vx;
+    let sy = vy;
+
+    /* Nothing here is told where to stop. The card keeps the speed the hand gave it and
+       loses it to friction, which is the whole point. */
+    const step = (time, dt) => {
+      const decay = Math.exp(-dt / DECK.tau);
+      sx *= decay;
+      sy *= decay;
+      x += sx * dt;
+      y += sy * dt;
+      gsap.set(card, { x, y, rotation: (x / deck.clientWidth) * DECK.swing });
+    };
+
+    flight = { card, step };
+    card.dataset.top = 'false';
+    gsap.set(card, { zIndex: cards.length + 1 });
+    gsap.ticker.add(step);
+    layout({ duration: DECK.close });
+
+    /* Fixed length, whatever the card is doing — this is what decides it is gone. */
     gsap.to(card, {
-      x: direction * deck.clientWidth * 1.35,
-      y: '+=60',
-      rotation: direction * 26,
       opacity: 0,
-      duration: DECK.fly,
-      ease: 'power2.in',
-      overwrite: true,
-      onComplete: () => {
-        order.push(order.shift());
-        /* Put it straight into the back slot, invisible; `layout` fades it in there while
-           the rest of the deck closes up. Sliding it back across the frame would read as
-           the card returning. */
-        gsap.set(card, { ...slot(order.length - 1), opacity: 0 });
-        layout(true);
-        flying = false;
-      },
+      duration: DECK.dissolve,
+      ease: 'power1.in',
+      onComplete: land,
     });
   }
 
@@ -410,7 +492,7 @@ if (deck) {
   }
 
   deck.addEventListener('pointerdown', (e) => {
-    if (flying || drag) return;
+    if (flight || drag) return;
 
     const card = order[0];
     if (e.target !== card) return;
@@ -418,12 +500,34 @@ if (deck) {
     card.setPointerCapture(e.pointerId);
     card.dataset.drag = 'true';
     gsap.killTweensOf(card);
-    drag = { card, id: e.pointerId, x: e.clientX, y: e.clientY, dx: 0 };
+
+    drag = {
+      card,
+      id: e.pointerId,
+      x: e.clientX,
+      y: e.clientY,
+      dx: 0,
+      /* Last sample and a smoothed speed, px/ms. One raw frame is far too jumpy to throw
+         a card with — a stalled finger can still report a 20px jump. */
+      lastX: e.clientX,
+      lastY: e.clientY,
+      lastAt: e.timeStamp,
+      vx: 0,
+      vy: 0,
+    };
   });
 
   deck.addEventListener('pointermove', (e) => {
     if (!drag || e.pointerId !== drag.id) return;
 
+    const gap = Math.max(1, e.timeStamp - drag.lastAt);
+    /* Exponential average: enough of the last frames to survive one bad sample, short
+       enough that letting go after a pause reads as letting go, not as a throw. */
+    drag.vx = mix(drag.vx, (e.clientX - drag.lastX) / gap, 0.7);
+    drag.vy = mix(drag.vy, (e.clientY - drag.lastY) / gap, 0.7);
+    drag.lastX = e.clientX;
+    drag.lastY = e.clientY;
+    drag.lastAt = e.timeStamp;
     drag.dx = e.clientX - drag.x;
 
     gsap.set(drag.card, {
@@ -431,16 +535,24 @@ if (deck) {
       y: e.clientY - drag.y,
       rotation: (drag.dx / deck.clientWidth) * DECK.swing,
     });
+
+    lead(Math.abs(drag.dx) / (deck.clientWidth * DECK.catch));
   });
 
   const release = (e) => {
     if (!drag || e.pointerId !== drag.id) return;
 
-    const { card, dx } = drag;
+    const { card, dx, vx, vy } = drag;
+    /* Either far enough, or fast enough in the direction it is already going. A flick that
+       covers 40px and stops is not a throw; one that covers 40px and is still moving is. */
+    const far = Math.abs(dx) > deck.clientWidth * DECK.catch;
+    const fast = Math.abs(vx) > DECK.flick && Math.sign(vx) === Math.sign(dx) && dx !== 0;
+
     stopDrag();
 
-    if (Math.abs(dx) > deck.clientWidth * DECK.catch) fly(card, Math.sign(dx));
-    else gsap.to(card, { ...slot(0), duration: DECK.fall, ease: 'power2.out', overwrite: true });
+    if (far || fast) toss(card, vx, vy);
+    /* Everything goes home together — the card, and the one that came up behind it. */
+    else layout({ duration: DECK.fall, ease: 'power3.out' });
   };
 
   deck.addEventListener('pointerup', release);
@@ -448,7 +560,8 @@ if (deck) {
 
   /* Same gate as the tabs, and for the same reason: a slide at opacity 0 still hit-tests,
      and a card must not be draggable from behind another section. A crossing that starts
-     mid-drag drops the card where it belongs rather than leaving it hanging. */
+     mid-drag, or mid-flight, puts every card back where it belongs rather than leaving one
+     hanging half-dissolved. */
   const deckSlide = deck.closest('.stage-frame__slide');
   let live = null;
 
@@ -461,14 +574,17 @@ if (deck) {
 
     if (!onStage) {
       stopDrag();
+      if (flight) {
+        gsap.ticker.remove(flight.step);
+        flight = null;
+      }
       gsap.killTweensOf(cards);
-      flying = false;
-      layout(false);
+      layout();
     }
   };
 
   gates.set(deckSlide, gate);
-  layout(false);
+  layout();
   /* A reload or a deep link can open on any section, so the first state comes from
      geometry — the same way the tabs get theirs. */
   gate(currentSection().id === 'customization' ? 1 : 0);
