@@ -41,6 +41,7 @@ if (canvas) {
       uniform float u_time;
       uniform vec2 u_mouse;    /* in pixels, canvas space; the tile's centre when idle */
       uniform float u_hover;   /* 0..1, smoothed in JS */
+      uniform float u_margin;  /* px, canvas space — the gap from the tile's corner */
 
       float hash(vec3 p) {
         p = fract(p * 0.3183099 + vec3(0.1, 0.2, 0.3));
@@ -83,8 +84,14 @@ if (canvas) {
         vec2 uv = (gl_FragCoord.xy - 0.5 * u_res) / size * 2.0;
         vec2 mouse = (u_mouse - 0.5 * u_res) / size * 2.0;
 
-        /* Centred in the tile since 2026-09-03, on the client's word, and half the size it
-           was — small enough that the text above it still sits on ink. */
+        /* The orb stands in the bottom-left corner, u_margin px clear of both edges —
+           the client's call, 2026-09-03, after one round centred. Its resting radius is
+           0.27 uv, and 1 uv is half the short side, so the centre has to sit a margin plus
+           that radius in from each edge; everything below is written around this origin. */
+        float rest = 0.135 * size;   /* the resting radius, in pixels */
+        vec2 origin = (vec2(u_margin + rest) - 0.5 * u_res) / size * 2.0;
+        uv -= origin;
+        mouse -= origin;
 
         float t = u_time * (1.0 + 0.5 * u_hover);
 
@@ -173,12 +180,17 @@ if (canvas) {
       const u_time = gl.getUniformLocation(program, 'u_time');
       const u_mouse = gl.getUniformLocation(program, 'u_mouse');
       const u_hover = gl.getUniformLocation(program, 'u_hover');
+      const u_margin = gl.getUniformLocation(program, 'u_margin');
 
       const tile = canvas.closest('.tile') || canvas;
       const stillness = window.matchMedia('(prefers-reduced-motion: reduce)');
 
       let raf = null;
       let started = 0;
+      /* CSS px from the tile's corner to the orb's edge. Scaled to canvas pixels at draw
+         time, so it stays 20 on the page at either device ratio. */
+      const MARGIN = 20;
+      let ratio = 1;
 
       /* Where the pointer is, and where the shader currently believes it is. The gap between
          the two is the whole feel of it: the orb never arrives at the cursor, it leans. */
@@ -188,6 +200,7 @@ if (canvas) {
       const size = () => {
         const box = canvas.getBoundingClientRect();
         const scale = Math.min(window.devicePixelRatio || 1, 2);
+        ratio = scale;
         const w = Math.max(1, Math.round(box.width * scale));
         const h = Math.max(1, Math.round(box.height * scale));
         if (canvas.width === w && canvas.height === h) return;
@@ -203,6 +216,7 @@ if (canvas) {
         /* The uniform is in canvas pixels and GL counts y up from the bottom. */
         gl.uniform2f(u_mouse, eased.x * canvas.width, (1 - eased.y) * canvas.height);
         gl.uniform1f(u_hover, eased.hover);
+        gl.uniform1f(u_margin, MARGIN * ratio);
         gl.drawArrays(gl.TRIANGLES, 0, 3);
       };
 

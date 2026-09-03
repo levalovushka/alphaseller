@@ -1,5 +1,22 @@
 # Worklog
 
+## 2026-09-03 — the orb moves into the bottom-left corner
+
+**What changed.** `assets/js/tile-shader.js`: new `u_margin` uniform and an origin computed
+from it — the orb's centre sits a margin plus its resting radius in from the left and bottom
+edges, and both the uv and the pointer vector are written around that origin. The margin is
+20 CSS px, scaled by the device ratio at draw time. Size untouched.
+
+**Why.** Client: centring it was a mistake; corner, 20px off it, same size.
+
+**How verified.** Live page at 1440×900 and 1920×1080, reading the framebuffer back: the
+orb's body (luminance ≥90) sits 18px from the left and 17px from the bottom at 1440, 17/17 at
+1920, and measures 82×83 and 109×110 CSS px — the size it was. Its faint halo reaches about
+6px closer to the corner, which is what a glow does. Text still on ink: luminance 22-26
+across its strip. No 4xx.
+
+**Left undone.** Nothing. The motion is still unseen here — hidden pane, no rAF.
+
 ## 2026-09-03 — the two marketplace app icons
 
 **What changed.** `index.html`: two more `.frame-chip` divs in the marketplaces slide.
