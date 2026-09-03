@@ -88,7 +88,7 @@ crossing, only the ink stays put and the frame's content swaps.
 
 Every section carries exactly three strings: title, subtitle, CTA label.
 **Neither titles nor subtitles carry a trailing period** — the client removed them. A ⏎ in
-the table is a hard `<br>` in the markup: the client sets those two titles' line breaks by
+the table is a hard `<br>` in the markup: the client sets those titles' line breaks by
 hand rather than leaving them to `text-wrap: balance`.
 
 | # | Title | Subtitle | CTA |
@@ -99,7 +99,7 @@ hand rather than leaving them to `text-wrap: balance`.
 | 4 | Стиль магазина уникальный, как ты сам | Выбирай из стильных шаблонов и докручивай, пока не будет идеально подходить под твой вкус | Посмотреть шаблоны |
 | 5 | Управляй своим бизнесом на маркетплейсах | Даём аналитику по заказам, остаткам, логистике и помогаем выбрать лучшие карточки товаров | Подключить |
 | 6 | Работают ⏎ с нами | Огромные корпорации и небольшие бизнесы уже вернули контроль в свои руки с нашей платформой | Все кейсы |
-| 7 | Приводите и удерживайте клиентов | — **none** | — **none** |
+| 7 | Приводите ⏎ и удерживайте ⏎ клиентов | — **none** | — **none** |
 | 8 | Работает на твою мечту | — **dropped** | Начать бесплатно |
 
 - **Section 2 has no CTA.** `О платформе` was removed on 2026-09-02 once the frame got its

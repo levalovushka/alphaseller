@@ -1,5 +1,18 @@
 # Worklog
 
+## 2026-09-03 — a hard break before «клиентов»
+
+**What changed.** `index.html`: the growth heading is now three hand-set lines,
+«Приводите / и удерживайте / клиентов». `CONTEXT.md`'s copy table records the breaks.
+
+**Why.** Client set them, the way he sets the other titles' breaks.
+
+**How verified.** Live page at 1440×900 and 1920×1080, reading the rendered lines back off
+the DOM with a Range: three rows, exactly as written, at 28px and 40px, no overflow of the
+column at either width.
+
+**Left undone.** Nothing for this change.
+
 ## 2026-09-03 — hero variant 4 becomes the light-grey photograph, interface in the frame
 
 **What changed.**
