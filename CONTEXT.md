@@ -710,6 +710,30 @@ inside it (24px), and the header's bottom padding (20px).
 - The client wires **Netlify autodeploy** from that repo, so the repo root must be directly
   servable as a static site (`index.html` at root, no build step).
 
+### Pushing — must go out as `levalovushka`
+
+Git Credential Manager on this machine holds a second GitHub account, `llleva`, which has no
+write access here; it was answering first and every push came back
+`403 Permission to levalovushka/alphaseller.git denied to llleva`. Fixed **repo-locally** on
+2026-09-02 by pointing this repo at the `gh` CLI, which is already logged in as
+`levalovushka`:
+
+```
+git config --local credential.helper ""
+git config --local --add credential.helper "!gh auth git-credential"
+```
+
+The empty value first resets the inherited helper list, so GCM is not consulted for this
+repo. Nothing global changed and no token was ever typed or stored — `gh` hands its own
+keyring credential straight to git. Verify with
+
+```
+printf 'protocol=https\nhost=github.com\n\n' | git credential fill | grep '^username='
+```
+
+which must print `username=levalovushka`. To undo: `git config --local --unset-all
+credential.helper`. If other repos need the same, `gh auth setup-git` does it globally.
+
 ## 10. Design source
 
 Figma: `Vp4DJG9ZvWkstVNKiihM0Q` — "Альфа Селлер". Single page `38:22805` ("Show").

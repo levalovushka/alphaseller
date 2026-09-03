@@ -1,5 +1,29 @@
 # Worklog
 
+## 2026-09-02 — pushes now authenticate as levalovushka
+
+**What changed.** `.git/config` of this repo only: `credential.helper` reset to empty and
+then set to `!gh auth git-credential`. `CONTEXT.md` §9 gains a "Pushing" subsection with the
+commands, the check and the undo.
+
+**Why.** Every push failed with `403 Permission to levalovushka/alphaseller.git denied to
+llleva`. Git Credential Manager holds a second GitHub account on this machine and was
+answering first; `gh` was already logged in as `levalovushka` with `repo` scope, so pointing
+git at gh's helper is enough. The empty value first is what drops the inherited GCM entry
+for this repo — without it GCM still wins, since helpers are tried in order.
+
+**Scope.** Repo-local. Global config, the keychain and GCM itself are untouched, and no
+token was typed, printed or stored — gh passes its keyring credential to git directly.
+
+**How it was verified.** `printf 'protocol=https\nhost=github.com\n\n' | git credential
+fill | grep '^username='` → **`username=levalovushka`** (password line filtered out, never
+displayed). `git push origin main` then reported `Everything up-to-date` with the branch
+level against `origin/main`; `8064ea9` is on `origin/main`, so yesterday's and today's work
+is out.
+
+**Left undone.** Only this repo is fixed. `gh auth setup-git` would fix every repo on the
+machine — the client's call, not done.
+
 ## 2026-09-02 — the layout moves onto a real page grid
 
 **What changed.** `assets/css/base.css`: `--col-gap`, `--col-min` and the hand-rolled
