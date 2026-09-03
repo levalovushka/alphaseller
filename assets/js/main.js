@@ -100,6 +100,68 @@ function stage(slide, t) {
   gates.get(slide)?.(t);
 }
 
+/* ---------- the hero morph ----------
+   The hero's green leaves as a shape rather than a cross-fade: a full-bleed layer that
+   shrinks, across the one crossing into capabilities, to exactly the frame's box and
+   stops there. It does not dissolve — it stays behind the frame and the opaque dashboard
+   arrives on top of it (client, 2026-09-03).
+
+   Three things follow from "exactly the frame's box":
+     - the target rect is measured off the frame itself, so the two can never drift when
+       --frame-w, the header height or the page padding change,
+     - the radius is measured too, so the panel lands on the same 32 as everything else
+       rounded on the page,
+     - the shape is a clip-path, so the corners stay true instead of being squashed by a
+       scale, and nothing is laid out again per frame.
+
+   The panel is hidden past capabilities. It is invisible there anyway — the dashboard
+   covers the box — but the next section's slide is empty, and a green box would show
+   through it. */
+
+const morph = document.querySelector('.stage-morph');
+const MORPH = { from: grounds[0], to: grounds[1] };
+
+let morphBox = null;
+
+/* The frame's top is written inline by the exit further down, so it is cleared for the
+   measurement and put back: this can be called from a refresh at any scroll position,
+   while the natural top is the only one the panel should aim at. */
+function measureMorph() {
+  const saved = frame.style.top;
+  frame.style.removeProperty('top');
+
+  const box = frame.getBoundingClientRect();
+  morphBox = {
+    top: box.top,
+    right: window.innerWidth - box.right,
+    bottom: window.innerHeight - box.bottom,
+    left: box.left,
+    radius: parseFloat(getComputedStyle(frame).borderRadius),
+  };
+
+  if (saved) frame.style.top = saved;
+}
+
+/* t = 0 full-bleed and square, t = 1 the frame's box with the frame's radius. */
+function drawMorph(t) {
+  const b = morphBox;
+  morph.style.clipPath =
+    `inset(${b.top * t}px ${b.right * t}px ${b.bottom * t}px ${b.left * t}px` +
+    ` round ${b.radius * t}px)`;
+}
+
+/* One rule, used by the crossing and by the settle alike: the panel is drawn across the
+   whole crossing and **gone** the moment it has landed. Being merely covered is not
+   enough on capabilities — the tab strip cross-fades its panes, and a pane at half
+   opacity let the green show through (client, 2026-09-03). Dropping it at t = 1 cannot
+   be seen: the dashboard covers the box exactly at that point. */
+function setMorph(t) {
+  drawMorph(t);
+  morph.hidden = t >= 1;
+}
+
+measureMorph();
+
 grounds.forEach((ground, i) => {
   if (i === 0) return;
 
@@ -109,16 +171,25 @@ grounds.forEach((ground, i) => {
   const leaving = slideFor(previous.id);
   const entering = slideFor(ground.id);
 
+  /* The hero's ground does not fade into the next one — the shrinking panel carries the
+     green away instead — so across that one crossing the ground goes smoky on the first
+     movement rather than over the gesture. The step is invisible: at t = 0 the panel
+     still covers the screen. The ink is dark on both sections, so only the ground is
+     special-cased. */
+  const shrinking = previous === MORPH.from && ground === MORPH.to;
+
   /* t = 0 is the previous section fully in place, t = 1 this one fully in place. */
   const apply = (t) => {
     paint(
-      mix(from.ground, to.ground, t),
+      mix(from.ground, to.ground, shrinking ? (t > 0 ? 1 : 0) : t),
       mix(from.ink, to.ink, t),
       mix(from.counter, to.counter, t)
     );
     photo.style.opacity = String(from.photo + (to.photo - from.photo) * t);
     stage(leaving, 1 - t);
     stage(entering, t);
+
+    if (shrinking) setMorph(t);
 
     document.dispatchEvent(
       new CustomEvent('section:scrub', { detail: { from: previous, to: ground, t } })
@@ -171,6 +242,24 @@ function settleSlides() {
 }
 
 settleSlides();
+
+/* The morph is scrubbed like everything else, so it carries the same trap: a jump that
+   clears the whole crossing in one step fires no update. Settle it from geometry — on
+   load, on every refresh, and on each section change. The crossing's range is exactly
+   one viewport, hero's top to capabilities' top, the same range the trigger uses. */
+function settleMorph() {
+  const start = MORPH.from.offsetTop;
+  const end = MORPH.to.offsetTop;
+
+  setMorph(gsap.utils.clamp(0, 1, (window.scrollY - start) / (end - start)));
+}
+
+settleMorph();
+ScrollTrigger.addEventListener('refresh', () => {
+  measureMorph();
+  settleMorph();
+});
+document.addEventListener('section:change', settleMorph);
 
 /* Whatever ground sits under the header owns the slide. The switch point is the
    header's own middle, so it lands as the boundary passes the logo.

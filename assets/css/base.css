@@ -29,7 +29,14 @@
   --page-max: 1704px;
   /* Room at the page edges and between the three columns. Both shrink on a narrower
      screen so the frame keeps a usable width there — see --frame-w. */
+  /* Vertical: the sections' bottom padding, and the frame's optical centre. */
   --page-pad: clamp(76px, calc(4.4vw + 12px), 96px);
+  /* Horizontal: the side margin, and therefore what is left for the frame. Split off
+     from --page-pad on 2026-09-03: the client wanted the laptop side margin to pay for a
+     bigger frame (76 → 52 at 1440, frame 448 → 496) and the vertical rhythm to stay put.
+     The same 4.4vw ramp as the vertical one, shifted down 24. At 1920 it does not show:
+     the side margin there comes from --page-max and the frame is at its own cap. */
+  --page-pad-x: clamp(52px, calc(4.4vw - 12px), 96px);
 
   /* Header: full-bleed. Its height follows from the padding plus the 52px
      controls — nothing fixes it. */
@@ -62,21 +69,25 @@
   --btn-h: 40px;
   --btn-pad-x: 20px;   /* both sizes, header and sections */
   /* The three-column stage. The text columns never go below --col-min; the frame
-     takes what is left, capped at 760. Without the floor, a long word in a title
+     takes what is left, capped at 720. Without the floor, a long word in a title
      runs out of its column and collides with the frame on a narrower screen. */
-  --col-gap: clamp(40px, calc(2.5vw + 16px), 64px);
-  /* The floor on the two text columns. What binds is not a word but the widest hard-broken
-     run in a title — "и интернет магазин", 309 at the 1440 xl and 386 at the 1920 one. The
-     longest single word ("маркетплейсах") only needs 236 and 295. 380 leaves 71px of slack
-     on a laptop and 42 at 1920. */
-  --col-min: 380px;
+  --col-gap: clamp(52px, calc(2.5vw + 28px), 76px);
+  /* The floor on the two text columns, and below ~1700 it is what sets the frame: the
+     columns rest on it and the frame takes the remainder. Lowered 380 → 356 on 2026-09-03
+     to pay for the +12 gap out of the columns rather than out of the frame, which the
+     client wanted back at 448 on a laptop.
+     What binds it is not a word but the widest hard-broken run in a title —
+     "и интернет магазин", ~275 at the 1440 xl and ~386 at the 1920 one; the longest single
+     word ("маркетплейсах") needs far less. So 356 still leaves ~81px of slack on a laptop.
+     At 1920 the frame is at its cap and this number does nothing. */
+  --col-min: 356px;
   /* At 1920 the cap is what sets the text columns, so it moves whenever --col-gap does:
      every 16px added to the gap costs each column 16. They must stay above the widest hard
      run in a title (386 at that width) or the client's hand-set third line wraps. Below
      ~1830 the cap does not bind and this number changes nothing. */
   --frame-w: min(
     720px,
-    calc(100vw - 2 * var(--page-pad) - 2 * var(--col-gap) - 2 * var(--col-min))
+    calc(100vw - 2 * var(--page-pad-x) - 2 * var(--col-gap) - 2 * var(--col-min))
   );
 
   /* How long a ground colour or an ink takes to cross-fade. */
@@ -282,7 +293,7 @@ img { display: block; max-width: 100%; height: auto; }
   scroll-snap-stop: always;
   display: flex;
   align-items: center;
-  padding: var(--header-h) var(--page-pad) var(--page-pad);
+  padding: var(--header-h) var(--page-pad-x) var(--page-pad);
   color: var(--ink);
 }
 
@@ -350,6 +361,30 @@ img { display: block; max-width: 100%; height: auto; }
   opacity: 0;
   background: url("../images/customization.webp") center / cover no-repeat;
   will-change: opacity, transform;
+}
+
+/* ---------- the hero morph ----------
+   The hero's green is not painted as the page's ground but as a layer of its own, so it
+   can leave as a shape instead of a cross-fade: across the crossing into capabilities it
+   shrinks from full-bleed to exactly the frame's box, picking up the frame's radius on
+   the way, and stops there. It never fades — it stays behind the frame, and the opaque
+   dashboard simply arrives on top of it. Client's call, 2026-09-03.
+
+   Layer 0, the same as the photographic ground and for the same reason: above the ground
+   the body is painted with, below the sections' own text (layer 1) so the hero's title
+   and CTA stay on top of it, and far below the frame (layer 5).
+
+   The shape is a `clip-path`, not `inset` or a `scale`. `inset` would lay the element out
+   again on every scrolled frame, and a `scale` would squash the corners — the radius has
+   to stay a true 32 at the end, which is the whole point of the move. JS writes the whole
+   `clip-path` per frame; the value here is the resting state, full-bleed and square. */
+.stage-morph {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: var(--c-green);
+  clip-path: inset(0 round 0);
+  will-change: clip-path;
 }
 
 /* ---------- the frame that stays ---------- */

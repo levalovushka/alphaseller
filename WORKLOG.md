@@ -1,5 +1,73 @@
 # Worklog
 
+## 2026-09-03 — 496 at 1440, paid out of the side margin
+
+**What changed.** `assets/css/base.css`: new `--page-pad-x`,
+`clamp(52px, calc(4.4vw - 12px), 96px)` — the old 4.4vw ramp shifted down 24 — used by
+`--frame-w` and by the sections' side padding. `--page-pad` keeps its old value and now means
+vertical only: the bottom padding and the frame's optical centre. `CONTEXT.md` §5: the two
+tokens, the measured table, the arithmetic paragraph, the frame's history.
+
+**Why.** Client asked the frame bigger again at 1440 and chose the side margin to pay for it
+rather than the columns, which had already cost two titles a line.
+
+**Why two tokens.** `--page-pad` was both the side margin and the sections' bottom padding,
+and the frame's centre is derived from it. Lowering the one token would have taken 24 off the
+bottom padding and moved the frame's centre 12px down — not asked for. Splitting is the only
+way to move one without the other.
+
+**How it was verified.** 1440: frame 496×372, side padding 52, bottom padding still 76, the
+frame's centre still 454, columns 356, no title or subtitle overflowing, every line count the
+same as at 448. 1680: frame 656 → 704, margin 86 → 62, bottom padding untouched at 85.92.
+1920: nothing moved — margin 108 from `--page-max`, frame at its 720 cap, columns 416, bottom
+padding 96. Screenshot at 1440.
+
+**What is left undone.** The frame now reaches its 720 cap at about 1700 rather than 1830, so
+the band where it grows with the screen is shorter. Not raised with the client. Headroom left
+at 1440 is written down in CONTEXT: columns to 324 (frame 560) before `speed` goes to four
+lines.
+
+## 2026-09-03 — the frame back up to 448 at 1440
+
+**What changed.** `assets/css/base.css`: `--col-min` 380 → 356. `CONTEXT.md` §5: the floor's
+comment, the measured table, what actually binds the floor, and the frame's history.
+
+**Why.** Client: the frame read too small at 1440 after the gap went up (400). He chose to
+pay for it out of the text columns rather than out of the page margin, and asked for 448 —
+wider than the 424 it had before the gap.
+
+**How it was verified.** At 1440: frame 448×336, columns 356, gap 64, side margin 76, no
+title or subtitle overflowing. 1680: frame 656. 1920: unchanged, 720 and 416 — the cap binds
+there, so the floor does nothing.
+
+**What is left undone / broke.** **380 was the exact edge.** Stepped the floor down 4px at a
+time in the live page: at 380 the hero and customization titles set in two lines, at 376 and
+below both go to three. So his choice costs those two titles a line at 1440. Told him with
+the numbers; not reverted, it was his call. The one alternative that keeps 448 *and* two
+lines is a 52px side margin instead of 76 — at 1440 the width does not divide any other way.
+The figure in CONTEXT that made 356 look safe (the widest hard-broken run, ~275) was never
+the real constraint; that is now written down.
+
+## 2026-09-03 — +12 on the column gap
+
+**What changed.** `assets/css/base.css`: `--col-gap` `clamp(40px, calc(2.5vw + 16px), 64px)`
+→ `clamp(52px, calc(2.5vw + 28px), 76px)`. `CONTEXT.md` §5: the value, the measured table
+(now with the text column and 1680), and the paragraph on which side pays for the gap.
+
+**Why.** Client wants more air between the frame and the two text columns.
+
+**How it was verified.** Measured at four widths: gap 64 / 65.8 / 70 / 76 at 1440 / 1512 /
+1680 / 1920 — +12 at every one. Below the frame's cap the frame pays: 424 → 400 at 1440,
+487 → 463 at 1512, 632 → 608 at 1680, columns staying on their 380 floor. At 1920 the cap
+binds, the frame holds 720 and each column pays: 428 → 416. No title overflows its column at
+1440 or 1920, and A/B against the old gap in the live page shows every title keeping the same
+line count. The closer's head takes the same token — 76 at 1920. The morph's target box is
+measured off the frame, so it followed on its own.
+
+**What is left undone.** The frame lost 24px on every screen below ~1830 as a side effect —
+nobody asked for a smaller frame, and CONTEXT warns against re-tuning it unasked. Flagged
+for the client; not compensated with a bigger cap.
+
 ## 2026-09-03 — section 3 goes black
 
 **What changed.** `index.html`: `#speed` moved from `data-theme="smoke" data-ink="dark"` to
@@ -87,6 +155,27 @@ look at there.
   over the hero's green ground — a hidden pane does not repaint after a scroll.
 - Sources unchanged: 836×627 is 2.0x at a 1440 frame, 1.16x at 1920.
 
+## 2026-09-03 — the morph is gone once it lands, not just covered
+
+**What changed.** `assets/js/main.js`: one `setMorph(t)` now owns both the shape and the
+panel's presence — `display: none` from t = 1 — and the crossing and `settleMorph()` both go
+through it. Dropped the separate "hide on the way off capabilities" hook, which is what left
+the panel alive under the tab strip. `CONTEXT.md` §5: that bullet rewritten.
+
+**Why.** Client: green showed through on section 2 while the tabs switched panes. The panes
+cross-fade, so mid-swap both are part transparent and the panel behind the frame was visible.
+Covered is not enough — it has to be gone.
+
+**How it was verified.** Swept the crossing both ways at 1440: `hidden` false through the
+whole gesture (t = 0.978 at 880, t = 0.999 at 899), true at exactly 900 and everywhere past
+it, false again on the way back at 450. On capabilities: `display: none`, and
+`elementsFromPoint` through the frame's centre no longer lists `.stage-morph` at all.
+Deep link `#capabilities` settles hidden.
+
+**What is left undone.** Same as the entry below — not watched at full speed, the browser
+pane throttles `requestAnimationFrame` while hidden. The mid-gesture half-opaque dashboard
+inside the still-large green rectangle is untouched and still the client's call.
+
 ## 2026-09-03 — the deck's throw made physical, and the fan replaced by a stack
 
 **What changed.** `main.js`, `the style deck`: the exit tween is now an ease-**out** whose
@@ -133,6 +222,33 @@ ledges under it, no rotation anywhere.
   over the hero's green ground: a hidden pane does not repaint after a scroll, so captures
   at the section's own black ground come back solid black.
 - Sources unchanged and still short — 836×627 is 2.0x at a 1440 frame, 1.16x at 1920.
+
+## 2026-09-03 — the hero's green shrinks into the frame
+
+**What changed.** New `.stage-morph` layer — `index.html` (one div beside `.stage-photo`),
+`assets/css/base.css` (the layer, full-bleed and square at rest), `assets/js/main.js`
+(`measureMorph` / `drawMorph` / `settleMorph`, and two hooks in the boundary pass: the
+hero → capabilities crossing draws the shape and steps the ground to smoke on the first
+movement, the crossing off capabilities hides the panel). `CONTEXT.md` §5: a new subsection
+and the boundary pass's inventory.
+
+**Why.** Client, 2026-09-03: repeat cash.app's move — the bright first ground "becomes" the
+frame in the middle of the screen. His three calls: start full-bleed with no radius, end
+without dissolving (the green stays behind the frame), ground smoky from the first movement.
+
+**How it was verified.** Swept the crossing in both directions at 1440 with
+`ScrollTrigger.update()`: t = 0 `inset(0px)` and green ground; t > 0 smoke immediately;
+t = 1 `inset(295px 508px 287px 508px round 32px)` against a frame box measured at
+(508, 295) 424×318 — exact, radius exactly 32. At 1920: `inset(264 600 276 600 round 32)`
+against a 720×540 box at (600, 264) — exact after a resize refresh. Hidden past capabilities,
+un-hidden coming back. Deep links `#capabilities` and `#speed` settle right. One screenshot
+mid-crossing shows the rounded green rectangle over smoke.
+
+**What is left undone.** The capabilities slide fades in on the same scrub, so mid-gesture a
+half-opaque dashboard sits inside a still-large green rectangle — flagged for the client,
+not changed. The browser pane throttles `requestAnimationFrame` when hidden, so the shrink
+was verified frame by frame from script rather than watched running; screenshots of fixed
+layers came back with stale offsets. Not looked at with eyes at full speed.
 
 ## 2026-09-03 — the hero frame plays a looping screen recording
 

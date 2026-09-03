@@ -419,8 +419,20 @@ ground's own data attributes, `isSection` is false only for the footer.
 > settling that trade first.
 
 
-`--page-pad` is `clamp(76px, calc(4.4vw + 12px), 96px)` and `--col-gap` is
-`clamp(40px, calc(2.5vw + 16px), 64px)`. The two text columns have a floor of `--col-min`
+The page padding is **two tokens**, split on 2026-09-03:
+
+| Token | What | Value |
+|---|---|---|
+| `--page-pad` | vertical — the sections' bottom padding, and the frame's optical centre | `clamp(76px, calc(4.4vw + 12px), 96px)` |
+| `--page-pad-x` | horizontal — the side margin, and therefore what is left for the frame | `clamp(52px, calc(4.4vw - 12px), 96px)` |
+
+The same 4.4vw ramp, the horizontal one shifted down 24. They were one token until the client
+asked the laptop side margin to pay for a bigger frame (76 → 52 at 1440, frame 448 → 496) —
+keeping them joined would have taken 24 off the bottom padding and moved the frame's centre
+12px with it, which nobody asked for. **Anything horizontal takes `--page-pad-x`; anything
+vertical takes `--page-pad`.**
+
+`--col-gap` is `clamp(52px, calc(2.5vw + 28px), 76px)` — +12 on the client's word, 2026-09-03. The two text columns have a floor of `--col-min`
 (380px) and the frame takes what is left, capped at 720px.
 
 On a 1920 screen the side margin comes from `--page-max` (1704px), not from the padding —
@@ -431,8 +443,8 @@ The **header is not on this grid**: it is full-bleed with a 16px side inset, so 
 the CTA sit closer to the edge than any section content does. That is deliberate.
 
 The column floor is a composition choice, not a constraint — how much screen the text keeps
-before the frame takes the rest. It stopped being a constraint when the xl size came down: at 36px the longest word in the
-copy sits well inside a 380px column.
+before the frame takes the rest. Below ~1830 it is also what sets the frame, since the
+columns rest on it and the frame takes the remainder.
 
 **The subtitle sets 30% narrower than its column** (`max-width: 70%` on
 `.section__subtitle`) — 266 at 1440, 300 at 1920. The column itself is untouched, which is
@@ -440,11 +452,17 @@ the point: the frame is fixed and centred on the screen's axis, so making the tw
 columns different widths would take it off that axis and off its slot. The client ruled that
 out explicitly; the text is narrowed inside a column that stays put.
 
-What the text columns can actually give up is small. Their floor is set by the widest
-hard-broken run in a title — `и интернет магазин`, 309 at the 1440 size and 386 at 1920 —
-not by the longest word (`маркетплейсах`, 236 and 295). At the 380 floor that leaves 71px of
-slack on a laptop and 42 at 1920, so a symmetric shrink of more than ~8% breaks a hand-set
-line.
+**What actually binds the floor is the hand-set line breaks, not the widest word or run.**
+Measured at 1440 on 2026-09-03, stepping the floor down 4px at a time: at exactly **380** the
+hero and customization titles set in two lines; at **376 and below** both go to three. Every
+other title is unaffected all the way down to 356. The old figure in this file — the widest
+hard-broken run, `и интернет магазин`, ~275 at the current 32px xl — is *not* the constraint
+and reading it as one is what let the floor be lowered past the edge. Measure the line counts
+before touching this number.
+
+At 1920 those same two titles are three lines whatever the floor is: the column is wider
+(416) but the xl is 40 rather than 32, and the type wins. So the two-line setting only ever
+existed on the narrower screens.
 
 **Titles are set with `text-wrap: balance`**, so lines even out instead of each being filled
 to the column edge. It never breaks a word, so it composes with the non-breaking spaces
@@ -457,21 +475,38 @@ remains, which fires solely for a word too long for its column — no current ti
 
 Measured:
 
-| viewport | xl | gap | frame | side margin |
-|---|---|---|---|---|
-| 1440 | 36 / 36 | 52 | 424 | 76 |
-| 1512 | 37.2 | 54 | 487 | 79 |
-| 1920 | 44 / 44 | 64 | 720 | 108 |
+| viewport | xl | gap | frame | text column | side margin |
+|---|---|---|---|---|---|
+| 1440 | 32 / 32 | 64 | 496 | 356 (the floor) | 52 |
+| 1680 | 36 | 70 | 704 | 356 (the floor) | 62 |
+| 1920 | 40 / 40 | 76 | 720 (the cap) | 416 | 108 |
 
-**The frame's cap and `--col-gap` are coupled.** At 1920 the cap is what sets the text
-columns, and they must stay at or above 428 for `и интернет магазин` (425 at the 44px xl) to
-keep the client's hand-set third line. Every 16px added to the gap costs each column 16, so
-the cap has to give the same back: 760 → 752 when the gap was 48, 752 → 720 now that it is
-64. Change one without the other and that title silently breaks to four lines.
+At 1920 nothing the last two rounds touched shows at all: the side margin there comes from
+`--page-max`, not the padding, and the frame is at its own 720 cap. The frame reaches that
+cap at about 1700 now, where it used to reach it at 1830.
 
-For anyone tempted to re-tune the frame: it has been 416, 473, 553, 513, 480, 456 and now 424
-across this conversation. The client keeps choosing the moderate end — do not "fix" it
-upward without asking.
+**Which side pays for the gap depends on the width.** Below ~1830 the frame is not at its
+cap: the two text columns sit on their floor and every pixel added to the gap comes out of
+the **frame**, twice over — +12 on the gap took the frame 424 → 400 at 1440, which is what
+made the client ask for it back. At 1920 the cap binds instead, the frame holds 720 and each
+**column** pays: 428 → 416, with no title overflowing and no line count changing there.
+
+While the xl was 44 the coupling was tighter still — the widest hard run measured 425 and the
+cap had to come down with the gap, 760 → 752 → 720. If the xl goes back up, re-measure before
+adding to the gap again.
+
+For anyone tempted to re-tune the frame: it has been 416, 473, 553, 513, 480, 456, 424, 400,
+448 and now **496** across this conversation. 400 was not chosen — it fell out of the gap going
+up — and 448 is the client's answer to it, 2026-09-03, paid for out of the columns
+(`--col-min` 380 → 356) rather than out of the page margin.
+
+**The arithmetic at 1440 leaves no slack.** 1440 = 2 margins + 2 columns + 2 gaps + frame,
+so every pixel the frame gains comes off the columns or off the margins, and the client has
+now spent both: the columns from 380 to 356 (which cost the hero and customization titles a
+line — 380 was the exact edge) and the side margin from 76 to 52. Measured headroom left, at
+the current gap and copy: the columns can go to 324 (frame 560) before the `speed` title
+breaks to four lines, and the margin below 52 starts crowding the header's own 16px inset.
+Measure the line counts, do not derive them, before spending either again.
 
 ## 6. Content
 
