@@ -67,7 +67,7 @@ Header + 7 sections + footer.
 
 | # | Section | Background |
 |---|---|---|
-| 1 | Hero | Graphite `#1A1817` — since 2026-09-03; was green `#A6ED00`. A photograph is laid over it by the morph panel, see §5 |
+| 1 | Hero | **Four variants since 2026-09-03, switched live — see "The four hero variants" in §5.** Variant 1 is the one that stood before: graphite `#1A1817` with the photograph laid over it by the morph panel |
 | 2 | Key capabilities | Smoky white `#E9EBEE` |
 | 3 | Speed | Black `#000000` — since 2026-09-03; was smoky white |
 | 4 | Customization | Black `#000000` |
@@ -231,9 +231,9 @@ changes; see "The wheel is ours, everything else is the browser's" below.
 1. **One frame for the whole page**, `position: fixed`, aligned with the middle grid column.
    The text columns scroll past it; it never moves. Each section keeps a
    `.section__frame-slot` that only holds the grid column open.
-2. The frame holds one `.stage-frame__slide` per section, cross-faded as the section under
-   the header changes (`--fade`, 0.9s — the one cross-fade left that is not tied to the
-   scroll). Slides are empty until the client supplies screens, video and people.
+2. The frame holds one `.stage-frame__slide` per section, and what it shows **wipes**
+   bottom to top as the section changes — see "the curtain" below. Nothing in the frame
+   fades. Slides are empty on the sections the client has not supplied content for.
 3. **Two live colours drive the page: `--ground` and `--ink`, interpolated against the
    scroll.** Sections are transparent; `--ground` is what the page is painted with and
    `--ink` is everything drawn on it — text, the logo square, the frame's tint, the footer
@@ -403,14 +403,75 @@ has to do next — an element flying out of the frame, a caption, a video:
 
 | Hook | What |
 |---|---|
-| CSS | every slide carries `--t`: 0 fully off stage, 1 fully on. Read it from anything inside that slide — `translate: calc((1 - var(--t)) * 40px)`. Slide children are **not** clipped, so they can leave the frame. Opacity is only the first consumer: `opacity: var(--t, 0)`. |
+| CSS | every slide carries `--t`: 0 fully off stage, 1 fully on. Read it from anything inside that slide — `translate: calc((1 - var(--t)) * 40px)`. Slide children are **not** clipped, so they can leave the frame. The curtain's mask is the first consumer; the tab strip's opacity is the second. |
 | JS | `section:scrub` on `document`, every step of every crossing: `{ from, to, t }` — the two section elements and 0..1. |
 
 The two ends of a crossing are pinned with `onLeave` / `onLeaveBack`, and `settleSlides()`
 sets the slides from geometry at rest, on load and on refresh: `onUpdate` never fires for a
-boundary cleared in one jump, which a deep link does. Slide opacity comes from JS now, so
-with JS off the frame is empty. `--fade` is declared and unused — the one place a wall-clock
-fade would go if anything needs one again.
+boundary cleared in one jump, which a deep link does. `--t` comes from JS, and the curtain's
+mask falls back to `var(--t, 0)` = 0, so with JS off the frame is empty. `--fade` is declared
+and unused — the one place a wall-clock fade would go if anything needs one again.
+
+#### The curtain
+
+The frame's content does not cross-fade. Three calls from the client, 2026-09-03:
+
+1. **nothing in the frame sits at a partial opacity on the way** — the arriving picture is
+   revealed from the frame's bottom edge upward,
+2. the curtain's leading edge carries the frame's own radius on its **top two corners**,
+3. whatever falls **under** the curtain takes a **20% black scrim** while it is under there.
+
+The rounded edge is why the two layers **overlap** rather than meet. Butted edge to edge the
+rounding leaves two crescents of bare frame at the ends of the line; instead the layer
+underneath runs on past the edge by the radius, the curtain covers it, and the crescents show
+that layer — scrimmed. Overlap is also what makes the scrim mean anything: without it there
+is no "under".
+
+Everything about the shape comes out of `--t`, which both slides already carry: the arriving
+slide's runs 0 → 1 and the departing one's 1 → 0, so one edge position falls out of two
+values that were already there.
+
+| | |
+|---|---|
+| arriving (`data-wipe="in"`, and the resting state) | `clip-path: inset(calc((1 - var(--t)) * 100%) 0 0 0 round var(--radius-btn) var(--radius-btn) 0 0)`. Bottom corners left square — the layer's own `border-radius: inherit` rounds them and the visible result is the intersection. |
+| underneath (`data-wipe="out"`) | whole box down to the edge **plus the radius**: `inset(0 0 calc((1 - var(--t)) * 100% - min(var(--radius-btn), var(--t) * 100%)) 0)`, and the scrim: `filter: brightness(calc(1 - var(--scrim) * min(1, (1 - var(--t)) / var(--scrim-ramp))))`. |
+| z-order | `in` is 2, `out` is 1. Overlap makes the stacking matter, which it did not while the regions were disjoint. |
+
+Two details that are load-bearing:
+
+- **`clip-path`, not a mask** — only a clip takes a radius. It is safe here because these
+  layers are leaves (a video, the panes), so clipping them clips nothing else.
+- **`min(radius, --t * 100%)`** caps the overlap at how far the edge has travelled from the
+  top, so it tapers to nothing as the curtain lands. Without the cap a strip of the old
+  picture is left over at the end on a section whose slide is empty and cannot cover it.
+- **The roles are cleared at both ends of a crossing** (`role(slide, null)`). A slide that
+  came to rest as the one underneath would otherwise keep its scrim and sit 20% dark for as
+  long as it was on screen — which happens on every scroll back up, where the arriving slide
+  is the earlier one.
+
+A 20% black scrim over an opaque picture is exactly `brightness(0.8)`, which is why the scrim
+needs no element of its own — it could not have had one anyway, since `::after` does not
+render on a `<video>`.
+
+**The scrim ramps in over `--scrim-ramp`, the first 0.15 of the crossing**, and holds at
+`--scrim` for the rest of it. It stepped on at the first pixel of movement to begin with and
+the client saw it flick; he asked for "one or two tenths" and 0.15 is the middle. `1 - --t`
+is the crossing's progress from the under layer's point of view — its own `--t` counts down.
+Measured: brightness 1 at rest, 0.987 at p = 0.01, 0.96 at 0.03, 0.899 at 0.076, 0.8 from
+0.15 on.
+
+**The mask goes on the picture layers, not on the slide** — `.stage-frame__video` and
+`.frame-pane`, both of which fill the frame's box exactly. A shape cut to that box would
+delete anything the slide keeps *outside* it, and two things do:
+
+| | |
+|---|---|
+| The tab strip | sits below the box (`top: 100%`). It keeps a fade of its own, `opacity: var(--t, 0)` — the one thing in a slide that still fades. Documented exception, not an oversight. |
+| The style deck | its cards are thrown out past the frame's edge, and a clip would cut the throw. The deck's gate in `main.js` marks it `data-onstage`, and the curtain stands down for as long as that is true — so it wipes through a crossing and is free at rest. |
+
+A future slide that paints a picture of its own must paint it into an **inner layer** and add
+that layer to the curtain's selector list. A `background-image` on the slide itself cannot be
+clipped without taking the strip and the deck with it.
 
 **Known gap:** the frame's dashed placeholder outline is still keyed to `data-active`, which
 flips at the middle of the header, so crossing away from the hero it can reappear as a
@@ -482,6 +543,56 @@ controller's speed. Two ways out if it shows: hold the ink white until the panel
 the text (lerp it over the tail of the crossing), or take the hero's text out with the panel.
 Both are motion decisions — ask.
 
+### The four hero variants
+
+Four grounds for the first screen, switched live from four 18px buttons in the bottom-left
+corner. Asked for on 2026-09-03: the client wants them compared in the live page, and the
+control small enough to stay out of a screenshot.
+
+| | the morph panel | the frame | the hero's ink |
+|---|---|---|---|
+| 1 | graphite + `hero-full.webp` at `50% 18%` — the state that stood before | the looping screen recording | white |
+| 2 | flat black | `hero.webp` | white |
+| 3 | flat brand green `#A6ED00` | `hero.webp` | black |
+| 4 | flat smoke `#E9EBEE` | `hero.webp` | black |
+
+- **`data-hero` on `<html>` is the whole switch.** CSS reads it for the panel's ground
+  (`--morph-bg`) and for which of the frame's two layers shows; the markup ships with `"1"`,
+  so a visitor with no JS keeps what the page had before.
+- **The ink is not a fifth knob.** White type is unreadable on green and on smoke, so it
+  follows the ground. JS writes it on the **hero section's own `data-ink`**, which the
+  scrubbed colour pass already reads — so the header, the buttons, the counter-ink and the
+  crossing into capabilities all come along for free. Nothing else had to learn about
+  variants.
+- **The photograph in the frame is `hero.webp`, the tighter 1.42:1 crop**, not the full
+  square that backs the panel on variant 1. Client's call: against a 4:3 frame it loses about
+  6% off each side instead of a quarter of its height, and 2236 down to at most 720 CSS px is
+  the sharpest source on the page. It is a layer of its own (`.hero-photo`) rather than a
+  background on the slide, because the curtain has to be able to clip it — see the rule in
+  §5's curtain notes.
+- **The video is taken out with `display: none` and paused.** `display` alone does not stop it
+  decoding, so the controller listens for a `hero:variant` event on `document` and gates
+  playback on the variant as well as on `--t`.
+- **The boundary pass reads the sections per frame** instead of caching each crossing's pair
+  of colours when the trigger is built. Without that, flipping the hero's ink while the page
+  is up changes nothing — the crossing keeps painting the ink the page had at load.
+  `settleColours()` is the resting-state counterpart, and the switch repaints through it.
+- The choice is mirrored to `localStorage`: the demo is shown by scrolling and refreshing, and
+  starting over from variant 1 each time would make the four impossible to hold side by side.
+- The control is visible only while the hero is the section under the header, off the same
+  `section:change` event everything else hangs on (`data-hero-focus` on `<html>`).
+
+**Variant 4's shrink is invisible, and it is not a bug in the code.** The ground behind the
+panel steps to the *next* section's colour on the first movement (see the morph, above), and
+capabilities is smoke — so a smoke panel shrinks against smoke and the move only reappears
+when the dashboard wipes into the frame. Measured at t = 0.5: the panel and `--ground` are
+both `rgb(233, 235, 238)`. Three ways out, all the client's: a different grey for the panel,
+white behind it across that one crossing, or a stroke on the panel. **Ask.**
+
+Smaller, known: clicking a variant *mid-crossing* repaints the ground from the section at
+rest, so on 3 and 4 the ground behind the panel flashes graphite until the next scroll frame.
+It self-corrects, and the control is meant to be used on the hero at rest.
+
 ### The `section:change` event
 
 Separate from the scrub, and still useful for things that happen *at* a change rather than
@@ -512,16 +623,19 @@ The page padding is **two tokens**, split on 2026-09-03:
 | Token | What | Value |
 |---|---|---|
 | `--page-pad` | vertical — the sections' bottom padding, and the frame's optical centre | `clamp(76px, calc(4.4vw + 12px), 96px)` |
-| `--page-pad-x` | horizontal — the side margin, and therefore what is left for the frame | `clamp(20px, calc(4.4vw - 43.36px), 96px)` |
+| `--page-pad-x` | horizontal — the side margin, and therefore what is left for the frame | `var(--col-gap)` |
 
-The same 4.4vw ramp, the horizontal one shifted down 36. They were one token until the client
-asked the laptop side margin to pay for a bigger frame — keeping them joined would have taken
-the same off the sections' bottom padding and moved the frame's centre with it, which nobody
-asked for. **Anything horizontal takes `--page-pad-x`; anything vertical takes `--page-pad`.**
-The side margin at 1440 went 76 → 52 → 40 → **20** across 2026-09-03, all four of them his.
-The ramp keeps its 4.4vw slope and is shifted to cross the floor exactly at 1440. Note the
-header sits at 16 (`--header-pad-side`), so on a laptop the two are 4px apart — raised with
-the client, not aligned.
+They were one token until the client asked the laptop side margin to pay for a bigger frame
+— keeping them joined would have taken the same off the sections' bottom padding and moved
+the frame's centre with it, which nobody asked for. **Anything horizontal takes
+`--page-pad-x`; anything vertical takes `--page-pad`.**
+
+**The side margin is now simply the column gap** — the client's call at the end of
+2026-09-03, after it had gone 76 → 52 → 40 → 20 across that day and read as too tight. The
+margin and the gap are one rhythm and there is no second ramp to keep in step: 52 at 1440,
+64 at 1680, and at 1920 it does not bind at all (see below). Note the header sits at 16
+(`--header-pad-side`), so on a laptop the bar is 36px inside the content — raised with the
+client, not aligned.
 
 `--col-gap` is `clamp(52px, calc(5vw - 20px), 76px)` — 52 at 1440, 76 at 1920. It was raised
 +12 at both ends earlier the same day and then trimmed back at the laptop end only, which is
@@ -539,11 +653,12 @@ The column floor is a composition choice, not a constraint — how much screen t
 before the frame takes the rest. Below ~1830 it is also what sets the frame, since the
 columns rest on it and the frame takes the remainder.
 
-**The subtitle sets 30% narrower than its column** (`max-width: 70%` on
-`.section__subtitle`) — 266 at 1440, 300 at 1920. The column itself is untouched, which is
-the point: the frame is fixed and centred on the screen's axis, so making the two side
-columns different widths would take it off that axis and off its slot. The client ruled that
-out explicitly; the text is narrowed inside a column that stays put.
+**The subtitle fills its column.** It used to set 30% narrower (`max-width: 70%` on
+`.section__subtitle`) — 249 at 1440, 291 at 1920; the client dropped that at the end of
+2026-09-03 and every subtitle is now the column's full width, 356 and 416. Note what did
+*not* change: the columns themselves. The frame is fixed and centred on the screen's axis, so
+making the two side columns different widths would take it off that axis and off its slot —
+the client ruled that out explicitly and it still stands.
 
 **What actually binds the floor is the hand-set line breaks, not the widest word or run.**
 Measured at 1440 on 2026-09-03, stepping the floor down 4px at a time: at exactly **380** the
@@ -568,30 +683,35 @@ remains, which fires solely for a word too long for its column — no current ti
 
 Measured:
 
-| viewport | xl | gap | frame | text column | side margin |
-|---|---|---|---|---|---|
-| 1440 | 32 / 32 | 52 | **584** | 356 (the floor) | **20** |
-| 1512 | 33.2 | 55.6 | **642** | 356 (the floor) | 23 |
-| 1920 | 40 / 40 | 76 | 720 (the cap) | 416 | 108 |
+| viewport | xl | gap | frame | text column | subtitle | side margin |
+|---|---|---|---|---|---|---|
+| 1440 | 28 / 28 | 52 | **520** | 356 (the floor) | 356 | **52** = the gap |
+| 1680 | 36 | 64 | 712 | 356 (the floor) | 356 | 64 = the gap |
+| 1920 | 40 / 40 | 76 | 720 (the cap) | 416 | 416 | 108, from `--page-max` |
 
-Re-measured after the side margin went to 20 on 2026-09-03. The 40px it gave up went
-straight into the frame at the laptop end — the text columns are on their floor there, so
-they neither gain nor lose. At 1920 nothing moved: `--page-max` sets the margin and the
+Re-measured after the margin was tied to the gap on 2026-09-03. It cost the frame 64px at
+1440 (584 → 520): the text columns are on their floor there, so every pixel the margin takes
+comes out of the frame, twice over. At 1920 nothing moved: `--page-max` sets the margin and the
 frame is capped.
 
-**The frame is now at its cap from about 1655 up.** Below that it grows at 0.812px per px of
-viewport (`0.812vw - 624`, from the two ramps); above it, flat 720. The band where it still
-grows with the screen is 1440–1655 — it was 1440–1830 at the start of 2026-09-03. If it
-should keep growing past 1655, the 720 cap is the number to raise, not the gap or the margin.
+**The frame is at its cap from about 1690 up.** Below that it grows at **0.80px per px of
+viewport** — with the margin tied to the gap the whole expression collapses to
+`80vw - 632`, because the gap is now subtracted four times (two gaps plus two margins) —
+and above it, flat 720. The band where it still grows with the screen is 1440–1690. If it
+should keep growing past that, the 720 cap is the number to raise, not the gap.
+
+**A consequence worth knowing before touching `--col-gap` again:** below the cap it now
+costs the frame **four times** what it used to cost twice. +12 on the gap takes 48px off the
+frame at 1440, not 24.
 
 At 1920 nothing any of this touched shows: the side margin there comes from `--page-max`, not
 the padding, and the frame is capped. `--page-pad-x`'s own 96 ceiling is now unreachable
 below ~2700 and is only a guard.
 
-**Which side pays for the gap depends on the width.** Below ~1830 the frame is not at its
+**Which side pays for the gap depends on the width.** Below the cap the frame is not at its
 cap: the two text columns sit on their floor and every pixel added to the gap comes out of
-the **frame**, twice over — +12 on the gap took the frame 424 → 400 at 1440, which is what
-made the client ask for it back. At 1920 the cap binds instead, the frame holds 720 and each
+the **frame** — four times over now that the margin is the gap. +12 on the gap took the frame
+424 → 400 at 1440 back when it was only twice, which is what made the client ask for it back. At 1920 the cap binds instead, the frame holds 720 and each
 **column** pays: 428 → 416, with no title overflowing and no line count changing there.
 
 While the xl was 44 the coupling was tighter still — the widest hard run measured 425 and the
@@ -690,6 +810,7 @@ Figma's own `#1E1E1E` canvas in as a full-bleed `<rect>`.
 | 4 — deck ground | `assets/images/customization-fashion-ground.webp` | `275:39455` | the photograph that pairs with the fashion card. Node export 1222×824 → 900×606, `-q 60`, 34 KB |
 | 4 — deck ground | `assets/images/customization-care-ground.webp` | `275:39458` | pairs with the care card. 900×600, `-q 60`, 19 KB |
 | 4 — deck ground | `assets/images/customization-furniture-ground.webp` | `275:39467` | pairs with the furniture card. 900×600, `-q 60`, 12 KB |
+| 5 — marketplaces | `assets/images/marketplaces.webp` | `206:60376` | a woman in red on a street of falling paper. Node export 2298×1635 (1.41:1) → `cwebp -q 82 -resize 2236 0`, 2236×1591, 163 KB. Against the 4:3 frame `cover` trims about 6% off each side |
 
 `209:35586` was on the `promotion` pane first; the client then said that screen is
 **Заказы** and supplied `206:62480` for Продвижение, so the file was renamed, not
@@ -967,7 +1088,7 @@ Verified with fontTools (2026-09-02):
 | Style | Cut | Size / leading | Tracking | Used for |
 |---|---|---|---|---|
 | `xxl` | Hyper Medium | 56 / 56 at 1440 → 64 / 64 at 1920 | normal | The cases and closer headings |
-| `xl` | Hyper Medium | 32 / 32 at 1440 → 40 / 40 at 1920 | normal | Section titles |
+| `xl` | Hyper Medium | 28 / 28 at 1440 → 40 / 40 at 1920 | normal | Section titles |
 | `md` | Hyper Regular | 14 / 18 at 1440 → 18 / 24 at 1920 | 1% (`0.01em`) | Everything else |
 
 "Hyper" is the `wdth 87` width; "Medium" is `wght 500`, "Regular" is `wght 400`. In CSS:
@@ -978,8 +1099,13 @@ Verified with fontTools (2026-09-02):
 | Style | Size clamp | Leading clamp | 1440 | 1920 |
 |---|---|---|---|---|
 | `xxl` | `clamp(56px, calc(32px + 1.6667vw), 64px)` | = size | 56 / 56 | 64 / 64 |
-| `xl` | `clamp(36px, calc(12px + 1.6667vw), 44px)` | = size | 36 / 36 | 44 / 44 |
+| `xl` | `clamp(28px, calc(2.5vw - 8px), 40px)` | = size | 28 / 28 | 40 / 40 |
 | `md` | `clamp(14px, calc(2px + 0.8333vw), 18px)` | `clamp(18px, 1.25vw, 24px)` | 14 / 18 | 18 / 24 |
+
+**`xl` no longer shares xxl's ramp.** Its laptop end came down 36 → 32 → 28 across
+2026-09-03 while 1920 stayed 40, so it climbs at 2.5vw against xxl's 1.6667vw and the gap
+between the two sizes is much wider on a laptop (28 against 56) than at 1920 (40 against 64).
+Measured 2026-09-03: 28 at 1440 and below, 29.8 at 1512, 34 at 1680, 40 at 1920.
 
 The two display sizes keep leading equal to the size. `md` needs a **second clamp** for its
 leading: the ratio is not constant across the window — 18/14 = 1.286 at 1440 against
@@ -1093,6 +1219,7 @@ Known nodes:
 | `209:35586` | Dashboard screen, 4:3 — the capabilities frame's **`orders`** pane. Supersedes `206:58220`, which superseded `204:51472` (the 1.42:1 cut). |
 | `206:62480` | "Продвижение — 4×3 / content" — the capabilities frame's `promotion` pane. |
 | `223:37237` | «Товары и остатки» screen, 4:3 — the capabilities frame's `logistics` pane. |
+| `206:60376` | Street photograph, woman in red — the marketplaces frame. |
 | `275:39451` | Section "tinder" — the style deck's six images, as three pairs. Children `275:39475` / `39476` / `39477` are the pairs; in each, the upper rectangle is the ground and the lower one the shop screen. |
 | `275:39455` / `275:39469` | Pair 1 — fashion shoot ground, POLENE shop screen. |
 | `275:39458` / `275:39470` | Pair 2 — skincare ground, "Bed Intentions" shop screen. |

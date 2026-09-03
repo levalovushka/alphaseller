@@ -100,6 +100,18 @@ function stage(slide, t) {
   gates.get(slide)?.(t);
 }
 
+/* Which side of the curtain a slide is on for the length of one crossing: 'in' is the
+   arriving picture, on top and rounded at its leading edge; 'out' is the one underneath,
+   which runs on past that edge and takes the scrim. null at rest. */
+function role(slide, name) {
+  if (!slide) return;
+  if (name === null) {
+    if (slide.dataset.wipe !== undefined) delete slide.dataset.wipe;
+    return;
+  }
+  if (slide.dataset.wipe !== name) slide.dataset.wipe = name;
+}
+
 /* ---------- the hero morph ----------
    The hero's green leaves as a shape rather than a cross-fade: a full-bleed layer that
    shrinks, across the one crossing into capabilities, to exactly the frame's box and
@@ -166,8 +178,6 @@ grounds.forEach((ground, i) => {
   if (i === 0) return;
 
   const previous = grounds[i - 1];
-  const from = coloursOf(previous);
-  const to = coloursOf(ground);
   const leaving = slideFor(previous.id);
   const entering = slideFor(ground.id);
 
@@ -180,12 +190,34 @@ grounds.forEach((ground, i) => {
 
   /* t = 0 is the previous section fully in place, t = 1 this one fully in place. */
   const apply = (t) => {
+    const crossing = t > 0 && t < 1;
+
+    /* Read, not captured: the hero variant switch rewrites the hero's own `data-ink`
+       while the page is up, and a pair of colours cached when the trigger was built would
+       keep painting the ink the page had at load. Three hex parses per frame. */
+    const from = coloursOf(previous);
+    const to = coloursOf(ground);
+
     paint(
       mix(from.ground, to.ground, shrinking ? (t > 0 ? 1 : 0) : t),
       mix(from.ink, to.ink, t),
       mix(from.counter, to.counter, t)
     );
     photo.style.opacity = String(from.photo + (to.photo - from.photo) * t);
+
+    /* The curtain needs to know which slide is on top: the one arriving is revealed from
+       the frame's bottom edge up, and the one it arrives over runs on underneath and takes
+       the scrim. Everything else about the shape comes out of `--t`, which both already
+       carry.
+
+       The roles are **cleared at both ends** of a crossing. Without that, a slide that came
+       to rest as the one underneath would keep its scrim and sit 20% dark for as long as it
+       was on screen — which happens on every scroll back up, where the arriving slide is
+       the earlier one. Written only on a change, so this is a handful of attribute writes
+       per crossing rather than one per frame. */
+    role(leaving, crossing ? 'out' : null);
+    role(entering, crossing ? 'in' : null);
+
     stage(leaving, 1 - t);
     stage(entering, t);
 
@@ -236,12 +268,27 @@ function currentSection() {
   return current;
 }
 
+/* The colours at rest, from geometry — the counterpart to `settleSlides` below. The
+   boundary triggers own the crossings; between them nothing is running, so anything that
+   changes a section's own colours while the page is up has to repaint through here. The
+   hero variant switch does exactly that. */
+function settleColours() {
+  const current = currentSection();
+  const { ground, ink, counter, photo: lit } = coloursOf(current);
+
+  paint(mix(ground, ground, 0), mix(ink, ink, 0), mix(counter, counter, 0));
+  /* The photographic ground belongs to the resting state too, or a deep link to the closer
+     opens with the photograph missing until the first crossing repaints it. */
+  photo.style.opacity = String(lit);
+}
+
 function settleSlides() {
   const current = currentSection();
   slides.forEach((slide) => stage(slide, slide.dataset.for === current.id ? 1 : 0));
 }
 
 settleSlides();
+settleColours();
 
 /* The morph is scrubbed like everything else, so it carries the same trap: a jump that
    clears the whole crossing in one step fires no update. Settle it from geometry — on
@@ -401,18 +448,29 @@ if (heroVideo) {
 
   const heroSlide = heroVideo.closest('.stage-frame__slide');
   let playing = null;
+  /* Variants 2-4 put the photograph in the frame instead, and CSS takes the video out with
+     `display: none` — which does not stop it decoding. This is the other half of that. */
+  let dropped = false;
 
   /* Same edge-triggered shape as the tabs: `--t` is written on every frame of a crossing,
      and there is nothing to gain from calling play() sixty times a second. */
   const gate = (t) => {
     if (still) return;
-    const onStage = Number(t) > 0.99;
+    const onStage = Number(t) > 0.99 && !dropped;
     if (onStage === playing) return;
     playing = onStage;
 
     if (onStage) heroVideo.play().catch(() => {});
     else heroVideo.pause();
   };
+
+  document.addEventListener('hero:variant', (e) => {
+    dropped = e.detail.variant !== 1;
+    /* The cache is what makes the gate edge-triggered, and the edge here is the variant,
+       not `--t`. Clear it so the next call acts. */
+    playing = null;
+    gate(heroSlide.style.getPropertyValue('--t') || 0);
+  });
 
   gates.set(heroSlide, gate);
   gate(currentSection().id === 'hero' ? 1 : 0);
@@ -583,8 +641,10 @@ if (deck) {
       return;
     }
 
-    /* Faded in rather than switched on: the deck's own arrival is a movement, and controls
-       that appear at full strength beside it read as a different screen. */
+    /* The controls are inside the deck, so the curtain's mask hides them along with the
+       cards for the length of a crossing and hands them back at the far end. Without this
+       they would appear at full strength the instant the mask lifts; they come in behind
+       the stack instead. */
     if (nav) {
       gsap.fromTo(
         nav,
@@ -768,6 +828,11 @@ if (deck) {
     live = onStage;
 
     deck.inert = !onStage;
+    /* On stage the deck comes out of the curtain: a thrown card leaves the frame, and a
+       mask cut to the frame's box would clip it mid-throw. Off stage — and that includes
+       every frame of a crossing — the mask is what hides it. */
+    deck.dataset.onstage = String(onStage);
+
     if (onStage) {
       enter();
       return;
@@ -981,3 +1046,81 @@ window.addEventListener(
 );
 
 ScrollTrigger.addEventListener('refresh', () => { wheelOwned = oneScreenEach(); });
+
+
+/* ---------- the four hero variants ----------
+   Four grounds for the first screen, compared in the live page (client, 2026-09-03). The
+   table is in `base.css` under the same heading; everything visual is there. This is only
+   the switch, and it writes exactly three things:
+
+     - `data-hero` on <html>, which CSS reads for the panel's ground and for which of the
+       two layers the frame shows,
+     - the hero section's own `data-ink`, because white type is unreadable on green and on
+       smoke. It is a section attribute rather than a fifth CSS rule so that the scrubbed
+       colour pass — which reads `data-ink` off the section — carries it into the header,
+       the buttons and the crossing for free,
+     - `hero:variant` on `document`, for the video controller, which has to stop decoding
+       frames nobody can see.
+
+   The choice survives a reload through `localStorage`: the demo is shown by scrolling and
+   refreshing, and starting over from variant 1 each time would make the four impossible to
+   hold side by side.
+
+   The control shows only while the hero is the section under the header, off the same
+   `section:change` event everything else hangs on. */
+
+const heroSwitch = document.querySelector('.hero-switch');
+
+if (heroSwitch) {
+  const heroSection = document.getElementById('hero');
+  const buttons = gsap.utils.toArray('.hero-switch__btn', heroSwitch);
+  const VARIANTS = [1, 2, 3, 4];
+  /* Not a knob — it follows from the panel's ground. See the table in base.css. */
+  const HERO_INK = { 1: 'light', 2: 'light', 3: 'dark', 4: 'dark' };
+  const STORE = 'alphaseller:hero-variant';
+
+  function setVariant(variant) {
+    root.dataset.hero = String(variant);
+    heroSection.dataset.ink = HERO_INK[variant];
+
+    buttons.forEach((btn) => {
+      btn.setAttribute('aria-pressed', String(Number(btn.dataset.variant) === variant));
+    });
+
+    /* At rest nothing is scrubbing, so the new ink has to be painted here; mid-crossing the
+       boundary pass picks it up on its next frame, because it reads the sections rather than
+       a cached pair. */
+    settleColours();
+
+    document.dispatchEvent(new CustomEvent('hero:variant', { detail: { variant } }));
+
+    try {
+      localStorage.setItem(STORE, String(variant));
+    } catch {
+      /* A private window can refuse it. The variant still works, it just will not survive
+         a reload. */
+    }
+  }
+
+  buttons.forEach((btn) => {
+    btn.addEventListener('click', () => setVariant(Number(btn.dataset.variant)));
+  });
+
+  let stored = null;
+  try {
+    stored = Number(localStorage.getItem(STORE));
+  } catch {
+    stored = null;
+  }
+
+  setVariant(VARIANTS.includes(stored) ? stored : 1);
+
+  /* Visible only on the hero. `section:change` fires as the boundary passes the middle of
+     the header, so the control leaves with the section rather than with the scroll. */
+  const focus = (id) => {
+    root.dataset.heroFocus = String(id === 'hero');
+  };
+
+  document.addEventListener('section:change', (e) => focus(e.detail.id));
+  focus(currentSection().id);
+}

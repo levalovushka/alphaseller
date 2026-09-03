@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ru">
+<html lang="ru" data-hero="1">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -35,6 +35,9 @@
     <video class="stage-frame__video" src="assets/video/hero.mp4"
            poster="assets/images/hero-poster.webp"
            autoplay muted loop playsinline preload="auto"></video>
+    <!-- The studio photograph, in the frame instead of the video on hero variants 2-4.
+         Its own layer rather than a background on the slide, so the curtain can clip it. -->
+    <div class="hero-photo"></div>
   </div>
   <!-- The one slide that holds more than a picture: three panes and a tab strip under the
        frame. The strip is real markup, not aria-hidden, because it takes clicks; JS makes
@@ -76,8 +79,13 @@
           </svg>
         </button>
       </div>
+    </div>
   </div>
-  <div class="stage-frame__slide" data-for="marketplaces" aria-hidden="true"></div>
+  <!-- Marketplaces: one photograph, Figma `206:60376`. Painted into an inner layer, not
+       onto the slide, so the curtain has something to clip. -->
+  <div class="stage-frame__slide" data-for="marketplaces" data-filled="true" aria-hidden="true">
+    <div class="frame-photo" data-photo="marketplaces"></div>
+  </div>
   <div class="stage-frame__slide" data-for="audience" aria-hidden="true"></div>
   <div class="stage-frame__slide" data-for="closer" aria-hidden="true"></div>
 </div>
@@ -95,7 +103,7 @@
   <div class="deck-ground__layer" data-card="furniture"></div>
 </div>
 
-<!-- The hero's green is a layer of its own, not the page's ground: across the crossing
+<!-- The hero's ground is a layer of its own, not the page's: across the crossing
      into capabilities it shrinks from full-bleed to exactly the frame's box and stops
      there, under the frame, so the dashboard arrives on top of it. -->
 <div class="stage-morph" aria-hidden="true"></div>
@@ -249,6 +257,15 @@
   </section>
 
 </main>
+
+<!-- Four grounds for the hero, switched live. A technical control for the demo, not part
+     of the design: it only shows while the hero is the section under the header. -->
+<div class="hero-switch" role="group" aria-label="Вариант первого экрана">
+  <button class="hero-switch__btn" type="button" data-variant="1" aria-pressed="true" title="Фото на плашке, видео в рамке">1</button>
+  <button class="hero-switch__btn" type="button" data-variant="2" aria-pressed="false" title="Чёрная плашка, фото в рамке">2</button>
+  <button class="hero-switch__btn" type="button" data-variant="3" aria-pressed="false" title="Зелёная плашка, фото в рамке">3</button>
+  <button class="hero-switch__btn" type="button" data-variant="4" aria-pressed="false" title="Светло-серая плашка, фото в рамке">4</button>
+</div>
 
 <script src="assets/vendor/gsap.min.js"></script>
 <script src="assets/vendor/ScrollTrigger.min.js"></script>

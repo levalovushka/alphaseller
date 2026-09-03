@@ -1,5 +1,26 @@
 # Worklog
 
+## 2026-09-03 — a photograph in the marketplaces frame
+
+**What changed.** `assets/images/marketplaces.webp` added (Figma `206:60376`, node export
+2298×1635 → `cwebp -q 82 -resize 2236 0`, 163 KB). `index.html`: the marketplaces slide is
+no longer empty — it carries `data-filled="true"` and one `.frame-photo` layer.
+`assets/css/base.css`: new generic `.frame-photo` layer plus its marketplaces file, and the
+class added to both curtain selector lists so the wipe clips it like the other pictures.
+`CONTEXT.md`: the file and the node recorded in the two asset tables.
+
+**Why.** Client sent the node and asked for that photograph in the marketplaces frame. The
+picture goes on an inner layer, not on the slide, because the curtain clips layers — a
+background on the slide could not be wiped.
+
+**How verified.** Live page at 1440×900, `#marketplaces` on stage: slide `data-active=true`,
+`--t` 1, `.frame-photo` measures 520×390 (exactly the frame's 4:3 box), `clip-path`
+`inset(0% 0px 0px round 32px…)` — curtain fully open, the file returns 200 / 167230 bytes,
+`--frame-outline` transparent so the empty-frame dashes are gone, no 4xx on the page.
+Screenshot not possible — the Browser pane is hidden and composites nothing.
+
+**Left undone.** Nothing for this change.
+
 ## 2026-09-03 — the section reveal is removed
 
 **What changed.** `assets/js/main.js`: the whole `reveals` block is gone — the `REVEAL`
@@ -89,6 +110,29 @@ catch-up sweep. Console clean, no errors.
 pane never ticks, so all of the above is hand-driven. Numbers unchanged and still mine: the
 0.3 lag, and the choice not to reverse on exit.
 
+## 2026-09-03 — margin = gap, and the subtitle fills its column
+
+**What changed.** `assets/css/base.css`: `--page-pad-x` is now just `var(--col-gap)` instead
+of its own `clamp(20px, calc(4.4vw - 43.36px), 96px)` ramp, and `.section__subtitle`'s
+`max-width: 70%` is gone. `CONTEXT.md` §5: the padding table, the subtitle paragraph, the
+measured table, and the two paragraphs on what the gap costs.
+
+**Why.** Client: the side margin on a laptop should be proportional and equal to the gap, and
+the subtitle's 70% cap should go everywhere.
+
+**How it was verified.** Measured at three widths after a cache-busting reload.
+1440: margin 52 = gap 52, columns 356, subtitle 356 (was 249) in 3 lines, frame 520×390.
+1680: margin 64 = gap 64, frame 712. 1920: **nothing moved except the subtitle** — margin
+still 108 from `--page-max`, gap 76, columns 416, frame at its 720 cap, and all five
+subtitles now 416 wide in 3 lines. Screenshots at 1440 and 1920.
+
+**What is left undone.** Tying the margin to the gap cost the frame 64px at 1440 (584 → 520):
+the columns are on their floor there, so the margin can only come out of the frame — and it
+takes it twice. Same reason the gap now costs the frame **four times** below the cap (two
+gaps plus two margins), so +12 on the gap is −48 on the frame rather than −24; the frame also
+reaches its 720 cap at ~1690 now instead of ~1655. Both written into CONTEXT — worth a look
+before the gap is tuned again.
+
 ## 2026-09-03 — the section body flies in after its title
 
 **What changed.** `assets/js/main.js`: the reveal is now a `gsap.timeline` per section
@@ -138,6 +182,23 @@ trails its own subtitle by the group stagger. Console clean, no errors.
   are untouched — and in a live browser ScrollTrigger's own loop covers it on the next
   frame. Worth a real fix, not done.
 
+## 2026-09-03 — xl down to 28 at the laptop end
+
+**What changed.** `assets/css/base.css`: `--fs-xl`
+`clamp(32px, calc(8px + 1.6667vw), 40px)` → `clamp(28px, calc(2.5vw - 8px), 40px)`.
+`CONTEXT.md` §7: both type tables and a note on the ramp; §5: the xl column of the measured
+table. The clamp table's xl row was two rounds stale (still 36 → 44) and is now right.
+
+**Why.** Client wants the section titles smaller on a laptop. 1920 stays 40, so only the
+laptop end moves — which makes the ramp 2.5vw, steeper than xxl's 1.6667vw.
+
+**How it was verified.** Measured: 28 at 1280 and 1440 (the floor holds below the window),
+29.8 at 1512, 34 at 1680, 40 at 1920. No title or subtitle overflows at 1440 or 1920. The
+customization title got a line back at 1440 — three lines to two. Screenshot at 1440.
+
+**What is left undone.** Nothing on this change. Still uncommitted, along with the other
+session's work in the same files.
+
 ## 2026-09-03 — experiment: the deck's grounds without the blur
 
 **What changed.** `--deck-blur` 32px → 0, and the three ground files re-exported sharp:
@@ -169,6 +230,58 @@ the arrow button through the deck.
 **What is left undone.** This is a state to look at, not a decision. Reverting is one line
 (`--deck-blur: 32px`) plus re-encoding the three grounds small again; the whole commit is
 `git revert`-able in one step.
+
+## 2026-09-03 — four hero variants, switched live from the corner
+
+**What changed.**
+
+- `index.html`: `data-hero="1"` on `<html>`; a `.hero-photo` layer in the hero slide next to
+  the video; a `.hero-switch` group of four 18px buttons after `</main>`.
+- `base.css`: the morph panel's ground becomes `--morph-bg`, set per `:root[data-hero]`
+  (1 photograph over graphite, 2 black, 3 green, 4 smoke); `.hero-photo` (the 1.42:1
+  `hero.webp`) joins both of the curtain's selector lists and swaps with the video by
+  `display`; the switch's own block at the foot of the file, with the variant table.
+- `main.js`: the boundary pass reads `coloursOf()` per frame instead of caching the pair at
+  build time, so a live `data-ink` change is picked up; new `settleColours()` for the resting
+  state; the video gate takes a `dropped` flag off a new `hero:variant` event; the variant
+  controller at the foot of the file (writes `data-hero`, the hero's `data-ink`, the event,
+  and `localStorage`; shows the control only while `data-hero-focus` is true).
+- `CONTEXT.md`: §5 gets "The four hero variants"; §4's section table notes the hero's ground
+  and ink now depend on the variant.
+
+**Why.** Client wants the four grounds compared in the live page rather than in Figma, with
+the switch small enough to stay out of a screenshot. The ink is not a fifth knob — white type
+is unreadable on green and on smoke, so it follows the ground; it is written on the hero
+section's `data-ink` so the existing scrubbed colour pass carries it into the header, the
+buttons and the crossing for free. Which photograph goes in the frame was his call: the
+tighter `hero.webp` (2236 wide, ~6% off each side against 4:3), not the full square.
+
+**How it was verified.** In the live page at 1440 via the preview pane, all four clicked
+through: `data-hero` 1-4, the panel's computed background graphite+`hero-full.webp` /
+`rgb(0,0,0)` / `rgb(166,237,0)` / `rgb(233,235,238)`, the frame swapping video ↔ photograph by
+`display`, the hero's ink `light/light/dark/dark` reaching `--ink` and the header CTA (black
+pill, white label on 3 and 4). Switch measured at 16,866 → 100,884, four 18px squares,
+`aria-pressed` following the choice; `opacity` 0 with `pointer-events: none` off the hero.
+Froze the crossing at t = 0.5 with snapping off: `clip-path: inset(116.5px 214px 114.5px
+round 16px)` — half-way, half the radius — on every variant. Screenshots of 1-4 taken and
+shown to the client, who confirmed.
+
+**Left undone / known.**
+
+- **Variant 4's shrink is invisible.** The ground behind the panel steps to the next section's
+  colour on the first movement, and capabilities is smoke — so a smoke panel shrinks against
+  smoke, and the move only reappears when the dashboard wipes in. Verified at t = 0.5: panel
+  and `--ground` both `rgb(233,235,238)`. Needs a client call — another grey, white behind it
+  across that one crossing, or a stroke on the panel.
+- Clicking a variant *mid-crossing* repaints the ground from the section at rest, so on 3 and
+  4 the ground behind the panel flashes graphite until the next scroll frame. Self-corrects;
+  the control is meant to be used on the hero at rest.
+- The preview pane blocks the load-time autoplay outright — the `autoplay` attribute does not
+  start the video either, and `play()` works as soon as it has a gesture. Not touched by this
+  work; variant 1's video was already in that state.
+- The deck's new arrow buttons (`.deck-nav`, another session's uncommitted work) sit at
+  opacity 1 with their slide's `--t` at 0, so they show under the frame on the hero. Left
+  alone — not mine.
 
 ## 2026-09-03 — the deck deals out on arrival and gets two arrow buttons
 
@@ -246,6 +359,25 @@ the pair cannot split if the column ever gets narrower.
 narrows further and a line could wrap inside itself. The page is a desktop demo, so that is
 not in scope — noted rather than guarded.
 
+## 2026-09-03 — the scrim ramps in instead of stepping on
+
+**What changed.** `assets/css/base.css`: new `--scrim-ramp: 0.15` token, and the under
+layer's filter becomes
+`brightness(calc(1 - var(--scrim) * min(1, (1 - var(--t, 0)) / var(--scrim-ramp))))`.
+`CONTEXT.md` §5: the curtain's scrim row and a paragraph on the ramp.
+
+**Why.** Client saw the scrim flick on at the first pixel of the gesture and asked for it
+over one or two tenths of the crossing. 0.15 is the middle of that.
+
+**How it was verified.** Sampled the computed filter across a crossing at 1440:
+`none` at rest, `brightness(0.986667)` at p = 0.010, `0.96` at 0.030, `0.899` at 0.076,
+`0.8` from p = 0.150 on and held to 0.5, `none` again at the far end. So it is linear over
+the first 15% and flat after, and neither rest point carries a filter.
+
+**What is left undone.** Nothing on this. `1 - --t` is used as the crossing's progress from
+the under layer's side, which is only correct because that slide's `--t` counts down — worth
+knowing if the roles are ever reworked.
+
 ## 2026-09-03 — the hero headline becomes "весь онлайн-бизнес"
 
 **What changed.** `index.html`: the `<h1>` and the `<title>`, "Одна платформа
@@ -269,6 +401,66 @@ short words on their own.
 **Left undone.** Nothing on this item. The thin middle line is a consequence of the 356px
 column, not of the copy; a hand-set `<br>` after "на" would give two fuller lines
 ("Одна платформа на" / "весь онлайн-бизнес") if he wants that instead.
+
+## 2026-09-03 — the curtain gets a rounded edge and a scrim under it
+
+**What changed.** `assets/css/base.css`: the curtain's two `linear-gradient` masks become
+`clip-path: inset(… round …)` — the arriving layer's top corners take `--radius-btn` — the
+layer underneath now runs on past the edge by the radius instead of butting against it, and
+takes `filter: brightness(calc(1 - var(--scrim)))`; new `--scrim: 0.2` token; `data-wipe`
+now also sets the two slides' z-order. `assets/js/main.js`: a `role()` helper that sets
+`data-wipe` during a crossing and **clears** it at both ends. `CONTEXT.md` §5: the curtain
+subsection rewritten.
+
+**Why.** Client: round the curtain's top corners like the frame, and put a 20% black scrim
+on the layer that falls under it.
+
+**How it was verified.** Swept hero → capabilities at 1440. At rest (both ends): no role, no
+filter, plain `inset(0% … round 32px 32px 0 0)` — full box, nothing dimmed. Mid-crossing at
+t = 0.1 / 0.5 / 0.9: the arriving pane clips to `(90%|50%|10%) 0 0 0 round 32px 32px 0 0` at
+z 2, the layer under it to `0 0 calc((10%|50%|90%) - min(32px, …)) 0` at z 1 with
+`brightness(0.8)`, and **both stay at `opacity: 1` throughout**. Froze a crossing at 45% and
+screenshotted: rounded top corners on the arriving screen, the picture above it visibly
+darkened, no seam artefacts.
+
+**Why overlap rather than butted edges.** Rounding a butted edge leaves two crescents of bare
+frame at the ends of the line. The layer underneath therefore runs past the edge by the
+radius, capped by `min(radius, --t * 100%)` so it tapers to nothing as the curtain lands —
+without that cap a strip of the old picture survives the end of a crossing into a section
+whose slide is empty.
+
+**What is left undone.** The scrim comes on as a step the moment a crossing starts, which is
+the literal reading of the client's "when it starts overlapping". If it reads as a flick,
+ramping it over the first tenth of the gesture is a one-line change — his call. The tab strip
+still fades rather than wipes, for the reason already written down.
+
+## 2026-09-03 — the frame's content wipes instead of fading
+
+**What changed.** `assets/css/base.css`: `.stage-frame__slide` loses `opacity: var(--t, 0)`;
+`.stage-frame__video`, `.frame-pane` and the off-stage `.style-deck` take a
+`linear-gradient` mask driven by `--t`, mirrored under `[data-wipe="out"]`; `.frame-tabs`
+gets an explicit `opacity: var(--t, 0)`. `assets/js/main.js`: the scrubbed pass writes
+`data-wipe` on the two slides in a crossing, and the deck's gate writes `data-onstage`.
+`CONTEXT.md` §5: the two stale "cross-faded / opacity" claims corrected and a new
+"The curtain" subsection.
+
+**Why.** Client: the transition between what the frame holds should be a curtain from the
+bottom up, and the content must not pass through zero opacity.
+
+**How it was verified.** Swept hero → capabilities at 1440 with `ScrollTrigger.update()`:
+the video's mask edge runs 100% → 0% downward while the pane's runs 0% → 100% upward, and
+**both layers stay at `opacity: 1` at every step** — the regions are disjoint, so at t = 0.5
+the frame is the old picture's top half over the new picture's bottom half with no overlap
+and no gap. Froze a crossing at 45% and screenshotted it: one hard line, the hero's video
+above, the capabilities screen below, neither dimmed. Deck: `mask: none` and `inert: false`
+at rest, masked and inert at every step of a crossing (checked at t = 0.75, 0.5, 0).
+
+**What is left undone.** The tab strip still fades — it lives below the frame's box, so a
+mask sized to that box would delete it outright; written up as a deliberate exception. If the
+client wants it to wipe too it needs its own mask geometry. Watch out for the browser cache
+when checking this by hand: python's `http.server` sends no `Cache-Control`, and Chrome
+served a stale `base.css` and `main.js` through two reloads until forced with
+`fetch(url, {cache: 'reload'})`.
 
 ## 2026-09-03 — the full picture on the panel, anchor solved to 18%
 
