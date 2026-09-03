@@ -472,6 +472,28 @@ img { display: block; max-width: 100%; height: auto; }
    read as the whole composition being pulled into the frame instead — a different move,
    not asked for.
 
+   `50% 18%`, and the 18 is solved, not chosen. The file is square (1254 x 1254) and the
+   viewport is 1.6 to 2.1, so `cover` scales to the **width** — the rendered height equals
+   the viewport width, and the vertical overflow is thrown away in the proportion the
+   position sets. Measured in the source on 2026-09-03: the top of his head is at 12.28% of
+   the height, his sunglasses at 21.53%.
+
+   His face has to land in the band between the header and the frame's top edge, and the
+   head-to-glasses span is 9.25% of the rendered height. Measured in the page:
+
+     1440: band 80 → 233 = 153px, span 133px. At 18% the head sits on 80 and the glasses on
+           213 — 20px clear of the frame.
+     1920: band 80 → 262 = 182px, span 178px. At 18% the head sits on 85 and the glasses on
+           262 — **exactly** the frame's top edge.
+
+   **So at 1920 there is no slack at all, and the frame's edge crosses his glasses.** The
+   full square simply does not fit: 178px of head-to-eyes into a 182px band, before the
+   glasses' own height. Nothing about the position fixes that. The three things that would:
+   bring the frame down, use a tighter crop than the full square (which is what the old
+   1.42:1 `hero.webp` was — his face landed at 108px there), or drop to `contain`, which
+   fits the face with 30px to spare but leaves graphite bands down both sides. Raised with
+   the client, 2026-09-03; 18% is the best the full picture allows.
+
    Layer 0, the same as the photographic ground and for the same reason: above the ground
    the body is painted with, below the sections' own text (layer 1) so the hero's title
    and CTA stay on top of it, and far below the frame (layer 5).
@@ -484,7 +506,7 @@ img { display: block; max-width: 100%; height: auto; }
   position: fixed;
   inset: 0;
   z-index: 0;
-  background: var(--c-graphite) url("../images/hero.webp") center / cover no-repeat;
+  background: var(--c-graphite) url("../images/hero-full.webp") 50% 18% / cover no-repeat;
   clip-path: inset(0 round 0);
   will-change: clip-path;
 }

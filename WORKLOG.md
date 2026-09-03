@@ -1,5 +1,59 @@
 # Worklog
 
+## 2026-09-03 — the full picture on the panel, anchor solved to 18%
+
+**What changed.** New `assets/images/hero-full.webp` (1254×1254, 89 KB).
+`assets/css/base.css`: the morph panel now uses it at `50% 18% / cover` instead of
+`hero.webp` at `center top`, with the arithmetic written into the comment.
+
+**Why.** Client supplied the full shot, Figma `275:53708`, and asked me to watch the quality.
+
+**How it was verified.** Encoding: compared `-q 82`, `-q 90`, `-q 95` and `-lossless` against
+each other on three 500-row scanlines through the gradient. Mean |Δ| from lossless is 1.44 /
+1.21 / 1.13 of 255, and the largest adjacent-row step in the lossy files (75–91) is *below*
+the lossless file's own (92) — so the steps are the photograph, not banding. Took `-q 90
+-sharp_yuv -m 6`: 89 KB against 56 at q82 and 1247 lossless; `-sharp_yuv` because saturated
+red is where chroma subsampling smears.
+Placement: measured the source by decoding to PPM and classifying rows by saturation — head
+top at 12.28% of the height, sunglasses at 21.53%. Solved the anchor from that against the
+band between the header and the frame's top edge, then checked it in the page: 1440 → head
+80, glasses 213, frame 233; 1920 → head 85, glasses 262, frame 262.
+
+**What is left undone / broken.** Two things the client has to decide:
+
+1. **At 1920 his glasses land exactly on the frame's top edge — zero slack**, and the edge
+   reads as cutting his eyes. The full square does not fit: 178px of head-to-eyes into a
+   182px band. 18% is the best any position value can do. The fixes are all structural —
+   bring the frame down, crop the picture tighter than the full square, or use `contain`
+   (fits with 30px spare, but graphite bands down both sides).
+2. **Resolution.** The node is 2030×2020 but its bitmap is only **1254×1254** — Figma is
+   already upscaling 1.62×, and my @2x export (4060px) was pure interpolation. Shipped at the
+   native 1254, so the browser upscales 1.53× to fill 1920. The previous `hero.webp` was
+   2236 wide and was *downscaled* there, so the hero photograph is measurably softer than it
+   was. If he has the original camera file, that fixes it; nothing in the encode can.
+
+## 2026-09-03 — the panel's photograph anchored to the top
+
+**What changed.** `assets/css/base.css`: the morph panel's background goes
+`center / cover` → **`center top / cover`**. `CONTEXT.md` §5: why, with the measurements.
+
+**Why.** Client: the man's face was being cut and he wanted it kept without giving up a
+responsive page. `background-position` is the knob — `cover` decides the scale, the position
+decides what survives.
+
+**How it was verified.** Measured the source first, by decoding `hero.webp` to PPM and
+scanning rows: the top of his head is 25px from the edge, 1.6% of 1578 — **no headroom**, the
+file already clips his hair, so no position value can clear the 80px header entirely. With
+`top`, the discarded height all comes off the studio floor at the bottom. Because the image
+is taller than the box across 1440–1920, its scale follows the width alone: rendered height =
+width / 1.4171, face at 8% of it → 81px at 1440, 108px at 1920, both below the header.
+Screenshots at 1440×900, 1920×1080 and 1920×900 (ratio 2.13, the worst case): the face is
+clear of the bar in all three, hair behind it.
+
+**What is left undone.** The hair still sits behind the header, and the only real fix is a
+re-export with gradient headroom above him — raised, not done. I have edit access to that
+file, so I can extend the canvas myself if he says so.
+
 ## 2026-09-03 — 15% black over the deck's grounds
 
 **What changed.** `base.css`: `--deck-scrim: 15%` and a `.deck-ground::after` that paints it

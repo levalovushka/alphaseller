@@ -431,7 +431,31 @@ The client's calls, all 2026-09-03 — do not re-litigate:
 | Gone at t = 1 | `display: none` the moment it lands, not merely covered. Covered was the first attempt and he caught it: the tab strip cross-fades its panes, so mid-swap both are part transparent and the panel showed through the frame. |
 | The ground behind | goes smoky white on the **first movement**, not across the gesture — otherwise the first frames of the shrink are graphite on graphite and read as nothing moving. The step is invisible: at t = 0 the panel still covers the screen. |
 | Colour | graphite, moved with the hero. It was green; the panel **is** the hero's ground, so the two can only ever be the same colour. |
-| The photograph | `hero.webp` (Figma `196:53708`) is the panel's own background, `center / cover`, and it does **not** move. As the clip closes, the panel is a shrinking window onto a photograph that stays put. Scaling the picture down with the panel would read as the whole composition being pulled into the frame — a different move, not asked for. |
+| The photograph | `hero-full.webp` (Figma `275:53708`, the full square shot) is the panel's own background, **`50% 18% / cover`**, and it does **not** move. As the clip closes, the panel is a shrinking window onto a photograph that stays put. Scaling the picture down with the panel would read as the whole composition being pulled into the frame — a different move, not asked for. |
+
+**Why `50% 18%`, and why the 18 is solved rather than chosen.** The file is square, so
+`cover` scales it to the **width**: rendered height = viewport width, and the overflow is
+discarded in the proportion the position sets. Measured in the source, 2026-09-03 (decoded to
+PPM, rows classified by saturation): the top of his head is at **12.28%** of the height, his
+sunglasses at **21.53%**. His face therefore has to land in the band between the header and
+the frame's top edge, and head-to-glasses is 9.25% of the rendered height.
+
+| | band | span | at 18% |
+|---|---|---|---|
+| 1440 | 80 → 233 = 153px | 133px | head 80, glasses 213 — 20px clear of the frame |
+| 1920 | 80 → 262 = 182px | 178px | head 85, glasses 262 — **exactly** the frame's edge |
+
+**At 1920 there is no slack and the frame's edge crosses his glasses.** 18 is the best any
+position value can do; the full square does not fit that band. The three ways out are all
+structural, and all the client's: bring the frame down, crop tighter than the full square
+(the old 1.42:1 `hero.webp` put his face at 108px), or `contain`, which fits with 30px spare
+but leaves graphite bands down both sides.
+
+**Resolution ceiling.** The node is 2030×2020 but its bitmap is **1254×1254** — Figma
+upscales it 1.62× on the canvas, and an @2x export is interpolation, not detail. Shipped at
+the native 1254, so the browser scales it up 1.53× to fill 1920 and the picture is
+measurably softer than the old `hero.webp` (2236 wide, downscaled there). Only a larger
+original fixes it; the encode cannot.
 
 How it is built:
 
