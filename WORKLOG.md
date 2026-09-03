@@ -1,5 +1,25 @@
 # Worklog
 
+## 2026-09-03 — 15% black over the deck's grounds
+
+**What changed.** `base.css`: `--deck-scrim: 15%` and a `.deck-ground::after` that paints it
+over all three blurred layers. `CONTEXT.md` §7 and §11 updated.
+
+**Why.** Client: "докинь ещё по 15% черного на фоны, чуть ярковаты сейчас."
+
+**One scrim, not three.** Per-layer overlays would stack mid-cross-fade and darken the
+middle of every swipe; a single overlay above the layers holds steady, and it still fades
+with the section because the layer's opacity lives on the parent.
+
+**How it was verified.** Emulated 1440×900, stylesheet cache busted first. `::after` on
+`.deck-ground` computes `rgba(0, 0, 0, 0.15)`, inset 0 over the full 900px height,
+`--deck-scrim` reads `15%`, the layers still blur 32px. Screenshotted with the deck forced
+on stage: the fashion ground is visibly deeper than the shot in the previous entry and the
+white title reads better against it. No console errors.
+
+**What is left undone.** The care and furniture photographs are beige even under 15%; if
+the white ink still reads weak on them, `--deck-scrim` is the number to raise.
+
 ## 2026-09-03 — the deck's screens come from Figma, each with a blurred ground of its own
 
 **What changed.** The three placeholder screenshots in the style deck are replaced by the

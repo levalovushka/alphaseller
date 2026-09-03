@@ -406,6 +406,7 @@ img { display: block; max-width: 100%; height: auto; }
   overflow: hidden;
   opacity: 0;
   --deck-blur: 32px;
+  --deck-scrim: 15%;
   --deck-ground-fade: 0.5s;
 }
 
@@ -422,6 +423,20 @@ img { display: block; max-width: 100%; height: auto; }
 }
 
 .deck-ground__layer[data-active="true"] { opacity: 1; }
+
+/* One scrim over all three, not one per layer: it has to hold steady across a cross-fade,
+   and two stacked 15% overlays mid-swap would darken the middle of every swipe. The
+   photographs came out brighter than the section wants — client, 2026-09-03: "докинь ещё
+   по 15% черного на фоны, чуть ярковаты сейчас". It sits above the blurred layers and
+   inside the container's clip, and it fades with the layer's own opacity because that is
+   written on the parent. */
+.deck-ground::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgb(0 0 0 / var(--deck-scrim));
+  pointer-events: none;
+}
 
 .deck-ground__layer[data-card="fashion"] {
   background-image: url("../images/customization-fashion-ground.webp");

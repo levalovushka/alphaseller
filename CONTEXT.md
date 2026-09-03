@@ -859,6 +859,9 @@ value a section change drives. Three things about it are deliberate:
   either way — the browser blurs the rendered layer, not the file.
 - Each layer is inset by twice the blur radius and the container clips it. A blur samples
   past its element's edges, so without that there is a soft band around the viewport.
+- `--deck-scrim` is 15% black, added on 2026-09-03 — "чуть ярковаты сейчас". It is one
+  `::after` over all three layers rather than one per layer, because it has to hold steady
+  through a cross-fade: two stacked 15% overlays would darken the middle of every swipe.
 
 **The card sources are now @2x for the frame's cap.** 1440×1080 against a 720px frame; the
 first cut of this deck topped out at 836×627 and was soft on a big screen, which is why
@@ -1109,6 +1112,6 @@ Five traps, all hit more than once:
 - Which screen / video / people go into which section frame — later; frames stay empty.
 - Date of the board meeting — unknown.
 - Font license for production — unresolved.
-- White ink over the blurred grounds: two of the three photographs are light (beige), and
-  the section's ink is white. Readable on the fashion ground, weak on the other two — a
-  scrim over the ground would fix it, and that is the client's call.
+- White ink over the blurred grounds: 15% black went on at the client's request, which
+  helps, but the care and furniture photographs are still beige under it. Whether that
+  needs more is his call — `--deck-scrim` is the one number to turn.
