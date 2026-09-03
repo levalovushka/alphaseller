@@ -749,11 +749,14 @@ img { display: block; max-width: 100%; height: auto; }
    clicks even though the frame does not, and JS makes it inert while this slide is off
    stage — an opacity of 0 still hit-tests. */
 /* ---------- the chips around the frame ----------
-   Two product cards from the client's mockup (Figma 279:55320): the conversion card hangs
-   off the frame's left edge near the top, the order statuses off the bottom edge near the
-   right. Both are flat pictures rather than live UI — the conversion card is the product's
-   own bitmap and the status list a vector export, both straight out of Figma, so neither
-   adds a type style to a site that has exactly two.
+   Four things from the client's mockup (Figma 279:55320), all of them crossing the frame's
+   edge: the conversion card off the left near the top, the order statuses off the bottom
+   near the right, and the two marketplace app icons — Ozon off the right edge, Megamarket
+   below the bottom. All flat pictures rather than live UI — the conversion card and the two
+   icons are bitmaps and the status list a vector export, all straight out of Figma, so
+   nothing here adds a type style to a site that has exactly two.
+
+   Nothing moves. The client asked for the elements only (2026-09-03, "движения не надо").
 
    Every number below is the mockup's own, and every one is written as
    `var(--frame-w) * N / 720` — 720 being the frame width the mockup was drawn at, so the
@@ -795,6 +798,28 @@ img { display: block; max-width: 100%; height: auto; }
   width: calc(var(--frame-w) * 164 / 720);
   height: calc(var(--frame-w) * 176 / 720);
   background-image: url("../images/marketplaces-statuses.svg");
+}
+
+/* The two app icons. Both are their own raw fill out of Figma — 720x720 squares whose
+   squircle corners are already in the alpha, resized down to 3x of the size they are drawn
+   at and taken lossy: at 192 and 240 px `-q 90` is a third of lossless and the difference
+   cannot survive being drawn at 45. */
+.frame-chip[data-chip="ozon"] {
+  right: calc(var(--frame-w) * -43 / 720);
+  top: calc(var(--frame-w) * 70 / 720);
+  width: calc(var(--frame-w) * 63 / 720);
+  height: calc(var(--frame-w) * 63 / 720);
+  background-image: url("../images/marketplaces-ozon.webp");
+}
+
+/* The one thing here that clears the frame completely — it sits below the bottom edge, in
+   the gap between the frame and the page's bottom padding. */
+.frame-chip[data-chip="megamarket"] {
+  left: calc(var(--frame-w) * 145 / 720);
+  bottom: calc(var(--frame-w) * -111 / 720);
+  width: calc(var(--frame-w) * 79 / 720);
+  height: calc(var(--frame-w) * 79 / 720);
+  background-image: url("../images/marketplaces-megamarket.webp");
 }
 
 .frame-tabs {

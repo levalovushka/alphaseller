@@ -923,13 +923,19 @@ Figma's own `#1E1E1E` canvas in as a full-bleed `<rect>`.
 | 5 — marketplaces, **the conversion chip** | `assets/images/marketplaces-conversion.webp` | `279:55403` | the product's own card — «Конверсия в заказ», 12,92 %. Not the node export: that bakes Figma's `#1E1E1E` canvas into the rounded corners. `download_assets` returns the **raw fill** as well, 384×179 with the rounding already in its alpha, and that is what shipped — `cwebp -lossless`, 4.2 KB, smaller than `-q 90` at 5.2 |
 | 5 — marketplaces, **the status chip** | `assets/images/marketplaces-statuses.svg` | `279:55414` | the order-status list, five rows, the first badge green. Exported as **SVG** and the one baked `<rect fill="#1E1E1E">` deleted — the only edit, asserted in the script. Text comes as outlines, so it carries the product's UI font without the page loading one, and stays crisp at any frame width. 58 KB uncompressed, and it is paths, so it gzips hard |
 
+| 5 — marketplaces, **the Ozon icon** | `assets/images/marketplaces-ozon.webp` | `284:55477` | the app icon, off the frame's right edge. Its own **raw fill**, 720×720 with the squircle corners already in the alpha, `-resize 192 192 -q 90 -alpha_q 100`, 13 KB — lossless was 49 |
+| 5 — marketplaces, **the Megamarket icon** | `assets/images/marketplaces-megamarket.webp` | `284:55478` | the same, below the frame's bottom edge. `-resize 240 240`, same settings, 8.8 KB against 39 lossless |
+
 **Getting a clean export out of Figma.** Three of these assets fought the same thing: a node
 export composites Figma's `#1E1E1E` canvas, so anything with rounded corners or a soft edge
 arrives matted onto grey. The growth tiles and the speed screen were keyed on that colour
 after the fact. There are two cleaner routes, both used above and both worth trying first:
 
 - `download_assets` also returns `rawImages` — the original uploaded bitmap, no canvas, alpha
-  intact. Good when the node is a picture (the conversion chip).
+  intact. Good when the node is a picture (the conversion chip, both app icons). A node with
+  several fills returns several, at different resolutions: take the largest, and check it is
+  the composed artwork rather than one layer of it — for these icons every one of them was
+  the whole icon, 93% opaque, which is a squircle's share of its square.
 - `defaultFormat: "svg"` puts the canvas in as a single full-bleed `<rect>` that can be
   deleted outright, and the rest is clean vector. Good when the node is UI (the status chip).
 - `get_screenshot` with `contentsOnly: true` also renders transparent, but only at the node's

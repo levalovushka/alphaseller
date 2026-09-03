@@ -1,5 +1,48 @@
 # Worklog
 
+## 2026-09-03 — the two marketplace app icons
+
+**What changed.** `index.html`: two more `.frame-chip` divs in the marketplaces slide.
+`assets/css/base.css`: their two rules, and the block's comment now covers four things
+rather than two. New `assets/images/marketplaces-ozon.webp` (13 KB) and
+`assets/images/marketplaces-megamarket.webp` (8.8 KB). `CONTEXT.md` §7: two asset rows and
+a line on multi-fill raw exports.
+
+**Why.** The client added the partner logos to the mockup (`279:55320`) after the first
+pass — they had not been inside the frame when I pulled it — and asked for them, with no
+motion.
+
+**How it is built.** Same as the other two chips: the mockup's own numbers over 720, each
+anchored to the frame edge it crosses. Ozon straddles the right edge (43 out, 70 down),
+Megamarket clears the bottom entirely (111 below, 145 in from the left) and sits in the gap
+between the frame and the page's bottom padding. Both fade on `--t` with the rest of the
+slide and do nothing else.
+
+Assets came from `rawImages`, not the node export — the export mats the icon onto Figma's
+`#1E1E1E` and there is no way to get the squircle back out of that. Each icon's raw fill is
+a 720×720 square with the corners already in its alpha. Both are lossy at `-q 90`: about a
+third of lossless, and they are drawn at 46 and 57 px on a laptop.
+
+**How it was verified.** `localhost:4321` at 1440×900, live DOM against the mockup (frame
+520, scale 0.722):
+
+| chip | size | expected | placement | expected |
+|---|---|---|---|---|
+| ozon | 46×46 | 46×46 | 31 past the right edge, 51 down from the top | 31, 51 |
+| megamarket | 57×57 | 57×57 | 80 below the bottom edge, 105 in from the left | 80, 105 |
+| conversion | 173×81 | 173×81 | unchanged | — |
+| statuses | 118×127 | 118×127 | unchanged | — |
+
+All four chips at opacity 1 with the slide's `--t` at 1; all four assets 200 on the wire.
+
+The app still will not repaint in this browser pane, so as before I served a throwaway page
+with the real assets at the measured geometry and screenshotted that: all four sit where the
+mockup puts them, corners clean, the Ozon icon crossing the right edge and the Megamarket M
+below the frame. Page deleted straight after. **Verified in a browser, not inside the
+running site.**
+
+**Left undone.** Nothing on this item. No motion, as asked.
+
 ## 2026-09-03 — three stills into the corner, the orb halved and centred
 
 **What changed.** `assets/images/growth-{loyalty,bloggers,partners}.webp` re-pulled from
