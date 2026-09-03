@@ -23,9 +23,10 @@
   --c-graphite: #1a1817;  /* the cards in the cases section */
   --c-red: #dc200c;       /* unused on this page */
 
-  /* Layout — provisional, not a design decision.
-     The content width is no longer a fixed max: it comes out of the page grid below
-     (--grid-content), which caps the columns instead. */
+  /* Layout — provisional, not a design decision. */
+  /* 1704, not 1728: on a 1920 screen this is what sets the side margin, and the +12
+     the client asked for has to come from here rather than from --page-pad. */
+  --page-max: 1704px;
   /* Room at the page edges and between the three columns. Both shrink on a narrower
      screen so the frame keeps a usable width there — see --frame-w. */
   --page-pad: clamp(76px, calc(4.4vw + 12px), 96px);
@@ -60,36 +61,26 @@
   --btn-h-nav: 48px;
   --btn-h: 40px;
   --btn-pad-x: 20px;   /* both sizes, header and sections */
-  /* ---------- the page grid ----------
-     Built the way cash.app builds theirs, read off their live page on 2026-09-02:
-
-       - one grid for the whole page: `1fr [content] repeat(12, <=cap) [content] 1fr`,
-       - a fixed gutter, never a percentage,
-       - the columns have a MAXIMUM, and once the screen is wider than the content can
-         use, the surplus goes to the two edge tracks rather than to the columns,
-       - sections span `1 / -1` and place their parts on named lines, so everything on the
-         page lands on the same rhythm. Theirs: headline `1 / span 4`, the phone
-         `5 / span 4`, the text `9 / span 4` — thirds of twelve.
-
-     Ours keeps that architecture and our own proportions: our gutter (not their 20) and a
-     column cap chosen so the content stops at the width it has today. */
-  --grid-cols: 12;
-  --grid-gutter: clamp(40px, calc(2.5vw + 16px), 64px);
-  /* 83 is not arbitrary: 12 x 83 + 11 x 64 = 1700, which is the content width the page
-     already had at 1920. Below that the cap does not bind and the columns simply share
-     what the margins leave. */
-  --grid-col-max: 83px;
-  --grid-margin: var(--page-pad);
-
-  /* Everything below is derived — do not set them. */
-  --grid-content: min(
-    calc(var(--grid-cols) * var(--grid-col-max) + 11 * var(--grid-gutter)),
-    calc(100vw - 2 * var(--grid-margin))
+  /* The three-column stage. The text columns never go below --col-min; the frame
+     takes what is left, capped at 760. Without the floor, a long word in a title
+     runs out of its column and collides with the frame on a narrower screen. */
+  --col-gap: clamp(40px, calc(2.5vw + 16px), 64px);
+  /* Titles hyphenate (see .section__title), so this floor no longer has to clear the
+     longest word in the copy — "маркетплейсах" is 391px wide at the xl style and used
+     to force 400 here. It is now a composition choice: how much of the screen the two
+     text columns keep before the frame takes the rest. 360 puts the frame at 553 on a
+     1440 screen; dropping to 300 would give it 673, which the client judged too much
+     for a laptop. */
+  --col-min: 380px;
+  /* The cap is what sets the text columns at 1920, so it moves whenever --col-gap does:
+     the columns must stay at or above 428 for "и интернет магазин" (425 at the 44px xl) to
+     hold the client's hand-set third line. 760 → 752 when the gap was 48; the gap is now
+     64, which costs the columns 16 each, so 752 → 720. Below ~1830 the cap does not bind
+     and this number changes nothing. */
+  --frame-w: min(
+    720px,
+    calc(100vw - 2 * var(--page-pad) - 2 * var(--col-gap) - 2 * var(--col-min))
   );
-  --grid-col: calc((var(--grid-content) - 11 * var(--grid-gutter)) / var(--grid-cols));
-  /* The frame is the middle four columns. The fixed .stage-frame cannot read the grid, so
-     it is spelled out here and the slot in the flow uses the same value. */
-  --frame-w: calc(4 * var(--grid-col) + 3 * var(--grid-gutter));
 
   /* How long a ground colour or an ink takes to cross-fade. */
   /* The page's three live colours. JS overwrites them on <html> as you scroll; these
@@ -294,30 +285,19 @@ img { display: block; max-width: 100%; height: auto; }
   scroll-snap-stop: always;
   display: flex;
   align-items: center;
-  /* No horizontal padding: the page grid's edge tracks are the margin. */
-  padding: var(--header-h) 0 var(--page-pad);
+  padding: var(--header-h) var(--page-pad) var(--page-pad);
   color: var(--ink);
 }
 
-/* The page grid itself: two flexible edge tracks and twelve capped columns. Anything that
-   has to sit on the page's rhythm places itself on these lines. */
-.section__inner,
-.page-grid {
+.section__inner {
   width: 100%;
+  max-width: var(--page-max);
+  margin-inline: auto;
   display: grid;
-  grid-template-columns:
-    minmax(calc(var(--grid-margin) - var(--grid-gutter)), 1fr)
-    repeat(var(--grid-cols), minmax(0, var(--grid-col-max)))
-    minmax(calc(var(--grid-margin) - var(--grid-gutter)), 1fr);
-  column-gap: var(--grid-gutter);
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
+  gap: var(--col-gap);
 }
-
-/* Thirds of twelve, the same split cash.app uses. Column 1 is the left edge track, so the
-   first content column is 2. */
-.section__lead { grid-column: 2 / span 4; }
-.section__frame-slot { grid-column: 6 / span 4; }
-.section__aside { grid-column: 10 / span 4; }
 
 /* Keep the 1fr columns from being blown out by long words in the title. */
 .section__inner > * { min-width: 0; }
@@ -351,6 +331,7 @@ img { display: block; max-width: 100%; height: auto; }
    column open so the two text columns keep their places. */
 .section__frame-slot {
   aspect-ratio: 4 / 3;
+  width: var(--frame-w);
 }
 
 /* ---------- photographic ground ----------
@@ -526,14 +507,13 @@ img { display: block; max-width: 100%; height: auto; }
   display: grid;
   align-items: stretch;
   justify-items: stretch;
-  /* These two sections lay themselves out rather than sitting on the page grid, so they
-     take the margin back as padding. */
-  padding: calc(var(--header-h) + 32px) var(--page-pad) var(--page-pad);
+  padding-top: calc(var(--header-h) + 32px);
+  padding-bottom: var(--page-pad);
 }
 
 .cases {
   width: 100%;
-  max-width: var(--grid-content);
+  max-width: var(--page-max);
   margin-inline: auto;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
@@ -610,15 +590,16 @@ img { display: block; max-width: 100%; height: auto; }
   display: grid;
   /* The head needs air under the navbar that the other sections do not: their content
      is centred in the screen, this one starts at the top. */
+  padding-top: calc(var(--header-h) + 32px);
   /* .section centres its single child; here the child must fill the screen instead. */
   align-items: stretch;
   justify-items: stretch;
-  padding: calc(var(--header-h) + 32px) var(--page-pad) var(--page-pad);
+  padding-bottom: var(--page-pad);
 }
 
 .closer {
   width: 100%;
-  max-width: var(--grid-content);
+  max-width: var(--page-max);
   margin-inline: auto;
   display: grid;
   /* The middle row takes what the head and the footer leave; the call to action sizes
@@ -628,12 +609,10 @@ img { display: block; max-width: 100%; height: auto; }
 }
 
 /* Title and text keep the columns they occupy on every other section. */
-/* The closer sits inside its own padding rather than on the page grid, so its head is a
-   plain three-part split on the same proportions. */
 .closer__head {
   display: grid;
   grid-template-columns: 1fr var(--frame-w) 1fr;
-  gap: var(--grid-gutter);
+  gap: var(--col-gap);
   align-items: start;
 }
 
