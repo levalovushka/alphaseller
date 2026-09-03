@@ -1,5 +1,55 @@
 # Worklog
 
+## 2026-09-03 — the reveal replays on every entry
+
+**What changed.** `assets/js/main.js`: the reveal's `once: true` is gone, replaced by
+`toggleActions: 'restart none restart none'` (`REVEAL.actions`). `catchUpReveals()` now
+tests the trigger's **end** instead of its start. `CONTEXT.md` §7 item 5.
+
+**Why.** Client: the reveal should run every time a section comes up, not once.
+
+**What follows.** `restart`, not `play`, because a finished timeline has nothing left to
+play — restart takes it back to 0 first. On both entries, so it runs coming back up the page
+as well as down. `none` on both exits, because reversing would pull the text off a section
+the visitor is still watching leave.
+
+The `catchUpReveals` change is not cosmetic. That sweep exists for reveals the page jumped
+over, and it snapped anything past `trigger.start` with `progress() === 0` straight to the
+end. With `once` gone it runs against a reveal that is entering *right now* — start behind
+us, end ahead, progress still 0 — and would have eaten the animation on every section
+change. Testing `end` means it only touches reveals that are genuinely behind.
+
+**How it was verified.** `localhost:4321` at 1440×900. The pane's rAF is frozen
+(`gsap.ticker.frame` stays 0), so ScrollTrigger was driven by hand: `window.scrollTo` for
+the position, `ScrollTrigger.update()` to evaluate, `gsap.ticker.tick()` to advance.
+
+Config on all four probed sections (`#hero`, `#capabilities`, `#speed`, `#audience`):
+`toggleActions: 'restart none restart none'`, `once` absent, trigger alive in
+`ScrollTrigger.getAll()` — 22 triggers on the page.
+
+`#capabilities`, three entries in a row (start 538, end 1404):
+
+| step | scrollY | progress | title opacity |
+|---|---|---|---|
+| first play | 900 | 1 | 1 |
+| back above start | 0 | 1 | 1 (no reverse, as designed) |
+| 2nd entry | 900 | **0** | 0 |
+| 2nd entry, ticking | 900 | 0.003 → rising | 0.011 |
+| 3rd entry | 900 | **0** | 0 |
+| 3rd entry, ticking | 900 | 0.002 → rising | 0.008 |
+
+So every entry resets to 0 and plays again, and the trigger is never killed — which is what
+`once: true` had been doing.
+
+Load path, fresh reload at the top: the hero's timeline is unpaused at progress 0 before
+anything is driven, and ticks take it up (0.058, title 0.23, with subtitle and button still
+at 0 — the late group). It animates on load now rather than being snapped to the end by the
+catch-up sweep. Console clean, no errors.
+
+**Left undone / not verified.** No rAF-driven playback was watched or screenshotted; the
+pane never ticks, so all of the above is hand-driven. Numbers unchanged and still mine: the
+0.3 lag, and the choice not to reverse on exit.
+
 ## 2026-09-03 — the section body flies in after its title
 
 **What changed.** `assets/js/main.js`: the reveal is now a `gsap.timeline` per section

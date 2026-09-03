@@ -862,7 +862,15 @@ gsap.matchMedia().add('(prefers-reduced-motion: no-preference)', () => {
    still trails its subtitle rather than arriving with it. The lag is a wait, not a slower
    move: both groups travel the same 24px over the same 0.8s, so the body reads as coming
    from the same place, only later. */
-const REVEAL = { travel: 24, duration: 0.8, ease: 'power2.out', stagger: 0.08, lag: 0.3 };
+const REVEAL = {
+  travel: 24,
+  duration: 0.8,
+  ease: 'power2.out',
+  stagger: 0.08,
+  lag: 0.3,
+  /* onEnter, onLeave, onEnterBack, onLeaveBack */
+  actions: 'restart none restart none',
+};
 
 const reveals = [];
 
@@ -885,9 +893,16 @@ gsap.matchMedia().add('(prefers-reduced-motion: no-preference)', () => {
 
     /* A timeline rather than one staggered tween, because the two groups need a gap
        between them that a single `stagger` cannot express. `catchUpReveals` below drives
-       it by `progress()`, which a timeline answers the same way a tween does. */
+       it by `progress()`, which a timeline answers the same way a tween does.
+
+       `restart` on both entries, `none` on both exits — the client wants it every time a
+       section comes up, not once (2026-09-03). Restart rather than play, so an entry
+       replays the whole thing instead of resuming a timeline that is already finished, and
+       it fires going up as well as down. Nothing on the way out: reversing would pull the
+       text back off a section the visitor is still looking at as it leaves, and there is no
+       need for it — `restart` does not care what state it is left in. */
     const tl = gsap.timeline({
-      scrollTrigger: { trigger: title, start: 'top 90%', once: true },
+      scrollTrigger: { trigger: title, start: 'top 90%', toggleActions: REVEAL.actions },
     });
 
     tl.from(title, { ...move });
@@ -910,12 +925,17 @@ ScrollTrigger.addEventListener('refresh', settleSlides);
 /* Any reveal the page is already past must render finished rather than sit at its
    from-state. ScrollTrigger does not fire `onEnter` for a trigger that is jumped over in
    one step — on load, on a deep link, or on a scroll long enough to clear a whole
-   section — and because these fire `once` they would never fire at all. Run the sweep
-   on load, on every refresh, and on each section change. */
+   section — so without this pass that section's text is left at opacity 0.
+
+   The test is the trigger's **end**, not its start: a reveal whose start is behind us but
+   whose end is not is the section being entered right now, and it is either playing or
+   about to be. Snapping that one to its finish would eat the very animation this sweep
+   exists to protect — and now that the reveal replays on every entry rather than firing
+   once, that collision comes up on every section change rather than only on a jump. */
 function catchUpReveals() {
   reveals.forEach((tween) => {
     const trigger = tween.scrollTrigger;
-    if (trigger && window.scrollY > trigger.start && tween.progress() === 0) {
+    if (trigger && window.scrollY > trigger.end && tween.progress() === 0) {
       tween.progress(1);
     }
   });
