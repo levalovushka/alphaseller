@@ -37,8 +37,9 @@
      vertical one, shifted so it crosses the floor exactly at 1440: the margin lands on
      **20** there (76 → 52 → 40 → 20 across the day). Note the header sits at 16
      (--header-pad-side), so the two are 4px apart on a laptop — not aligned. At 1920 none
-     of this shows — the side margin there comes from --page-max and the frame is at its own
-     cap — so the ceiling is only a guard for a screen wider than ~2700. */
+     of this shows — the side margin
+     there comes from --page-max and the frame is at its own cap — so the ceiling is only a
+     guard for a screen wider than ~2700. */
   --page-pad-x: clamp(20px, calc(4.4vw - 43.36px), 96px);
 
   /* Header: full-bleed. Its height follows from the padding plus the 52px
@@ -772,10 +773,10 @@ img { display: block; max-width: 100%; height: auto; }
 }
 
 .closer__head > * { min-width: 0; }
-.closer__head .section__subtitle { grid-column: 3; }
 
-/* At xxl a single text column is too narrow, so the heading is allowed to run under the
-   frame column as well. It still stops at its own measure, well clear of the subtitle. */
+/* At xxl a single text column is too narrow, so the heading runs under the frame column as
+   well. It still stops at its own measure. The subtitle that used to sit in column 3 was
+   dropped by the client on 2026-09-03 — the heading carries this screen alone. */
 .closer__head .section__title--xxl { grid-column: 1 / 3; }
 
 /* Nothing lives in the middle row: the frame itself comes to rest there, shrunk and

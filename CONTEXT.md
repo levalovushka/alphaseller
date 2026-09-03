@@ -98,13 +98,15 @@ hand rather than leaving them to `text-wrap: balance`.
 | 4 | Стиль магазина уникальный, как ты сам | Выбирай из стильных шаблонов и докручивай, пока не будет идеально подходить под твой вкус | Посмотреть шаблоны |
 | 5 | Управляй своим бизнесом на маркетплейсах | Даём аналитику по заказам, остаткам, логистике и помогаем выбрать лучшие карточки товаров | Подключить |
 | 6 | Работают ⏎ с нами | *(unused — the cases layout has no subtitle column)* | Все кейсы |
-| 7 | Продавай по своим правилам | Верни контроль над бизнесом и заставь его работать на твою мечту | Начать бесплатно |
+| 7 | Работает на твою мечту | — **dropped** | Начать бесплатно |
 
 - **Section 2 has no CTA.** `О платформе` was removed on 2026-09-02 once the frame got its
   tabs: the tabs are the thing to interact with there, and a second control next to them
   competed with the first.
 - Sections 1 and 7 share the CTA `Начать бесплатно`, and the header carries it too. **This
   repetition is intentional** — do not "fix" it.
+- **Section 7 has no subtitle** either, dropped on 2026-09-03: the heading carries that
+  screen alone, over the photograph.
 - Copy is v1 and will change. Keep every string in one place in the markup so swapping is
   cheap.
 

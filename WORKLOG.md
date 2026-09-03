@@ -1,5 +1,18 @@
 # Worklog
 
+## 2026-09-03 — closer heading rewritten, its subtitle dropped
+
+**What changed.** `index.html`: the closer's heading is now "Работает на твою мечту" and its
+subtitle is gone. `assets/css/base.css`: the `.closer__head .section__subtitle` placement
+rule removed with it. `CONTEXT.md` copy table updated.
+
+**Why.** Client's call — the heading carries that screen alone, over the photograph.
+
+**How it was verified.** Freshly loaded stylesheet. No `.section__subtitle` left anywhere in
+`#closer`. The heading sets in two lines at both widths — "Работает / на твою мечту" — at
+56px on 1440 and 64 on 1920, settles at opacity 1, and the screen still fits: head ends at
+224, footer starts at 684, footer bottom inside the viewport. No horizontal overflow.
+
 ## 2026-09-03 — the cases heading becomes "Работают с нами"
 
 **What changed.** `index.html`: `#audience`'s title from `С нами работают самые смелые` to
