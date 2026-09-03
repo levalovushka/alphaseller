@@ -1,5 +1,27 @@
 # Worklog
 
+## 2026-09-02 — squircle narrowed to the logo, buttons become pills
+
+**What changed.** `assets/css/base.css`: the `@supports (corner-shape: squircle)` block now
+lists only `.header__logo`; the second such block on `.case` is gone. New `--radius-pill:
+999px` drives `.btn` and `.frame-tab`. The frame, its slides, the panes and the cards keep
+`--radius-btn` (32) as plain rounded rectangles. `CONTEXT.md` updated in three places.
+
+**Why.** Client's call.
+
+**How it was verified.** Freshly loaded stylesheet, computed values read off the page:
+
+| element | radius | corner-shape |
+|---|---|---|
+| logo square | 32px | **squircle** |
+| header button | 999px | round |
+| section button | 999px | round |
+| cases button | 999px | round |
+| frame tab | 999px | round |
+| frame | 32px | round |
+| frame slide | 32px | round |
+| case card | 32px | round |
+
 ## 2026-09-03 — the wheel gets its own controller
 
 **What changed.** `assets/js/main.js` gains a `one gesture, one section` block at the

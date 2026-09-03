@@ -549,8 +549,8 @@ interpolation.
 Under the frame on section 2 sits a strip of three tabs — `Продвижение`, `Заказы`,
 `Логистика` — and the frame shows one pane per tab.
 
-They are pills on the buttons' own geometry — same `--btn-h` height, 20px side padding, radius
-32, squircle — so they are the site's existing control rather than a third one:
+They are pills on the buttons' own geometry — same `--btn-h` height, 20px side padding, full
+pill radius — so they are the site's existing control rather than a third one:
 
 | State | Look |
 |---|---|
@@ -645,15 +645,17 @@ default to bold — the title weight must be forced back to 500.
 | Logo — **mark only, no wordmark**, in a rounded square | 48×48 |
 | Header CTA button | 48 high |
 | Section CTA buttons (under the subtitle) | 40 high — was 44 until 2026-09-02 |
-| Corner radius — buttons, logo square, frame | 32 (`--radius-btn`) |
+| Corner radius — logo square, frame, slides, cards | 32 (`--radius-btn`) |
+| Corner radius — buttons and tabs | full pill (`--radius-pill: 999px`) |
 | Button side padding — both sizes | 20 (`--btn-pad-x`) |
 
-**Everything rounded on the page carries the same radius, 32.** `--radius: 16px` survives
-only as the base `--radius-btn` is derived from; nothing uses it directly. 32 exceeds half
-of both button heights (44 and 52), so browsers clamp it and the buttons render fully
-rounded. On the 52×52 logo square the squircle corner shape absorbs the clamp and it still
-reads as a rounded square — but the `border-radius` fallback in Safari and Firefox clamps to
-26 and draws a full circle. Known divergence, raised with the client.
+**Two shapes, not one.** The frame, its slides, the cards and the logo square are rounded at
+32 (`--radius-btn`); the buttons and the tabs are full pills (`--radius-pill`). `--radius:
+16px` survives only as the base `--radius-btn` is derived from; nothing uses it directly.
+
+The logo square used to rely on the squircle to survive the 32 radius on a 48px box; that is
+still true, and in Safari and Firefox the `border-radius` fallback clamps to 24 and draws a
+circle instead. Known divergence, raised with the client.
 
 **The logo square is the only squircle on the page** — `corner-shape: squircle` inside
 `@supports`, with `border-radius` as the fallback for Safari and Firefox. Everything else is

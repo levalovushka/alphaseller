@@ -105,12 +105,12 @@
   --tab-drop: 32px;
   --tab-elapsed: color-mix(in srgb, var(--ink) 78%, var(--ground));
 
-  /* Everything rounded on the page — the buttons, the logo square, the frame — takes
-     the same radius. `--radius` is only the base it is derived from; nothing uses it
-     directly. On the 44 and 52 high buttons the browser clamps 32 down, so they render
-     fully rounded. */
+  /* The frame, its slides, the cards and the logo square take the same 32. `--radius` is
+     only the base it is derived from; nothing uses it directly. */
   --radius: 16px;
   --radius-btn: calc(var(--radius) * 2);
+  /* Buttons and tabs are full pills — any number past half their height does it. */
+  --radius-pill: 999px;
 
   /* How long a button takes to fill in on hover. TODO: not specified by the client. */
   --hover: 0.2s;
@@ -199,17 +199,12 @@ img { display: block; max-width: 100%; height: auto; }
   border-radius: var(--radius-btn);
 }
 
-/* Squircle wherever a corner is rounded. `border-radius` above is the fallback for
-   browsers without CSS corner shaping (Safari, Firefox); Chromium takes this. */
+/* The logo square is the only squircle on the page. Everything else is either a plain
+   rounded rectangle (the frame, its slides, the cards) or a full pill (the buttons and the
+   tabs). `border-radius` above is the fallback for browsers without CSS corner shaping
+   (Safari, Firefox); Chromium takes this. */
 @supports (corner-shape: squircle) {
-  .header__logo,
-  .btn,
-  .stage-frame,
-  /* A slide and a pane each clip their own image, so they need the shape too —
-     `border-radius: inherit` carries the radius but not the corner shape. */
-  .stage-frame__slide,
-  .frame-pane,
-  .frame-tab { corner-shape: squircle; }
+  .header__logo { corner-shape: squircle; }
 }
 
 /* The mark is painted, not placed: a mask lets it take --ink-invert, so it stays the
@@ -248,7 +243,7 @@ img { display: block; max-width: 100%; height: auto; }
   color: var(--ink-invert);
   background: var(--ink);
   border: 0;
-  border-radius: var(--radius-btn);
+  border-radius: var(--radius-pill);
   cursor: pointer;
 }
 
@@ -460,7 +455,7 @@ img { display: block; max-width: 100%; height: auto; }
   /* Same optical 2px lift as .btn — YFF sits high in its line box. */
   padding: 2px var(--btn-pad-x) 0;
   border: 0;
-  border-radius: var(--radius-btn);
+  border-radius: var(--radius-pill);
   cursor: pointer;
   color: var(--ink);
   background-color: transparent;
@@ -564,10 +559,6 @@ img { display: block; max-width: 100%; height: auto; }
   /* The card keeps its own colours: white on the smoky section, whatever --ink is doing. */
   background: var(--c-white);
   color: var(--c-black);
-}
-
-@supports (corner-shape: squircle) {
-  .case { corner-shape: squircle; }
 }
 
 /* The partner logos ship white on transparent — there is no dark version of the source
