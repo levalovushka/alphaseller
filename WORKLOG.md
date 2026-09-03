@@ -1,5 +1,39 @@
 # Worklog
 
+## 2026-09-03 — the stack's seam, and a documentation audit
+
+**What changed.**
+
+- `base.css`: new `--case-lap` (the frame's radius). Every case card is a lap taller and pays
+  it back in its bottom padding, so it runs on **under** the card after it and the seam has
+  nothing showing through. Content box unchanged.
+- `CONTEXT.md`, audited against the code rather than from memory. Corrected: the page is
+  8 × 100vh, not 7 (two places); the cases row in §4's section table still said "carousel";
+  `--col-min` was quoted at 380 and is 356; the frame-width history ended at 544 and it is
+  520 at 1440 (720 at 1920); the squircle paragraph still quoted the old 32/44 radii; §7's
+  asset table listed `hero.webp` as the morph panel's ground, which is `hero-full.webp` now
+  (`hero.webp` is variant 2's frame photograph). Added the rows the table was missing: the
+  four partner logos and the closer's photograph. The Cases section gained the lap.
+- `base.css` comments: the morph panel's photograph and the hero slide's content are
+  per-variant now, and the `.deck-nav` note said the case carousel still had a copy of it.
+
+**Why.** Client on the seam: "из-за скруглений смотри какой подвох. снизу появляется такой
+разрывчик между ними нехороший" — with a screenshot. Both sides of the seam are rounded, so
+butting them edge to edge left a notch of the ground at each end. Same problem the frame's
+curtain has and the same answer: overlap by the radius. Then: "документацию приведи в порядок
+… важно чтобы всё было чистенько и актуально."
+
+**How it was verified.** At 1440, with the section parked and the picked card in front: the
+active card is 234 tall against a 210 slot, its bottom edge sits **24px** past the next card's
+top edge — exactly the radius — and `scrollHeight - clientHeight` is still 0 on all four, so
+nothing overflows. Looked at the seam at 5× (a temporary `scale(5)` on the deck): the rounded
+corners of each card sit over the card above, no ground anywhere in the seam. Full page
+reloaded afterwards: no console errors, frame radius 24, four hero buttons, no card overflow.
+The doc claims above were each checked against the file they describe.
+
+**Left undone.** The case copy is still mine and its numbers are invented. The text is four
+lines at 1440 and three at 1920.
+
 ## 2026-09-03 — the cases become a Wallet stack, in four colours, and the logos get re-cut
 
 **What changed.**

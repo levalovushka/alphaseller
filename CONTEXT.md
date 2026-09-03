@@ -72,7 +72,7 @@ Header + 8 sections + footer.
 | 3 | Speed | Black `#000000` — since 2026-09-03; was smoky white |
 | 4 | Customization | Black `#000000` |
 | 5 | Marketplaces | Smoky white `#E9EBEE` |
-| 6 | Cases | Smoky white `#E9EBEE` — the ordinary three columns; the cards are a carousel in the frame, see below |
+| 6 | Cases | Smoky white `#E9EBEE` — the ordinary three columns; the cards are a **Wallet-style stack** in the frame, in four colours, see below |
 | 7 | Growth tiles | Black `#000000` — six tiles, no frame, added 2026-09-03, see below |
 | 8 | Closer + footer | Black `#000000` — one screen, see below |
 
@@ -158,11 +158,18 @@ Section 6 went back to the ordinary three columns on 2026-09-03, on the client's
     on the card in front. Everything below a card's ledge is covered by the card ahead of it,
     so a click can only land on the strip; the keyboard gets the same thing for free.
   - The geometry is exact rather than tuned: every card is the same box, `frame - 3 ledges`
-    tall, and only its `top` differs — so the active card's bottom edge lands on the top edge
-    of the first card collected below it, whichever card is active. JS writes one number
-    (`--slot`) and one attribute (`data-side`); `calc()` does the rest, so a resize needs no
-    re-measuring. The stacking order never changes — a card is always covered by the next —
-    so the z-index is the DOM index, set once.
+    tall **plus `--case-lap`**, and only its `top` differs — so the active card's bottom edge
+    lands on the top edge of the first card collected below it, whichever card is active, and
+    then runs on under it by the lap. JS writes one number (`--slot`) and one attribute
+    (`data-side`); `calc()` does the rest, so a resize needs no re-measuring. The stacking
+    order never changes — a card is always covered by the next — so the z-index is the DOM
+    index, set once.
+  - **The lap is the radius, and it is not optional.** Butted edge to edge the cards left a
+    notch of the ground showing at each end of the seam, because both sides of it are rounded
+    — the client caught it on a screenshot. It is the same problem the frame's curtain has and
+    the same answer: overlap by the radius and let the card in front cover it. Anything less
+    leaves part of the notch. The lap is paid back in the card's bottom padding, so its
+    content box is exactly what it would be without it.
   - `--case-ledge` is `pad + logo + 8`, and **1440 is what sets all of it**: frame 390 = three
     ledges + an active card that needs 188 for its own content, which leaves about 60 a ledge.
     That is why the pad is 20 and the logo 32 rather than the 32 and 40 the single carousel
@@ -321,7 +328,8 @@ section's top padding gives.
 
 This also removed a standing problem. The old footer was ~344px tall, so it could never
 hold a snap point of its own and the closer could never centre itself before the page ran
-out of scroll. Now the page is exactly 7 × 100vh and the closer is the last snap.
+out of scroll. Now the page is exactly 8 × 100vh — it was 7 until the growth tiles were added on
+2026-09-03 — and the closer is the last snap.
 
 Footer element inventory, from Figma node `196:46921` — **inventory only, ignore its
 styling**. No red panel, no pills.
@@ -416,7 +424,7 @@ html     { scroll-snap-type: y mandatory; }
 .section { scroll-snap-align: start; scroll-snap-stop: always; }
 ```
 
-Every snap point is a section top, and the page is exactly 7 × 100vh, so the last section
+Every snap point is a section top, and the page is exactly 8 × 100vh, so the last section
 is the last snap. (The footer used to need a bottom-edge snap of its own because it was
 shorter than a screen; merging it into the closer removed that.)
 
@@ -786,7 +794,7 @@ client, not aligned.
 `--col-gap` is `clamp(52px, calc(5vw - 20px), 76px)` — 52 at 1440, 76 at 1920. It was raised
 +12 at both ends earlier the same day and then trimmed back at the laptop end only, which is
 why the ramp is 5vw: from 52 at 1440, a 2.5vw ramp cannot reach 76 at 1920. The two text columns have a floor of `--col-min`
-(380px) and the frame takes what is left, capped at 720px.
+(**356px**) and the frame takes what is left, capped at 720px.
 
 On a 1920 screen the side margin comes from `--page-max` (1704px), not from the padding —
 the container hits its cap before the padding matters. Both numbers have to move together to
@@ -865,9 +873,11 @@ cap had to come down with the gap, 760 → 752 → 720. If the xl goes back up, 
 adding to the gap again.
 
 For anyone tempted to re-tune the frame: it has been 416, 473, 553, 513, 480, 456, 424, 400,
-448, 496 and now **544** across this conversation. 400 was not chosen — it fell out of the gap going
-up — and 448 is the client's answer to it, 2026-09-03, paid for out of the columns
-(`--col-min` 380 → 356) rather than out of the page margin.
+448, 496, 544 and, since the side margin became the column gap, **520 at 1440** (720 at 1920,
+where the cap binds). 400 was not chosen — it fell out of the gap going up — and 448 was the
+client's answer to it, 2026-09-03, paid for out of the columns (`--col-min` 380 → 356) rather
+than out of the page margin. **Measure it, do not trust this line**: it is the last thing to
+move on this page and it has moved eleven times.
 
 **The arithmetic at 1440 leaves no slack.** 1440 = 2 margins + 2 columns + 2 gaps + frame,
 so every pixel the frame gains comes off one of the other three, and across 2026-09-03 the
@@ -945,7 +955,8 @@ Figma's own `#1E1E1E` canvas in as a full-bleed `<rect>`.
 | Section | File | Figma node | Source |
 |---|---|---|---|
 | 1 — hero | `assets/video/hero.mp4` + `assets/images/hero-poster.webp` | `247:42060` | screen recording, on a loop. See below |
-| 1 — hero, **the morph panel's ground** | `assets/images/hero.webp` | `196:53708` | 2236×1578 (1.42:1). Not in the frame — it backs the full-bleed morph panel, see §5. Re-pulled 2026-09-03 and byte-for-byte the same shot, so the file in the repo was already it |
+| 1 — hero, **variant 1's panel ground** | `assets/images/hero-full.webp` | `275:53708` | 1254×1254, the full square shot. Backs the morph panel on variant 1 at `50% 18% / cover`, see §5. Its bitmap is only 1254 on a 2030 node, which is why it is the softest of the four panels |
+| 1 — hero, **variant 2's frame photograph** | `assets/images/hero.webp` | `196:53708` | 2236×1578 (1.42:1), the tighter crop of the same studio shot. It backed the morph panel until the variants landed; now it is what variant 2 puts *in* the frame |
 | 1 — hero, **variant 4's panel ground** | `assets/images/hero-smoke.webp` | — | the same shoot on a light-grey studio ground, 1.79:1. Client-supplied PNG, 2752×1536, `cwebp -q 88 -resize 2560 0`, 96 KB. Same `center / cover` as variant 3's |
 | 1 — hero, **variant 3's panel ground** | `assets/images/hero-green.webp` | — | the man against the brand green, 1.79:1. Client-supplied PNG, 5504×3072, `cwebp -q 88 -resize 2560 0`, 220 KB. Wide enough to be *downscaled* at 1920 rather than blown up, which is variant 1's known softness. `center / cover` is enough here — a 1.79 source against a 1.6-2.1 viewport crops a little off whichever axis is tighter, unlike the square, which needed a solved vertical position |
 | 1 — hero, unused | `assets/images/hero-street.webp` | `265:39107` | a street shot that was in the frame for one round on 2026-09-03. 4096×2286 JPEG, centre-cropped to 4:3 and resized in one `cwebp -q 82 -crop 524 0 3048 2286 -resize 1440 1080` pass, 91 KB. Unwired, kept |
@@ -961,6 +972,8 @@ Figma's own `#1E1E1E` canvas in as a full-bleed `<rect>`.
 | 7 — growth tile, ads | `assets/images/growth-ads.webp` | `279:54331` | 3D Я + VK. @3x export, keyed off Figma's `#1E1E1E` canvas, `cwebp -q 90 -alpha_q 100`, 25 KB |
 | 7 — growth tile, loyalty | `assets/images/growth-loyalty.webp` | `279:54334` | 3D heart. Same treatment, 34 KB |
 | 7 — growth tile, bloggers | `assets/images/growth-bloggers.webp` | `276:54324` | 3D percent sign. Same treatment, 35 KB |
+| 6 — cases, the four partner logos | `assets/logos/kinash.webp`, `domodedovo.webp`, `12mesyatsev.webp`, `mreason.webp` | `32:29061` | white artwork that shipped on an opaque black rectangle; the black was keyed out in place on 2026-09-03 and M.Reason cropped to its own pill and inverted — see §4's Cases. 190/306/192 × 120, M.Reason 357×71 |
+| 8 — closer, the photographic ground | `assets/images/closer.webp` | `201:56528` | 1858×2000, 75 KB. Was the customization section's until the client moved it |
 | 7 — growth tile, partners | `assets/images/growth-partners.webp` | `279:54335` | 3D figure and plus. Same treatment, 28 KB |
 | 3 — speed | `assets/images/speed.webp` | `276:54234` (tablet inside it, `276:54238`) | the catalogue on an iPad. Instance export @3x, 2154×1641 (1.31:1). Figma paints its own `#1E1E1E` canvas behind the device, so the export was keyed on that colour and flattened onto black (`ffmpeg colorkey` + `overlay` on `color=black`) — the key also blackens the `#1E1E1E` text inside the screenshot, which at 520px wide is invisible. `cwebp -q 90`, 127 KB. **`contain`**, not cover |
 | 5 — marketplaces | `assets/images/marketplaces.webp` | `206:60376` | a woman in red on a street of falling paper. Node export 2298×1635 (1.41:1) → `cwebp -q 82 -resize 2236 0`, 2236×1591, 163 KB. Against the 4:3 frame `cover` trims about 6% off each side |
@@ -1314,14 +1327,14 @@ at 44 — so they went with it, 44 → 36. Changed at `--radius`, not at `--radi
 and the picture layers inherit it, the curtain cuts its rounded leading edge on the same
 token, and the morph panel measures the frame, so it lands on a true 24.
 
-The logo square used to rely on the squircle to survive the 32 radius on a 48px box; that is
-still true, and in Safari and Firefox the `border-radius` fallback clamps to 24 and draws a
-circle instead. Known divergence, raised with the client.
+The logo square used to rely on the squircle to survive its radius on a 48px box; that is
+still true, and in Safari and Firefox the `border-radius` fallback clamps and draws a circle
+instead. Known divergence, raised with the client.
 
 **The logo square is the only squircle on the page** — `corner-shape: squircle` inside
 `@supports`, with `border-radius` as the fallback for Safari and Firefox. Everything else is
-plain: the frame and its slides are rounded rectangles at 32, the cards at 44, and the
-buttons and the tabs are full pills (`--radius-pill: 999px`). The client narrowed it to the
+plain: the frame and its slides are rounded rectangles at **24** (32 until 2026-09-03), the
+growth tiles at **36**, and the buttons and the tabs are full pills (`--radius-pill: 999px`). The client narrowed it to the
 logo on 2026-09-02 — do not spread it back without asking.
 
 ### Button styles

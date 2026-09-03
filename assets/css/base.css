@@ -148,6 +148,12 @@
   --case-logo-h: 32px;
   --case-ledge: calc(var(--case-pad) + var(--case-logo-h) + 8px);
   --case-slide: 0.45s;
+  /* How far every card runs on **under** the card after it. Butted edge to edge the cards
+     left a notch of the ground showing at each end of the seam, because both sides of it are
+     rounded — the client caught it. Same problem the frame's curtain has, and the same
+     answer: overlap by the radius, and let the card in front cover it. Anything less than
+     the radius leaves part of the notch. */
+  --case-lap: var(--radius-btn);
 
   /* The frame and its slides take the same radius, and the curtain's rounded leading edge
      is cut on it too. 24 since 2026-09-03 — client asked for slightly tighter corners; it
@@ -512,9 +518,10 @@ img { display: block; max-width: 100%; height: auto; }
    the two can only ever be the same colour. It was green until then. The graphite is now
    only what shows under the photograph and if it fails to load.
 
-   The photograph on it is the studio shot, Figma `196:53708` — the same file that used to
-   sit in the frame, which is why it is `hero.webp` and not a new asset. It is the panel's
-   own background and does not move: as the clip closes, the panel is a shrinking window
+   The photograph on it is the full square studio shot, `hero-full.webp` (Figma
+   `275:53708`) — and only on variant 1; variants 3 and 4 put their own photograph here and
+   variant 2 leaves the panel flat. See "the four hero variants" at the foot of this file. It
+   is the panel's own background and does not move: as the clip closes, the panel is a shrinking window
    onto a photograph that stays where it is. Scaling the picture down with the panel would
    read as the whole composition being pulled into the frame instead — a different move,
    not asked for.
@@ -674,10 +681,10 @@ img { display: block; max-width: 100%; height: auto; }
   );
 }
 
-/* The hero slide holds the interface again — the looping screen recording, restored on the
-   client's word, 2026-09-03. The street photograph that was here for one round
-   (`assets/images/hero-street.webp`, Figma `265:39107`) is unwired but kept in the repo,
-   as is the studio `hero.webp`, which now backs the morph panel instead. */
+/* The hero slide holds the interface — the looping screen recording — on three of the four
+   variants, and the studio photograph (`hero.webp`) on variant 2; see "the four hero
+   variants" at the foot of this file. The street photograph that was in the frame for one
+   round (`assets/images/hero-street.webp`, Figma `265:39107`) is unwired but kept. */
 
 /* ---------- the capabilities tabs ----------
    Three panes behind one strip of tabs under the frame. The pane swap is a wall-clock
@@ -975,9 +982,11 @@ img { display: block; max-width: 100%; height: auto; }
   pointer-events: auto;
   /* Same as the tab strip: it hangs below the frame's box, so the curtain — cut to that
      box — cannot hide it, and it has to fade with its own slide instead. The deck's copy
-     used to get this for free, because the curtain clips the whole deck and the buttons
-     sit inside it; the carousel's does not, and without this the arrows stood under every
-     section on the page. */
+     gets this for free, because the curtain clips the whole deck and the buttons sit inside
+     it — but the copy the case carousel had did not, and without this its arrows stood under
+     every section on the page. That carousel is gone (the cases are a stack now, with no
+     arrows), so the style deck is the only user again; the rule stays because it is correct
+     for any future user that hangs below the box. */
   opacity: var(--t, 0);
 }
 
@@ -1091,10 +1100,14 @@ img { display: block; max-width: 100%; height: auto; }
 }
 
 /* Every card is the same box, and only its `top` differs — which is what makes the stack
-   arithmetic exact. The height is `frame - (n - 1) ledges` for all of them, so the active
-   card's bottom edge lands **exactly** on the top edge of the first card collected below
-   it, whichever card is active. Nothing overlaps, and nothing is re-measured on a resize:
-   both positions are `calc()`s off the ledge, and `--slot` is all JS writes.
+   arithmetic exact. The height is `frame - (n - 1) ledges` **plus the lap**, so the active
+   card's bottom edge lands exactly on the top edge of the first card collected below it and
+   then runs on underneath it by the lap, which is what hides the seam. Nothing is
+   re-measured on a resize: both positions are `calc()`s off the ledge, and `--slot` is all
+   JS writes.
+
+   The lap is paid back in the bottom padding, so the card's content box is exactly what it
+   would be without it — the text does not know the card runs on.
 
    `top`, not a transform, deliberately: four boxes laying out on a click is nothing — this
    is a discrete event, not a scrubbed one — and a transform would have to know the frame's
@@ -1106,7 +1119,7 @@ img { display: block; max-width: 100%; height: auto; }
   position: absolute;
   left: 0;
   right: 0;
-  height: calc(100% - 3 * var(--case-ledge));
+  height: calc(100% - 3 * var(--case-ledge) + var(--case-lap));
   /* Cards at or above the active one hang from the top of the frame... */
   top: calc(var(--slot, 0) * var(--case-ledge));
   transition: top var(--case-slide) cubic-bezier(0.32, 0.72, 0, 1);
@@ -1116,7 +1129,7 @@ img { display: block; max-width: 100%; height: auto; }
      shape it had as a single carousel card. */
   justify-content: space-between;
   gap: var(--case-pad);
-  padding: var(--case-pad);
+  padding: var(--case-pad) var(--case-pad) calc(var(--case-pad) + var(--case-lap));
   border-radius: inherit;
   /* The plate and the type are the card's own and do not follow --ink — see the four tones
      below. The white one is the fallback if a card ships without a tone. */
