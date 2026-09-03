@@ -287,9 +287,14 @@
   <section class="section section--closer" id="closer" data-theme="black" data-ink="light" data-photo="true">
     <div class="closer">
 
-      <!-- No subtitle here: the client dropped it, the heading carries the screen alone. -->
+      <!-- No subtitle here: the client dropped it. The heading and the page's last call to
+           action carry the screen between them; the button is the filled one from the
+           header, not the stroke the section bodies use — client's call, 2026-09-03. -->
       <div class="closer__head">
-        <h2 class="section__title section__title--xxl">Работает на&nbsp;твою мечту</h2>
+        <div class="closer__lead">
+          <h2 class="section__title section__title--xxl">Альфа Селлер работает на&nbsp;твою мечту</h2>
+          <button class="btn" type="button">Начать бесплатно</button>
+        </div>
       </div>
 
       <div class="closer__gap" aria-hidden="true"></div>

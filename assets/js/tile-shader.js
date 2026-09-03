@@ -1,14 +1,24 @@
-/* Alpha Seller — the shader on the last growth tile.
+/* Alpha Seller — the orb on the last growth tile.
 
-   A warped fractal-noise field in the brand green, the standard domain-warping recipe:
-   noise sampled at a point that has itself been pushed around by two more layers of noise,
-   which is what gives the slow marbled drift rather than plain moving blobs. Everything is
-   in this file and in WebGL 1, so the demo still runs with no network.
+   A voice-assistant / "thinking" orb, in the brand green. Written here in WebGL 1 rather
+   than pulled in: the demo has to run with no network, and the libraries that do this
+   (react-bits' Orb on OGL, ElevenLabs' UI orb, the Skia one for React Native) are all React
+   and would cost more than the tile is worth. The **technique** is theirs, and it is the one
+   every orb in that family uses:
 
-   It only draws while the tile is on screen — an IntersectionObserver starts and stops the
-   loop — and it draws a single frame and stops for a visitor who asked for less motion.
-   The canvas is sized from its own box, capped at 2x device pixels: it is a 388px square at
-   most, and there is no point paying for more. */
+     - polar coordinates around a centre, so everything is written as a radius and an angle;
+     - a noise field modulating that radius, which is what makes the edge breathe instead of
+       being a circle;
+     - inverse-square falloffs (`1 / (1 + k*d*d)`) standing in for lights, rather than any
+       real lighting: one for the rim, one or two more for the highlights travelling around
+       inside it;
+     - smoothstep rings for the inner and outer fades, so the body has depth;
+     - on hover: the orb leans toward the pointer, its uv is rippled, and the whole thing
+       brightens and speeds up.
+
+   Everything the pointer drives is smoothed in JS (an exponential approach per frame), so
+   the orb follows the hand rather than snapping to it, and settles back to the middle when
+   the pointer leaves. */
 
 const canvas = document.querySelector('.tile__shader');
 
@@ -21,73 +31,115 @@ if (canvas) {
       void main() { gl_Position = vec4(a_pos, 0.0, 1.0); }
     `;
 
-    /* --ground is black and --c-green is #A6ED00; both are written in here rather than read
-       from CSS, because this tile keeps its own colours the way the case cards do. */
+    /* The greens are the brand's `#A6ED00` and two derivations of it. They live here rather
+       than being read from CSS because this tile keeps its own colours, the way the case
+       cards do. */
     const FRAG = `
       precision highp float;
 
       uniform vec2 u_res;
       uniform float u_time;
+      uniform vec2 u_mouse;    /* in pixels, canvas space; the tile's centre when idle */
+      uniform float u_hover;   /* 0..1, smoothed in JS */
 
-      float hash(vec2 p) {
-        return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
+      float hash(vec3 p) {
+        p = fract(p * 0.3183099 + vec3(0.1, 0.2, 0.3));
+        p *= 17.0;
+        return fract(p.x * p.y * p.z * (p.x + p.y + p.z));
       }
 
-      /* Value noise with a smoothstep fade — cheap, and smooth enough that four octaves of
-         it read as cloud rather than as a grid. */
-      float noise(vec2 p) {
-        vec2 i = floor(p);
-        vec2 f = fract(p);
-        vec2 u = f * f * (3.0 - 2.0 * f);
-        float a = hash(i);
-        float b = hash(i + vec2(1.0, 0.0));
-        float c = hash(i + vec2(0.0, 1.0));
-        float d = hash(i + vec2(1.0, 1.0));
-        return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
+      /* Value noise in 3D — the third axis is time, so the field evolves instead of
+         scrolling. Smooth enough at three octaves to read as breath. */
+      float noise(vec3 x) {
+        vec3 i = floor(x);
+        vec3 f = fract(x);
+        f = f * f * (3.0 - 2.0 * f);
+        return mix(
+          mix(mix(hash(i + vec3(0, 0, 0)), hash(i + vec3(1, 0, 0)), f.x),
+              mix(hash(i + vec3(0, 1, 0)), hash(i + vec3(1, 1, 0)), f.x), f.y),
+          mix(mix(hash(i + vec3(0, 0, 1)), hash(i + vec3(1, 0, 1)), f.x),
+              mix(hash(i + vec3(0, 1, 1)), hash(i + vec3(1, 1, 1)), f.x), f.y),
+          f.z);
       }
 
-      float fbm(vec2 p) {
+      float fbm(vec3 p) {
         float v = 0.0;
         float amp = 0.5;
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 3; i++) {
           v += amp * noise(p);
-          p *= 2.02;
+          p *= 2.03;
           amp *= 0.5;
         }
         return v;
       }
 
+      /* The two falloffs every orb of this kind is built out of: linear for a soft wash,
+         quadratic for a point of light. */
+      float wash(float intensity, float k, float d) { return intensity / (1.0 + k * d); }
+      float lamp(float intensity, float k, float d) { return intensity / (1.0 + k * d * d); }
+
       void main() {
-        /* Square-corrected coordinates, so the pattern does not stretch with the box. */
-        vec2 uv = gl_FragCoord.xy / u_res;
-        vec2 p = uv * 2.2;
-        p.x *= u_res.x / u_res.y;
+        float size = min(u_res.x, u_res.y);
+        vec2 uv = (gl_FragCoord.xy - 0.5 * u_res) / size * 2.0;
+        vec2 mouse = (u_mouse - 0.5 * u_res) / size * 2.0;
 
-        float t = u_time * 0.05;
+        /* The orb sits low in the tile: the text is at the top and must stay on ink, not on
+           the body of the thing. */
+        uv.y += 0.34;
+        mouse.y += 0.34;
 
-        /* Two warps. The second is sampled at the point the first moved, which is where the
-           folding and the sheen come from. */
-        vec2 q = vec2(fbm(p + vec2(0.0, t)), fbm(p + vec2(5.2, 1.3) - t));
-        vec2 r = vec2(
-          fbm(p + 3.4 * q + vec2(1.7, 9.2) + 0.6 * t),
-          fbm(p + 3.4 * q + vec2(8.3, 2.8) - 0.5 * t)
-        );
-        float f = fbm(p + 3.6 * r);
+        float t = u_time * (1.0 + 0.5 * u_hover);
 
-        vec3 ink = vec3(0.03, 0.03, 0.03);
+        /* Lean toward the pointer, and ripple with it. Both are the hover alone — at rest
+           the orb is centred and smooth. */
+        uv -= 0.16 * u_hover * mouse;
+        uv += 0.022 * u_hover * sin(9.0 * uv.yx + t * 1.6);
+
+        float len = length(uv);
+        float ang = atan(uv.y, uv.x);
+
+        /* The breathing edge: a slow pulse plus a noise field, so the silhouette is never
+           twice the same and never a circle. */
+        float n = fbm(vec3(uv * 1.6, t * 0.30));
+        float radius = 0.52 + 0.030 * sin(t * 0.9) + 0.115 * (n - 0.5) + 0.045 * u_hover;
+
+        /* Distance to the edge, which is what the rim light is attached to. */
+        float edge = abs(len - radius);
+        float rim = wash(1.0, 26.0, edge) * smoothstep(radius * 1.55, radius * 0.55, len);
+
+        /* Two highlights orbiting inside, at different speeds and in opposite directions —
+           the "thinking" motion. A third, slower one keeps the body from ever going flat. */
+        vec2 p1 = vec2(cos(t * 0.62), sin(t * 0.62)) * radius * 0.62;
+        vec2 p2 = vec2(cos(-t * 0.41 + 2.1), sin(-t * 0.41 + 2.1)) * radius * 0.74;
+        vec2 p3 = vec2(cos(t * 0.23 + 4.0), sin(t * 0.23 + 4.0)) * radius * 0.35;
+        float l1 = lamp(0.85, 16.0, distance(uv, p1));
+        float l2 = lamp(0.65, 22.0, distance(uv, p2));
+        float l3 = lamp(0.45, 9.0, distance(uv, p3));
+
+        /* Body and halo. The body is filled inward from the edge; the halo is what escapes
+           it, and it is what makes the tile glow rather than hold a sticker. */
+        float body = smoothstep(radius + 0.02, radius - 0.30, len);
+        float halo = exp(-3.2 * max(len - radius, 0.0) * 6.0);
+
         vec3 green = vec3(0.651, 0.929, 0.0);   /* #A6ED00 */
-        /* Deeper green in the troughs so the field has a body and not just a glow. */
-        vec3 deep = green * 0.22;
+        vec3 mint = mix(green, vec3(1.0), 0.55);
+        vec3 deep = green * 0.18;
 
-        vec3 col = mix(ink, deep, clamp(f * 1.9, 0.0, 1.0));
-        col = mix(col, green, clamp(pow(f, 2.2) * 2.4, 0.0, 1.0));
-        /* The highlight rides the warp, not the noise, so it moves across the folds. */
-        col += green * pow(clamp(r.x, 0.0, 1.0), 5.0) * 0.55;
-        /* Dark at the top, where the text sits, bright at the foot — the tile has to stay
-           legible, and gl_FragCoord counts up from the bottom, so this reads inverted. */
-        col *= 0.35 + 0.85 * (1.0 - uv.y);
+        /* Colour by depth: deep green in the body, brand green where the lights fall, mint
+           at their cores. The angular term keeps a slow sweep going around the rim. */
+        float sweep = 0.5 + 0.5 * cos(ang * 1.0 + t * 0.8);
+        vec3 col = deep * body;
+        col += green * (rim * (0.55 + 0.45 * sweep));
+        col += green * (l1 + l2) * body;
+        col += mint * (l1 * l1 * 0.9 + l2 * l2 * 0.6 + l3 * 0.25) * body;
+        col += green * halo * (0.22 + 0.20 * u_hover);
 
-        gl_FragColor = vec4(col, 1.0);
+        /* A touch of grain, so the gradients do not band on a dark ground. */
+        col += (hash(vec3(gl_FragCoord.xy, floor(u_time * 24.0))) - 0.5) * 0.015;
+
+        /* Sits on the tile's own near-black rather than on pure black. */
+        vec3 ink = vec3(0.102, 0.094, 0.090);
+        gl_FragColor = vec4(ink + col, 1.0);
       }
     `;
 
@@ -108,8 +160,8 @@ if (canvas) {
       gl.linkProgram(program);
       gl.useProgram(program);
 
-      /* One triangle that covers the clip space — cheaper than two, and nothing here needs
-         a quad's seam. */
+      /* One triangle covering clip space — cheaper than two, and nothing here needs a quad's
+         seam. */
       const buffer = gl.createBuffer();
       gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
@@ -120,10 +172,19 @@ if (canvas) {
 
       const u_res = gl.getUniformLocation(program, 'u_res');
       const u_time = gl.getUniformLocation(program, 'u_time');
+      const u_mouse = gl.getUniformLocation(program, 'u_mouse');
+      const u_hover = gl.getUniformLocation(program, 'u_hover');
 
+      const tile = canvas.closest('.tile') || canvas;
       const stillness = window.matchMedia('(prefers-reduced-motion: reduce)');
+
       let raf = null;
       let started = 0;
+
+      /* Where the pointer is, and where the shader currently believes it is. The gap between
+         the two is the whole feel of it: the orb never arrives at the cursor, it leans. */
+      const target = { x: 0.5, y: 0.5, hover: 0 };
+      const eased = { x: 0.5, y: 0.5, hover: 0 };
 
       const size = () => {
         const box = canvas.getBoundingClientRect();
@@ -140,11 +201,24 @@ if (canvas) {
         size();
         gl.uniform2f(u_res, canvas.width, canvas.height);
         gl.uniform1f(u_time, seconds);
+        /* The uniform is in canvas pixels and GL counts y up from the bottom. */
+        gl.uniform2f(u_mouse, eased.x * canvas.width, (1 - eased.y) * canvas.height);
+        gl.uniform1f(u_hover, eased.hover);
         gl.drawArrays(gl.TRIANGLES, 0, 3);
+      };
+
+      /* Exponential approach, framerate-independent enough for this: the constants are a
+         third of the way per frame at 60fps for the position, a fifth for the hover, so the
+         lean lands in about a tenth of a second and the brightening a shade slower. */
+      const follow = () => {
+        eased.x += (target.x - eased.x) * 0.09;
+        eased.y += (target.y - eased.y) * 0.09;
+        eased.hover += (target.hover - eased.hover) * 0.06;
       };
 
       const frame = (now) => {
         if (!started) started = now;
+        follow();
         draw((now - started) / 1000);
         raf = requestAnimationFrame(frame);
       };
@@ -160,8 +234,22 @@ if (canvas) {
         }
       };
 
-      /* The tile is one screen down a page of eight; there is no reason to burn a frame
-         budget on it until it is in view. */
+      /* The pointer is tracked on the tile, not the canvas: the canvas is under the text,
+         and a pointer over the words is still a pointer over the tile. */
+      tile.addEventListener('pointermove', (e) => {
+        const box = canvas.getBoundingClientRect();
+        target.x = (e.clientX - box.left) / box.width;
+        target.y = (e.clientY - box.top) / box.height;
+        target.hover = 1;
+      });
+
+      tile.addEventListener('pointerleave', () => {
+        target.x = 0.5;
+        target.y = 0.5;
+        target.hover = 0;
+      });
+
+      /* No reason to burn a frame budget on a tile a screen and a half down the page. */
       new IntersectionObserver(
         (entries) => entries.forEach((entry) => run(entry.isIntersecting)),
         { threshold: 0 }

@@ -203,19 +203,27 @@ and the copy in Figma (`276:54325`): "он будет черный, без ра�
     was keyed on that colour (`ffmpeg colorkey`, threshold 0.02) and written as a webp with
     alpha. Without it every tile would carry a grey slab across its foot. Fewer than 30
     pixels per image were bitten out of the object itself.
-  - **The sixth tile's ground is a shader** — `assets/js/tile-shader.js`, a WebGL 1 canvas
-    filling the tile under the text. Domain-warped value-noise fbm in the brand green
-    (`#A6ED00`) over near-black, with a highlight riding the warp. It is dark at the top and
-    bright at the foot, so the white text keeps its contrast: measured luminance 39-51 under
-    the text against 63-81 at the bottom. The loop runs only while the tile is on screen (an
+  - **The sixth tile's ground is a voice-assistant orb** — `assets/js/tile-shader.js`, a
+    WebGL 1 canvas filling the tile under the text, in the brand green (`#A6ED00`). The first
+    cut was a flat marbled field; the client rejected it on 2026-09-03: "нужно что-то более
+    похожее на thinking / voice assistant анимацию… и надо чтобы на мышь реагировал."
+  - **The technique**, which is what every orb in that family (react-bits' Orb on OGL,
+    ElevenLabs' UI orb, the Skia `react-native-magic-orb`) is built out of:
+    polar coordinates around a centre; a noise field modulating the **radius**, so the edge
+    breathes instead of being a circle; inverse-square falloffs standing in for lights — one
+    on the rim, three orbiting inside at different speeds and directions, which is the
+    "thinking" motion; smoothstep rings for the inner fade and an exponential halo outside.
+    Nothing is imported: the demo runs with no network, and every library in that space is
+    React.
+  - **The pointer**: the orb leans toward it (16% of the way), the uv ripples with it, and
+    the whole thing brightens and runs half again as fast. Everything the pointer drives is
+    eased in JS toward its target each frame, so it follows the hand rather than snapping,
+    and settles back to the middle on `pointerleave`. Tracked on the **tile**, not the
+    canvas — a pointer over the words is still a pointer over the tile.
+  - It is dark where the text is (measured luminance ≤26 across the text's own strip at
+    1920) and bright at the foot. The loop runs only while the tile is on screen (an
     IntersectionObserver) and draws a single frame for a visitor who asked for less motion.
-    Client's brief: "своруй где-нибудь красивый переливистый шейдер… зеленый наш можно
-    использовать как базу". **This is the second place the brand green is back**, after the
-    red on the bank tile.
-- Tile ground is graphite `#1A1817` on the section's black, after the cash.app reference the
-  client attached. Type is style md, like every other paragraph.
-- This is the section that carries `data-frame="none"`: the frame leaves upward on it, the
-  way it used to leave on the cases screen.
+    **This is the second place the brand green is back**, after the red on the bank tile.
 
 **Tile copy**, shortened by me from the client's Figma pairs, which were a title plus a
 sentence each. His originals mixed «ты» and «вы» (`Охвати` next to `Повышайте`); these are

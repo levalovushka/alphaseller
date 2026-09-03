@@ -1,5 +1,34 @@
 # Worklog
 
+## 2026-09-03 — the tile shader becomes a voice-assistant orb that follows the pointer
+
+**What changed.** `assets/js/tile-shader.js` rewritten. The flat marbled field is gone; the
+tile now holds an orb: polar coordinates, a noise field on the radius so the edge breathes,
+a rim light and three highlights orbiting inside at different speeds, a smoothstep body and
+an exponential halo. New uniforms `u_mouse` and `u_hover`, both eased in JS each frame; the
+tile leans the orb toward the pointer, ripples the field, brightens and speeds up, and
+settles back on `pointerleave`. `CONTEXT.md` records the technique and the reference points.
+
+**Why.** Client rejected the first shader — he wants the thinking / voice-assistant look and
+a reaction to the mouse. I read how the ones in that space are built (react-bits' Orb source
+on OGL, ElevenLabs' UI orb, `react-native-magic-orb`, a couple of write-ups) and wrote ours
+on the same technique rather than importing: they are all React, and the demo has to run
+with no network.
+
+**How verified.** Live page at 1440×900 and 1920×1080. The orb is where it should be — the
+lit centroid sits in the lower third at rest — and the field responds to the uniforms: with
+`u_hover` 1 and the pointer left the centroid moves to 0.436 of the width, right 0.548, top
+0.421 of the height against 0.330 at rest, and the lit area grows from 8.8k to 10.9k samples.
+Time advances the field. The text stays on ink: luminance ≤26 across the strip the text
+actually occupies at 1920. `pointermove` and `pointerleave` dispatched on the tile without
+error; the canvas covers the tile and sits under the text (`z-index` 1 on the paragraph).
+**Not verified: the motion and the easing.** The Browser pane is hidden here, so
+`requestAnimationFrame` never fires — every measurement above came from driving the uniforms
+by hand and drawing single frames.
+
+**Left undone.** Nothing outstanding; the feel of the lean and the speed are one constant
+each if the client wants them different.
+
 ## 2026-09-03 — smaller stills, the heart into its corner, a shader on the last tile
 
 **What changed.** `assets/css/base.css`: `.tile__art` is 30% tall (was 38) and stands on the
