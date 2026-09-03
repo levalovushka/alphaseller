@@ -1,5 +1,30 @@
 # Worklog
 
+## 2026-09-03 — the hero headline goes to three hand-set lines
+
+**What changed.** `index.html`: the `<h1>` becomes
+`Одна платформа<br>для&nbsp;управления<br>ecom-бизнесом`, and the `<title>` follows in plain
+text. `CONTEXT.md` §4: the section 1 copy row, in the same `⏎` notation the other rows use.
+
+**Why.** Client's call, breaks included — he wrote the line as three.
+
+**How it was verified.** `localhost:4321`, measured on the live DOM at two widths and then
+seen in a screenshot at 1440:
+
+| viewport | font | text column | the three lines | overflow |
+|---|---|---|---|---|
+| 1440 | 32 / 32 | 356 (its `--col-min` floor) | 259 / 245 / 246 | none |
+| 1920 | 40 / 40 | 416 | 324 / 306 / 308 | none |
+
+Two `<br>`, three lines, and every line clears its column with ~100px to spare, so the
+breaks are the only thing setting the wrap at either width — nothing re-wraps behind them.
+The `&nbsp;` in "для управления" is therefore doing nothing at these sizes; it is there so
+the pair cannot split if the column ever gets narrower.
+
+**Left undone.** Hand-set breaks are width-blind by definition: below ~1200 the column
+narrows further and a line could wrap inside itself. The page is a desktop demo, so that is
+not in scope — noted rather than guarded.
+
 ## 2026-09-03 — the hero headline becomes "весь онлайн-бизнес"
 
 **What changed.** `index.html`: the `<h1>` and the `<title>`, "Одна платформа
