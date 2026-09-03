@@ -870,6 +870,12 @@ img { display: block; max-width: 100%; height: auto; }
   display: flex;
   gap: var(--tab-gap);
   pointer-events: auto;
+  /* Same as the tab strip: it hangs below the frame's box, so the curtain — cut to that
+     box — cannot hide it, and it has to fade with its own slide instead. The deck's copy
+     used to get this for free, because the curtain clips the whole deck and the buttons
+     sit inside it; the carousel's does not, and without this the arrows stood under every
+     section on the page. */
+  opacity: var(--t, 0);
 }
 
 .deck-arrow {

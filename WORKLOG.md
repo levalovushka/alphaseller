@@ -1,5 +1,21 @@
 # Worklog
 
+## 2026-09-03 — the carousel's arrows stood under every section
+
+**What changed.** `assets/css/base.css`: `.deck-nav` fades with its own slide
+(`opacity: var(--t, 0)`), the way the tab strip already did.
+
+**Why.** My bug, shipped in 73578e4. The arrows hang below the frame's box, so the curtain —
+cut to that box — cannot hide them. The style deck's copy got away with it because the
+curtain clips the whole deck and its buttons sit inside it; the carousel's track is what is
+clipped, and its arrows are outside, so they stood on all eight screens.
+
+**How verified.** Live page at 1440×900, walking every section and reading both nav strips'
+computed opacity: 1 only on `customization` and `audience` respectively, 0 on the other six
+screens for both.
+
+**Left undone.** Nothing for this fix.
+
 ## 2026-09-03 — hero variant 3 becomes the green photograph with the interface in the frame
 
 **What changed.**
