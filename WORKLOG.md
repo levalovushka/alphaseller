@@ -1,5 +1,30 @@
 # Worklog
 
+## 2026-09-03 — hero variant 3 becomes the green photograph with the interface in the frame
+
+**What changed.**
+
+- New `assets/images/hero-green.webp` (2560×1429, 220 KB) — the man against the brand green,
+  from a client-supplied 5504×3072 PNG, `cwebp -q 88 -resize 2560 0`.
+- `base.css`: `:root[data-hero="3"]` sets `--morph-bg` to that file at `center / cover` over
+  green; the frame's two layers are now swapped per variant explicitly (recording on 1 and 3,
+  the man on 2 and 4) instead of "anything but 1".
+- `main.js`: the variant table gains `HERO_VIDEO = [1, 3]`, and `hero:variant` carries
+  `video` so the video controller stops decoding on the two variants that hide it.
+- `CONTEXT.md`: §5's variant table and §7's asset table.
+
+**Why.** Client: variant 3 was a flat green with the man in the frame; he replaced it with the
+photograph he was shot against green in, built like variant 1 — the man on the panel, the
+interface in the frame.
+
+**How it was verified.** In the live page at 1440: clicked variant 3, `--morph-bg` resolves to
+`hero-green.webp`, the video's `display` is `block` and it is playing (`paused: false`), the
+photo layer is `display: none`, `--ink` is `rgb(0, 0, 0)`. Screenshot taken — the man reads
+full-bleed with the dashboard over his torso and his head clear above the frame.
+
+**Left undone / known.** The 1.79:1 source against a 1.6 viewport crops the sides, so at 1440
+the man sits a little left of where he does at 1920. Not raised with the client yet.
+
 ## 2026-09-03 — cases into the frame as a carousel, and a new tiles section
 
 **What changed.** `index.html`: `#audience` is an ordinary three-column section again —

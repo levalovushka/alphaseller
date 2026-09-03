@@ -465,7 +465,7 @@ if (heroVideo) {
   };
 
   document.addEventListener('hero:variant', (e) => {
-    dropped = e.detail.variant !== 1;
+    dropped = !e.detail.video;
     /* The cache is what makes the gate edge-triggered, and the edge here is the variant,
        not `--t`. Clear it so the next call acts. */
     playing = null;
@@ -1140,6 +1140,10 @@ if (heroSwitch) {
   const VARIANTS = [1, 2, 3, 4];
   /* Not a knob — it follows from the panel's ground. See the table in base.css. */
   const HERO_INK = { 1: 'light', 2: 'light', 3: 'dark', 4: 'dark' };
+  /* Which variants keep the screen recording in the frame. The other two put the man there
+     instead, and CSS swaps the two layers on the same `data-hero`; this is only so the video
+     controller can stop decoding. */
+  const HERO_VIDEO = [1, 3];
   const STORE = 'alphaseller:hero-variant';
 
   function setVariant(variant) {
@@ -1155,7 +1159,11 @@ if (heroSwitch) {
        a cached pair. */
     settleColours();
 
-    document.dispatchEvent(new CustomEvent('hero:variant', { detail: { variant } }));
+    document.dispatchEvent(
+      new CustomEvent('hero:variant', {
+        detail: { variant, video: HERO_VIDEO.includes(variant) },
+      })
+    );
 
     try {
       localStorage.setItem(STORE, String(variant));

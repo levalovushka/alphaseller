@@ -1173,8 +1173,12 @@ img { display: block; max-width: 100%; height: auto; }
    |---|---|---|---|
    | 1 | graphite + the full square photograph at 50% 18% | the looping screen recording | white |
    | 2 | flat black | the studio photograph | white |
-   | 3 | flat brand green | the studio photograph | black |
+   | 3 | the green-ground photograph, `hero-green.webp` | the looping screen recording | black |
    | 4 | flat smoke | the studio photograph | black |
+
+   Variant 3 was a flat green with the man in the frame for one round on 2026-09-03; the
+   client replaced it with the photograph he was shot against green in, built like variant 1 —
+   the man on the panel, the interface in the frame.
 
    The ink is not a fourth knob — it follows from the ground and JS writes it on the hero
    section's `data-ink`, which the whole scrubbed colour pass already reads. White type on
@@ -1191,13 +1195,26 @@ img { display: block; max-width: 100%; height: auto; }
 }
 
 :root[data-hero="2"] { --morph-bg: var(--c-black); }
-:root[data-hero="3"] { --morph-bg: var(--c-green); }
 :root[data-hero="4"] { --morph-bg: var(--c-smoke); }
 
-/* The frame holds one or the other, never both. `display` and not opacity: the video keeps
-   decoding behind a transparent layer, and JS pauses it on top of this. */
-:root[data-hero="1"] .hero-photo { display: none; }
-:root:not([data-hero="1"]) .stage-frame__video { display: none; }
+/* Variant 3's photograph is 1.79:1 against a 1.6-2.1 viewport, so `cover` crops a little off
+   whichever axis is tighter and `center` is enough — unlike variant 1's square, which needed
+   a solved vertical position. Green underneath for the moment before it decodes and if it
+   fails: it is the ground the shot was taken against. Shipped at 2560 from a 5504 original,
+   `cwebp -q 88`, 220 KB — wide enough to be downscaled at 1920 rather than blown up, which
+   is variant 1's known softness. */
+:root[data-hero="3"] {
+  --morph-bg: var(--c-green) url("../images/hero-green.webp") center / cover no-repeat;
+}
+
+/* The frame holds one or the other, never both — the interface on 1 and 3, the man on 2 and
+   4. `display` and not opacity: the video keeps decoding behind a transparent layer, and JS
+   pauses it on top of this. */
+:root[data-hero="1"] .hero-photo,
+:root[data-hero="3"] .hero-photo { display: none; }
+
+:root[data-hero="2"] .stage-frame__video,
+:root[data-hero="4"] .stage-frame__video { display: none; }
 
 /* ---------- the variant switch ----------
    Deliberately not designed: four 18px squares hugging the corner on the header's own 16px
