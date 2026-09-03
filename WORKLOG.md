@@ -1,5 +1,31 @@
 # Worklog
 
+## 2026-09-03 — hero variant 4 becomes the light-grey photograph, interface in the frame
+
+**What changed.**
+
+- New `assets/images/hero-smoke.webp` (2560×1429, 96 KB) — the same shoot on a light-grey
+  studio ground, from a client-supplied 2752×1536 PNG, `cwebp -q 88 -resize 2560 0`.
+- `base.css`: `:root[data-hero="4"]` sets `--morph-bg` to that file at `center / cover` over
+  smoke; the frame's photo layer is now hidden on 1, 3 **and** 4 — variant 2 is the only one
+  left with the man in the frame.
+- `main.js`: `HERO_VIDEO` becomes `[1, 3, 4]`.
+- `CONTEXT.md` §5 and §7, and the variant table in `base.css`.
+
+**Why.** Client, the same call he made for variant 3: the flat ground goes, the photograph he
+was shot against it in takes the panel, and the frame goes back to the interface recording.
+
+**How it was verified.** In the live page at 1440: variant 4 clicked, `--morph-bg` resolves to
+`hero-smoke.webp` over `rgb(233,235,238)`, the video's `display` is `block`, the photo layer
+`none`, `--ink` black. Froze the crossing at t = 0.5 with snapping off: `clip-path:
+inset(128.5px 230px 126.5px round 16px)` and the panel reads as a distinct rounded rectangle
+against the smoke ground — **the invisible-shrink problem this variant had as a flat colour is
+gone**, the photograph's content gives the edge something to show against.
+
+**Left undone / known.** The load-time autoplay is still blocked in the preview pane
+(`paused: true` on a fresh navigate), so variants 1, 3 and 4 show the poster there until
+`play()` gets a gesture. Environment, not the page.
+
 ## 2026-09-03 — the cases heading drops to xl
 
 **What changed.** `index.html`: `#audience`'s heading loses `section__title--xxl`.

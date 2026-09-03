@@ -1177,28 +1177,29 @@ img { display: block; max-width: 100%; height: auto; }
    | 1 | graphite + the full square photograph at 50% 18% | the looping screen recording | white |
    | 2 | flat black | the studio photograph | white |
    | 3 | the green-ground photograph, `hero-green.webp` | the looping screen recording | black |
-   | 4 | flat smoke | the studio photograph | black |
+   | 4 | the light-grey photograph, `hero-smoke.webp` | the looping screen recording | black |
 
-   Variant 3 was a flat green with the man in the frame for one round on 2026-09-03; the
-   client replaced it with the photograph he was shot against green in, built like variant 1 —
-   the man on the panel, the interface in the frame.
+   Variants 3 and 4 were flat colours with the man in the frame for one round on 2026-09-03;
+   the client replaced both the same day with the photographs he was shot against those
+   grounds in, built like variant 1 — the man on the panel, the interface in the frame. So
+   **variant 2 is the only one that puts the man in the frame.**
 
    The ink is not a fourth knob — it follows from the ground and JS writes it on the hero
    section's `data-ink`, which the whole scrubbed colour pass already reads. White type on
    green or on smoke is unreadable; nothing about that is a choice.
 
-   **Variant 4's shrink is invisible, and that is not a bug in this code.** The ground behind
-   the panel steps to the *next* section's colour on the first movement (see the morph, above),
-   and capabilities is smoke — so a smoke panel shrinks against smoke. The move only reappears
-   when the dashboard wipes into the frame. Three ways out, all the client's: a different grey
-   for the panel, white behind it across that one crossing, or a stroke on the panel. */
+   **Variant 4 used to have an invisible shrink**, and it is worth knowing why in case a flat
+   ground comes back: the ground behind the panel steps to the *next* section's colour on the
+   first movement (see the morph, above), and capabilities is smoke — so a flat smoke panel
+   shrank against smoke and the move only reappeared when the dashboard wiped in. The
+   photograph fixed it by accident: its floor line and darker corners give the panel's edge
+   something to show against. */
 
 :root {
   --morph-bg: var(--c-graphite) url("../images/hero-full.webp") 50% 18% / cover no-repeat;
 }
 
 :root[data-hero="2"] { --morph-bg: var(--c-black); }
-:root[data-hero="4"] { --morph-bg: var(--c-smoke); }
 
 /* Variant 3's photograph is 1.79:1 against a 1.6-2.1 viewport, so `cover` crops a little off
    whichever axis is tighter and `center` is enough — unlike variant 1's square, which needed
@@ -1210,14 +1211,22 @@ img { display: block; max-width: 100%; height: auto; }
   --morph-bg: var(--c-green) url("../images/hero-green.webp") center / cover no-repeat;
 }
 
-/* The frame holds one or the other, never both — the interface on 1 and 3, the man on 2 and
-   4. `display` and not opacity: the video keeps decoding behind a transparent layer, and JS
-   pauses it on top of this. */
-:root[data-hero="1"] .hero-photo,
-:root[data-hero="3"] .hero-photo { display: none; }
+/* Variant 4's photograph is the same shoot on a light-grey studio ground, same 1.79:1 and
+   the same treatment. Smoke underneath it, which is also what the ground behind the panel
+   steps to — so unlike the flat version this one was, the shrink is legible: the panel's
+   edge shows against smoke as the photograph's floor line and its darker corners. */
+:root[data-hero="4"] {
+  --morph-bg: var(--c-smoke) url("../images/hero-smoke.webp") center / cover no-repeat;
+}
 
-:root[data-hero="2"] .stage-frame__video,
-:root[data-hero="4"] .stage-frame__video { display: none; }
+/* The frame holds one or the other, never both — the interface everywhere except variant 2,
+   which is the only one with the man in the frame. `display` and not opacity: the video keeps
+   decoding behind a transparent layer, and JS pauses it on top of this. */
+:root[data-hero="1"] .hero-photo,
+:root[data-hero="3"] .hero-photo,
+:root[data-hero="4"] .hero-photo { display: none; }
+
+:root[data-hero="2"] .stage-frame__video { display: none; }
 
 /* ---------- the variant switch ----------
    Deliberately not designed: four 18px squares hugging the corner on the header's own 16px

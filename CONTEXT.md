@@ -595,12 +595,12 @@ control small enough to stay out of a screenshot.
 | 1 | graphite + `hero-full.webp` at `50% 18%` — the state that stood before | the looping screen recording | white |
 | 2 | flat black | `hero.webp` | white |
 | 3 | the green-ground photograph, `hero-green.webp` | the looping screen recording | black |
-| 4 | flat smoke `#E9EBEE` | `hero.webp` | black |
+| 4 | the light-grey photograph, `hero-smoke.webp` | the looping screen recording | black |
 
-Variant 3 was a flat green with the man in the frame for one round on 2026-09-03. The client
-replaced it the same day with the photograph he was shot against green in, built like variant
-1 — the man on the panel, the interface in the frame. So two variants put the recording in the
-frame (1 and 3) and two put the man there (2 and 4).
+Variants 3 and 4 were flat colours with the man in the frame for one round on 2026-09-03. The
+client replaced both the same day with the photographs he was shot against those grounds in,
+built like variant 1 — the man on the panel, the interface in the frame. **Variant 2 is the
+only one that puts the man in the frame.**
 
 - **`data-hero` on `<html>` is the whole switch.** CSS reads it for the panel's ground
   (`--morph-bg`) and for which of the frame's two layers shows; the markup ships with `"1"`,
@@ -628,12 +628,12 @@ frame (1 and 3) and two put the man there (2 and 4).
 - The control is visible only while the hero is the section under the header, off the same
   `section:change` event everything else hangs on (`data-hero-focus` on `<html>`).
 
-**Variant 4's shrink is invisible, and it is not a bug in the code.** The ground behind the
-panel steps to the *next* section's colour on the first movement (see the morph, above), and
-capabilities is smoke — so a smoke panel shrinks against smoke and the move only reappears
-when the dashboard wipes into the frame. Measured at t = 0.5: the panel and `--ground` are
-both `rgb(233, 235, 238)`. Three ways out, all the client's: a different grey for the panel,
-white behind it across that one crossing, or a stroke on the panel. **Ask.**
+**Variant 4's shrink used to be invisible**, and the reason is worth keeping in case a flat
+ground comes back. The ground behind the panel steps to the *next* section's colour on the
+first movement (see the morph, above), and capabilities is smoke — so a flat smoke panel
+shrank against smoke, both `rgb(233, 235, 238)`, and the move only reappeared when the
+dashboard wiped into the frame. The photograph fixed it by accident: its floor line and darker
+corners give the panel's edge something to show against. Verified at t = 0.5 on 2026-09-03.
 
 Smaller, known: clicking a variant *mid-crossing* repaints the ground from the section at
 rest, so on 3 and 4 the ground behind the panel flashes graphite until the next scroll frame.
@@ -846,6 +846,7 @@ Figma's own `#1E1E1E` canvas in as a full-bleed `<rect>`.
 |---|---|---|---|
 | 1 — hero | `assets/video/hero.mp4` + `assets/images/hero-poster.webp` | `247:42060` | screen recording, on a loop. See below |
 | 1 — hero, **the morph panel's ground** | `assets/images/hero.webp` | `196:53708` | 2236×1578 (1.42:1). Not in the frame — it backs the full-bleed morph panel, see §5. Re-pulled 2026-09-03 and byte-for-byte the same shot, so the file in the repo was already it |
+| 1 — hero, **variant 4's panel ground** | `assets/images/hero-smoke.webp` | — | the same shoot on a light-grey studio ground, 1.79:1. Client-supplied PNG, 2752×1536, `cwebp -q 88 -resize 2560 0`, 96 KB. Same `center / cover` as variant 3's |
 | 1 — hero, **variant 3's panel ground** | `assets/images/hero-green.webp` | — | the man against the brand green, 1.79:1. Client-supplied PNG, 5504×3072, `cwebp -q 88 -resize 2560 0`, 220 KB. Wide enough to be *downscaled* at 1920 rather than blown up, which is variant 1's known softness. `center / cover` is enough here — a 1.79 source against a 1.6-2.1 viewport crops a little off whichever axis is tighter, unlike the square, which needed a solved vertical position |
 | 1 — hero, unused | `assets/images/hero-street.webp` | `265:39107` | a street shot that was in the frame for one round on 2026-09-03. 4096×2286 JPEG, centre-cropped to 4:3 and resized in one `cwebp -q 82 -crop 524 0 3048 2286 -resize 1440 1080` pass, 91 KB. Unwired, kept |
 | 2 — capabilities, `promotion` pane | `assets/images/capabilities-promotion.webp` | `206:62480` | node is named "Продвижение — 4×3 / content". 1118×838.5, @2x → 2236×1677, cwebp **`-lossless`**, 172 KB |

@@ -1140,10 +1140,10 @@ if (heroSwitch) {
   const VARIANTS = [1, 2, 3, 4];
   /* Not a knob — it follows from the panel's ground. See the table in base.css. */
   const HERO_INK = { 1: 'light', 2: 'light', 3: 'dark', 4: 'dark' };
-  /* Which variants keep the screen recording in the frame. The other two put the man there
-     instead, and CSS swaps the two layers on the same `data-hero`; this is only so the video
-     controller can stop decoding. */
-  const HERO_VIDEO = [1, 3];
+  /* Which variants keep the screen recording in the frame — every one but 2, which is the
+     only variant with the man in the frame. CSS swaps the two layers on the same `data-hero`;
+     this is only so the video controller can stop decoding. */
+  const HERO_VIDEO = [1, 3, 4];
   const STORE = 'alphaseller:hero-variant';
 
   function setVariant(variant) {
