@@ -1,5 +1,44 @@
 # Worklog
 
+## 2026-09-03 — the section reveal is removed
+
+**What changed.** `assets/js/main.js`: the whole `reveals` block is gone — the `REVEAL`
+token object, the per-section timeline and its ScrollTrigger, the `reveals` array, and
+`catchUpReveals()` with its three listeners, which existed only to keep those reveals
+honest on load, on refresh and on a jump. Two comments that described the reveal were
+rewritten: the file header's list of what moves, and the load-pass note above
+`ScrollTrigger.refresh()`. `CONTEXT.md` §7 item 5 now records the removal instead of the
+effect.
+
+**Why.** Client: "я передумал, убери этот эффект вообще". He asked for the lag earlier the
+same day and for the replay after that; this drops the effect itself, not just those two
+refinements. Read literally — "вообще" — and flagged back to him in case he meant only the
+0.3s lag, in which case the single staggered tween comes back rather than nothing.
+
+**What follows.** Section text now renders at its natural opacity from the first paint;
+nothing writes `opacity` or `y` on `.section__title`, `.section__subtitle`, `.btn` or
+`.case` any more. The load-time `ScrollTrigger.refresh()` / `update()` / `settleSlides()`
+pass stays — it is what settles the scrubbed colours and the frame, and was never only
+about reveals. Everything else that moves is untouched: the scrubbed section boundary, the
+frame's slides, the tab strip, the style deck, the closer's morph, the photo parallax.
+
+**How it was verified.** `localhost:4321` at 1440×900, fresh reload.
+
+| check | result |
+|---|---|
+| `ScrollTrigger.getAll()` | **15**, was 22 — the seven title triggers are gone |
+| any trigger on a `.section__title` | none |
+| `.section__title` / `.section__subtitle` / `.btn` opacity, all 7 sections | 1 |
+| inline `style` on title, subtitle, button, case — all 7 sections | none |
+| `gsap.globalTimeline` children touching section text | none |
+| console | clean |
+| `node --check assets/js/main.js` | passes |
+| `grep -n "REVEAL\|reveals\|catchUpReveals"` | no matches |
+
+**Left undone.** The brief's own wish list in CONTEXT §1 item 6 still says
+"scroll-triggered reveals" — left as written, because that is the brief as received, not
+the current state; §7 item 5 is where the current state lives.
+
 ## 2026-09-03 — the reveal replays on every entry
 
 **What changed.** `assets/js/main.js`: the reveal's `once: true` is gone, replaced by

@@ -7,8 +7,7 @@
    section changes.
      1. the ground colour, the ink and the frame's slides are all interpolated against
         the same scroll, so a section change lands as one movement,
-     2. the frame leaves upward on the one section that has none,
-     3. each section's text reveals once as it enters the viewport.
+     2. the frame leaves upward on the one section that has none.
    The header never hides. */
 
 gsap.registerPlugin(ScrollTrigger);
@@ -850,100 +849,13 @@ gsap.matchMedia().add('(prefers-reduced-motion: no-preference)', () => {
   );
 });
 
-/* ---------- reveals ----------
-   The trigger is the title, not the section: sections are a full viewport tall with
-   their content centred, so anything anchored to the section fires while the content
-   is still a screen below the fold and the animation is over before it comes into
-   view. Skipped entirely when the visitor asked for less motion.
-
-   The title lands first and the section's body — its subtitle, its CTA, the case cards —
-   flies in after it, which is the client's call (2026-09-03). `lag` is the gap between
-   the two groups; the body then keeps its own `stagger` inside the group, so the button
-   still trails its subtitle rather than arriving with it. The lag is a wait, not a slower
-   move: both groups travel the same 24px over the same 0.8s, so the body reads as coming
-   from the same place, only later. */
-const REVEAL = {
-  travel: 24,
-  duration: 0.8,
-  ease: 'power2.out',
-  stagger: 0.08,
-  lag: 0.3,
-  /* onEnter, onLeave, onEnterBack, onLeaveBack */
-  actions: 'restart none restart none',
-};
-
-const reveals = [];
-
-gsap.matchMedia().add('(prefers-reduced-motion: no-preference)', () => {
-  gsap.utils.toArray('.section').forEach((section) => {
-    const title = section.querySelector('.section__title');
-    if (!title) return;
-
-    /* Everything in the section that is not the title. The cases section has no aside —
-       its CTA sits in the head next to the title and its cards below — so the group is
-       written as a selector list rather than `.section__aside > *`. */
-    const body = section.querySelectorAll('.section__subtitle, .btn, .case');
-
-    const move = {
-      y: REVEAL.travel,
-      opacity: 0,
-      duration: REVEAL.duration,
-      ease: REVEAL.ease,
-    };
-
-    /* A timeline rather than one staggered tween, because the two groups need a gap
-       between them that a single `stagger` cannot express. `catchUpReveals` below drives
-       it by `progress()`, which a timeline answers the same way a tween does.
-
-       `restart` on both entries, `none` on both exits — the client wants it every time a
-       section comes up, not once (2026-09-03). Restart rather than play, so an entry
-       replays the whole thing instead of resuming a timeline that is already finished, and
-       it fires going up as well as down. Nothing on the way out: reversing would pull the
-       text back off a section the visitor is still looking at as it leaves, and there is no
-       need for it — `restart` does not care what state it is left in. */
-    const tl = gsap.timeline({
-      scrollTrigger: { trigger: title, start: 'top 90%', toggleActions: REVEAL.actions },
-    });
-
-    tl.from(title, { ...move });
-    if (body.length) tl.from(body, { ...move, stagger: REVEAL.stagger }, REVEAL.lag);
-
-    reveals.push(tl);
-  });
-});
-
-/* A reload part-way down the page, or a deep link like /#customization, opens below
-   most of these triggers. Two things go wrong without this pass: every scrubbed value
-   stays at its CSS default until the first scroll (the ground would stay the hero's
-   and the photograph invisible), and any reveal the page opened below never fires, so
-   its text is left sitting at opacity 0 — permanently, since it only fires `once`. */
+/* A reload part-way down the page, or a deep link like /#customization, opens below most
+   of the triggers. Without this pass every scrubbed value stays at its CSS default until
+   the first scroll — the ground would stay the hero's and the photograph invisible. */
 ScrollTrigger.refresh();
 ScrollTrigger.update();
 settleSlides();
 ScrollTrigger.addEventListener('refresh', settleSlides);
-
-/* Any reveal the page is already past must render finished rather than sit at its
-   from-state. ScrollTrigger does not fire `onEnter` for a trigger that is jumped over in
-   one step — on load, on a deep link, or on a scroll long enough to clear a whole
-   section — so without this pass that section's text is left at opacity 0.
-
-   The test is the trigger's **end**, not its start: a reveal whose start is behind us but
-   whose end is not is the section being entered right now, and it is either playing or
-   about to be. Snapping that one to its finish would eat the very animation this sweep
-   exists to protect — and now that the reveal replays on every entry rather than firing
-   once, that collision comes up on every section change rather than only on a jump. */
-function catchUpReveals() {
-  reveals.forEach((tween) => {
-    const trigger = tween.scrollTrigger;
-    if (trigger && window.scrollY > trigger.end && tween.progress() === 0) {
-      tween.progress(1);
-    }
-  });
-}
-
-catchUpReveals();
-ScrollTrigger.addEventListener('refresh', catchUpReveals);
-document.addEventListener('section:change', catchUpReveals);
 
 /* ---------- one gesture, one section ----------
    The wheel no longer reaches the browser's own snapping. CSS snapping stays on and still

@@ -254,17 +254,13 @@ changes; see "The wheel is ours, everything else is the browser's" below.
    against the sheet that *uses* it, so an inline one was fetched from
    `assets/css/assets/icons/…` and 404'd.
 4. The frame fades out across the footer's entrance, scrubbed to the scroll.
-5. Each section's text reveals **on every entry**, rise 24px + fade, 0.8s, and in **two
-   groups**: the title lands first, and the body — subtitle, CTA, case cards — starts
-   **0.3s later** and keeps its own 0.08s stagger inside the group, so the button still
-   trails its subtitle. The lag is a wait, not a slower move: both groups travel the same
-   distance over the same duration. The client's call, 2026-09-03; the 0.3 is mine and his
-   to change (`REVEAL.lag` in `main.js`). It fired `once` until he asked for every time;
-   now `toggleActions: 'restart none restart none'` — it replays coming down *and* coming
-   back up, and never reverses on the way out, so text is never pulled off a section that
-   is still on screen. The trigger is the **title**, not the section — sections are a
-   viewport tall with centred content, so a section-anchored trigger fires a full screen
-   too early. Skipped under `prefers-reduced-motion: reduce`.
+5. **There is no entrance reveal on the section text — removed, the client's call**
+   (2026-09-03), and it was his own feature the same day: title first, body 0.3s behind,
+   replaying on every entry. He changed his mind and asked for it gone entirely, so the
+   rise-and-fade, its ScrollTrigger and the catch-up sweep that existed only to serve it
+   are all out. A section's text is simply there when the section arrives. Do not add it
+   back on the argument that the sections feel static — that is the state he chose. It is
+   in the history if he wants it again (`git log -S REVEAL`).
 
 **The header does not hide on scroll** — tried, dropped at the client's request. It stays
 put; only its ink changes. No custom cursor, no magnetic buttons.
