@@ -1,5 +1,31 @@
 # Worklog
 
+## 2026-09-03 — smaller stills, the heart into its corner, a shader on the last tile
+
+**What changed.** `assets/css/base.css`: `.tile__art` is 30% tall (was 38) and stands on the
+tile's 24px padding instead of its edge; the loyalty tile's still moved to the bottom-left
+corner with a bleed (left -6%, bottom -5%, 34% tall); `.tile__shader` added. New file
+`assets/js/tile-shader.js` and a `<canvas>` in the last tile, wired in `index.html`.
+`CONTEXT.md` records all of it.
+
+**Why.** Client: the stills too big, the Я/VK pair jammed into the corner, and the heart was
+supposed to reach into the bottom-left corner — I had it against the right edge. The shader
+is his too: "своруй где-нибудь красивый переливистый шейдер… зеленый наш можно использовать
+как базу". It is written here rather than pulled in — domain-warped fbm is a standard
+recipe, and the demo has to run with no network.
+
+**How verified.** Live page at 1440×900 and 1920×1080. Stills: 30% of the tile's height,
+24px in from the left and up from the bottom on all four; the heart sits at -18/-15 (1440)
+and -23/-19 (1920) — into the corner and cut by it. Shader: WebGL context created, canvas
+587² at 1440 and 776² at 1920 (2x its box), pixels read back off the buffer show the green
+field, luminance 39-51 across the top where the text is against 63-81 at the foot. No 4xx,
+no horizontal overflow. The only console errors on the page came from my own probe
+dispatching `section:change` with no detail — `heroFocus` computes correctly on load, so the
+real listeners are fine. **The motion is not verified**: the Browser pane is hidden, so
+`requestAnimationFrame` never fires there; only the single load-time frame was measured.
+
+**Left undone.** Nothing outstanding on this section.
+
 ## 2026-09-03 — the growth tiles get their artwork, and lg comes down
 
 **What changed.** `assets/css/base.css`: `lg` is now 18/24 → 22/28; `.tile` clips its

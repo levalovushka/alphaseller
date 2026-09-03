@@ -192,15 +192,26 @@ and the copy in Figma (`276:54325`): "он будет черный, без ра�
     foot (`assets/logos/alfa-a.svg`, from `279:54330`, stripped of the canvas rect Figma
     exports behind it). **This puts the brand red back on the page** — it had been nowhere
     since the hero went graphite.
-  - Four tiles carry a 3D still on the bottom edge, cut by it: ads `279:54331`, loyalty
-    `279:54334`, bloggers `276:54324`, partners `279:54335`. Each is 38% of the tile's
-    height, which lands them at 67-74% of its width — the same proportion they hold in the
-    mockup. Left-aligned, except the heart, which runs off the right edge there too.
+  - Four tiles carry a 3D still at the foot: ads `279:54331`, loyalty `279:54334`, bloggers
+    `276:54324`, partners `279:54335`. Each is **30%** of the tile's height and stands on the
+    tile's own 24px padding, not on its edge — the client, 2026-09-03: "тридешные
+    иллюстрации хочется поменьше сделать… лого яндекса и вк наоброт слишком вжались в угол".
+  - **The heart is the exception**: it reaches into the **bottom-left corner** and is cut by
+    it (left -6%, bottom -5%, 34% tall), which is what it does in the mockup. It sat against
+    the right edge for one round and the client caught it.
   - **The stills come out of Figma on its `#1E1E1E` canvas, not on transparency**, so each
     was keyed on that colour (`ffmpeg colorkey`, threshold 0.02) and written as a webp with
     alpha. Without it every tile would carry a grey slab across its foot. Fewer than 30
     pixels per image were bitten out of the object itself.
-  - **The sixth tile is deliberately bare** — the client is putting a shader behind it.
+  - **The sixth tile's ground is a shader** — `assets/js/tile-shader.js`, a WebGL 1 canvas
+    filling the tile under the text. Domain-warped value-noise fbm in the brand green
+    (`#A6ED00`) over near-black, with a highlight riding the warp. It is dark at the top and
+    bright at the foot, so the white text keeps its contrast: measured luminance 39-51 under
+    the text against 63-81 at the bottom. The loop runs only while the tile is on screen (an
+    IntersectionObserver) and draws a single frame for a visitor who asked for less motion.
+    Client's brief: "своруй где-нибудь красивый переливистый шейдер… зеленый наш можно
+    использовать как базу". **This is the second place the brand green is back**, after the
+    red on the bank tile.
 - Tile ground is graphite `#1A1817` on the section's black, after the cash.app reference the
   client attached. Type is style md, like every other paragraph.
 - This is the section that carries `data-frame="none"`: the frame leaves upward on it, the

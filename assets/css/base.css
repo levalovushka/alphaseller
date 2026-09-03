@@ -1112,11 +1112,13 @@ img { display: block; max-width: 100%; height: auto; }
    which runs off the right edge there. */
 .tile__art {
   position: absolute;
-  inset: auto 0 0 0;
-  /* 38 of the tile's height, which is what the mockup's stills measure against their card
-     (154-168 against 442) — at the site's tile that puts each one at about 70% of the
-     width, the same as there. */
-  height: 38%;
+  /* Standing on the tile's own padding rather than on its edge — the client, 2026-09-03:
+     "лого яндекса и вк наоброт слишком вжались в угол". Smaller too: 30 of the tile's
+     height against the 38 of the first cut. */
+  left: 24px;
+  right: 24px;
+  bottom: 24px;
+  height: 30%;
   background-position: bottom left;
   background-size: contain;
   background-repeat: no-repeat;
@@ -1126,9 +1128,15 @@ img { display: block; max-width: 100%; height: auto; }
 .tile__art[data-art="bloggers"] { background-image: url("../images/growth-bloggers.webp"); }
 .tile__art[data-art="partners"] { background-image: url("../images/growth-partners.webp"); }
 
+/* The heart is the one that reaches **into** the corner and is cut by it, which is what it
+   does in the mockup — I had it against the right edge for one round and the client caught
+   it: "иллюстрация с сердечком не залезла как должна была в левый нижний угол". */
 .tile__art[data-art="loyalty"] {
   background-image: url("../images/growth-loyalty.webp");
-  background-position: bottom right;
+  left: -6%;
+  right: 24px;
+  bottom: -5%;
+  height: 34%;
 }
 
 /* The bank's own tile: the brand red, white type, and the Alfa "А" standing at its foot.
@@ -1147,7 +1155,16 @@ img { display: block; max-width: 100%; height: auto; }
   width: auto;
 }
 
-/* The last tile is bare on purpose — a shader is going in there. */
+/* The last tile's ground is a shader, painted by `tile-shader.js` into this canvas. It
+   fills the tile edge to edge and sits under the text; the tile's own `overflow: hidden`
+   rounds it. Sized in CSS, resolution set in JS from the box and the device ratio. */
+.tile__shader {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
 
 /* ---------- closer + footer ----------
    The last screen is one section, not two: the closer's title and text sit at the top
