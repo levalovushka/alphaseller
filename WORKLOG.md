@@ -1,5 +1,26 @@
 # Worklog
 
+## 2026-09-03 — the frame's corners go 32 → 24
+
+**What changed.** `base.css`: `--radius: 16px` → `12px`, so `--radius-btn` (the frame, its
+slides, the picture layers, the curtain's rounded leading edge, the logo square) is 24 and
+`--radius-card` (the growth tiles) follows to 36. `CONTEXT.md` §7's size table and the two
+places that quoted 32 by hand.
+
+**Why.** Client: "давай скругления на рамке сделаем чуть поменьше". Offered 28 / 24 / 20; he
+took 24, and chose to keep the tiles' +12 relation rather than pin them at 44. Changed at
+`--radius` rather than at `--radius-btn` so the "base × 2" structure stands and `--radius`
+does not become dead.
+
+**How it was verified.** In the live page at 1440: the frame's computed `border-radius` is
+`24px` and the video layer inherits `24px`; `.tile` is `36px`. Drove the hero → capabilities
+crossing with snapping off — at t ≈ 1 the morph panel's clip is `inset(256.714px 459.489px
+252.719px round 23.9733px)` against a frame rect of top 257, left 460, bottom 253, so it still
+lands on the frame exactly and on a true 24; at t = 0.5 the radius is `12px`, half of it.
+
+**Left undone.** Nothing. The logo square's Safari/Firefox clamp noted in §7 is unaffected —
+24 on a 48px box is inside the clamp either way.
+
 ## 2026-09-03 — a new type style, lg, and the tile text moves to the top
 
 **What changed.** `assets/css/base.css`: `--fs-lg` / `--lh-lg` added to the tokens, the tile

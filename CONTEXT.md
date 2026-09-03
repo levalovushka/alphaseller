@@ -572,7 +572,7 @@ How it is built:
   padding change. The radius is measured too.
 - **The shape is a `clip-path: inset(… round …)`**, not `inset` and not a `scale`. `inset`
   would lay the element out again on every scrolled frame; a `scale` would squash the
-  corners, and a true 32 at the end is the whole point of the move.
+  corners, and a true 24 at the end (32 until 2026-09-03) is the whole point of the move.
 - **Layer 0**, the same as the photographic ground: above the ground the body is painted
   with, below the sections' own content (layer 1) so the hero's title and CTA stay on top of
   the photograph, far below the frame (layer 5).
@@ -969,7 +969,7 @@ hover state: a tab is not a call to action, so it does not fill like `.btn--seco
 ### The style deck
 
 Section 4 holds a deck of three shop screens in the frame — Tinder, thrown by hand. The
-front card *is* the frame: same size, same 32px radius. Everything about it is the client's
+front card *is* the frame: same size, same radius — 24 since 2026-09-03. Everything about it is the client's
 call on 2026-09-03, chosen against the alternatives offered:
 
 - **By hand only.** No 5s carousel like the tabs, and no buttons under the frame.
@@ -1173,16 +1173,23 @@ default to bold — the title weight must be forced back to 500.
 | Logo — **mark only, no wordmark**, in a rounded square | 48×48 |
 | Header CTA button | 48 high |
 | Section CTA buttons (under the subtitle) | 40 high — was 44 until 2026-09-02 |
-| Corner radius — logo square, frame, slides | 32 (`--radius-btn`) |
-| Corner radius — case cards | 44 (`--radius-card`, `--radius-btn` + 12) |
+| Corner radius — logo square, frame, slides | **24** (`--radius-btn`) — was 32 until 2026-09-03 |
+| Corner radius — the growth tiles | **36** (`--radius-card`, `--radius-btn` + 12) — was 44 |
 | Corner radius — buttons and tabs | full pill (`--radius-pill: 999px`) |
 | Button side padding — both sizes | 20 (`--btn-pad-x`) |
 
-**Two shapes, three radii.** The frame, its slides and the logo square are rounded at 32
-(`--radius-btn`); the case cards at **44** — the client asked for +12 on them alone on
-2026-09-02, so they carry their own `--radius-card: calc(var(--radius-btn) + 12px)`; the
-buttons and the tabs are full pills (`--radius-pill`). `--radius: 16px` survives only as the
-base `--radius-btn` is derived from; nothing uses it directly.
+**Two shapes, three radii.** The frame, its slides and the logo square are rounded at **24**
+(`--radius-btn`); the tiles at **36** — the client asked for +12 on that one element on
+2026-09-02, so it carries its own `--radius-card: calc(var(--radius-btn) + 12px)`; the buttons
+and the tabs are full pills (`--radius-pill`). `--radius: 12px` survives only as the base
+`--radius-btn` is derived from; nothing uses it directly.
+
+**32 → 24 on 2026-09-03**, client: "давай скругления на рамке сделаем чуть поменьше". He was
+given 28 / 24 / 20 and took 24, and chose to keep the +12 relation rather than pin the tiles
+at 44 — so they went with it, 44 → 36. Changed at `--radius`, not at `--radius-btn`, so the
+"base × 2" structure stands. Everything that follows the frame followed for free: the slides
+and the picture layers inherit it, the curtain cuts its rounded leading edge on the same
+token, and the morph panel measures the frame, so it lands on a true 24.
 
 The logo square used to rely on the squircle to survive the 32 radius on a 48px box; that is
 still true, and in Safari and Firefox the `border-radius` fallback clamps to 24 and draws a

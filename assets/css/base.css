@@ -131,11 +131,15 @@
   --tab-drop: 32px;
   --tab-elapsed: color-mix(in srgb, var(--ink) 78%, var(--ground));
 
-  /* The frame, its slides and the logo square take the same 32. `--radius` is only the
-     base it is derived from; nothing uses it directly. */
-  --radius: 16px;
+  /* The frame and its slides take the same radius, and the curtain's rounded leading edge
+     is cut on it too. 24 since 2026-09-03 — client asked for slightly tighter corners; it
+     was 32 all day before that. `--radius` is only the base it is derived from; nothing uses
+     it directly. */
+  --radius: 12px;
   --radius-btn: calc(var(--radius) * 2);
-  /* The case cards are the one thing rounded harder — client's call, +12 on 2026-09-02. */
+  /* The case cards are the one thing rounded harder — client's call, +12 on 2026-09-02. They
+     ride on the frame's number, so tightening it to 24 took them 44 → 36; the client wanted
+     the +12 kept rather than the 44 pinned. */
   --radius-card: calc(var(--radius-btn) + 12px);
   /* Buttons and tabs are full pills — any number past half their height does it. */
   --radius-pill: 999px;
