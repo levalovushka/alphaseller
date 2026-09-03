@@ -188,8 +188,9 @@ if (canvas) {
       let raf = null;
       let started = 0;
       /* CSS px from the tile's corner to the orb's edge. Scaled to canvas pixels at draw
-         time, so it stays 20 on the page at either device ratio. */
-      const MARGIN = 20;
+         time, so it stays 28 on the page at either device ratio. 20 → 28 on the client's
+         call, 2026-09-03: he asked for exactly 8 more once the orb had been halved. */
+      const MARGIN = 28;
       let ratio = 1;
 
       /* Where the pointer is, and where the shader currently believes it is. The gap between

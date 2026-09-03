@@ -1,5 +1,31 @@
 # Worklog
 
+## 2026-09-03 — the orb moves 8px further off the corner
+
+**What changed.** `assets/js/tile-shader.js`: `MARGIN` 20 → 28, with the comment.
+`CONTEXT.md` §5's orb entry.
+
+**Why.** Client: "орбу надо ещё 8 пикселей отступа точно". `MARGIN` is exactly that number —
+CSS px from the tile's corner to the orb's edge — so the change is the one constant.
+
+**How it was verified.** `localhost:4321` at 1440×900. The served file reads 28 (fetched with
+`cache: 'reload'`). Then measured off the canvas itself rather than the source: copied the
+WebGL canvas into a 2D one and scanned it for lit green pixels.
+
+| | before, per the previous entry | now |
+|---|---|---|
+| lit body from the left edge | 18 | **26.5** |
+| from the bottom edge | 17 | **27** |
+| orb diameter | — | 80.5 CSS px |
+
+The canvas is 293×293 CSS at a 587×587 buffer (dpr 2), and it fills the tile exactly —
+0 inset on both axes — so the margin is measured against the tile's own corner. The shortfall
+against 28 is the glow's soft edge falling under the brightness threshold, and the centre
+checks out: 26.5 + 40.25 ≈ 68, which is margin + radius.
+
+**Left undone.** No screenshot — the app does not repaint in this browser pane, and the
+growth section comes back black. The canvas readback above is the evidence.
+
 ## 2026-09-03 — the orb moves into the bottom-left corner
 
 **What changed.** `assets/js/tile-shader.js`: new `u_margin` uniform and an origin computed

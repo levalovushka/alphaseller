@@ -228,11 +228,12 @@ and the copy in Figma (`276:54325`): "он будет черный, без ра�
     radius 0.27 in uv units against 0.52. Every distance-based constant moved with it — the
     rim's falloff doubled, the lamps' quadrupled, the halo's steepened — or the smaller orb
     would have had a fatter edge than the big one.
-  - **It stands in the bottom-left corner, 20px clear of both edges**, which is the `u_margin`
+  - **It stands in the bottom-left corner, 28px clear of both edges**, which is the `u_margin`
     uniform (CSS px, scaled to canvas pixels at draw time, so it holds at either device
-    ratio). It was centred for one round and the client called that a mistake. Measured: the
-    body sits 18/17px off the corner at 1440 and 17/17 at 1920, its faint halo reaching a few
-    px closer, which is what a glow does.
+    ratio). It was centred for one round and the client called that a mistake, then sat at 20
+    until he asked for "ещё 8 пикселей отступа точно" on 2026-09-03. Measured at 28: the lit
+    body starts 26.5px from the left edge and 27px from the bottom at 1440, its faint halo
+    reaching a few px closer, which is what a glow does.
   - **The pointer**: the orb leans toward it (10% of the way), the uv ripples with it, and
     the whole thing brightens and runs half again as fast. Everything the pointer drives is
     eased in JS toward its target each frame, so it follows the hand rather than snapping,
