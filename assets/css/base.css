@@ -748,6 +748,55 @@ img { display: block; max-width: 100%; height: auto; }
 /* Under the frame, not inside it: the slide does not clip its children. The strip takes
    clicks even though the frame does not, and JS makes it inert while this slide is off
    stage — an opacity of 0 still hit-tests. */
+/* ---------- the chips around the frame ----------
+   Two product cards from the client's mockup (Figma 279:55320): the conversion card hangs
+   off the frame's left edge near the top, the order statuses off the bottom edge near the
+   right. Both are flat pictures rather than live UI — the conversion card is the product's
+   own bitmap and the status list a vector export, both straight out of Figma, so neither
+   adds a type style to a site that has exactly two.
+
+   Every number below is the mockup's own, and every one is written as
+   `var(--frame-w) * N / 720` — 720 being the frame width the mockup was drawn at, so the
+   cards scale with our frame instead of holding a pixel size while the picture shrinks.
+   By 1440 that difference is a fifth. It has to be that shape and not a `--chip-u` factor
+   multiplied into each value: dividing a length by a plain 720 leaves a length, and
+   `240px * 0.72px` is an area, which computes to nothing — measured, both cards came out
+   0x0 the first time.
+
+   Each card is anchored to the frame corner it sits near — left/top for one, right/bottom
+   for the other — so its overhang is what stays fixed, which is the thing you actually see.
+
+   They cross the frame's box, so the curtain cannot mask them: a shape cut to the box would
+   delete whatever is outside it. Like the tab strip, they fade on `--t` instead of wiping. */
+.frame-chip {
+  position: absolute;
+  background-position: center;
+  /* The box is cut to the asset's own aspect, so this only ever scales it. */
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  opacity: var(--t, 0);
+}
+
+/* The card's own screenshot, 384x179 into 240x112 on screen, with its rounded corners
+   already in the alpha — nothing here rounds it. */
+.frame-chip[data-chip="conversion"] {
+  left: calc(var(--frame-w) * -57 / 720);
+  top: calc(var(--frame-w) * 36 / 720);
+  width: calc(var(--frame-w) * 240 / 720);
+  height: calc(var(--frame-w) * 112 / 720);
+  background-image: url("../images/marketplaces-conversion.webp");
+}
+
+/* A vector export, so it stays crisp at any frame width. Its text is outlines, which is
+   why it carries the product's UI font without the page loading one. */
+.frame-chip[data-chip="statuses"] {
+  right: calc(var(--frame-w) * 46 / 720);
+  bottom: calc(var(--frame-w) * -59 / 720);
+  width: calc(var(--frame-w) * 164 / 720);
+  height: calc(var(--frame-w) * 176 / 720);
+  background-image: url("../images/marketplaces-statuses.svg");
+}
+
 .frame-tabs {
   position: absolute;
   top: 100%;
@@ -1110,32 +1159,55 @@ img { display: block; max-width: 100%; height: auto; }
    The still stands on the tile's bottom edge and is cut by it — that is the composition in
    the mockup, and it is why the text moved to the top. Left-aligned, except the heart,
    which runs off the right edge there. */
+/* Every still is trimmed to its own object — Figma exports them inside a padded box, and
+   with the padding still on they stood at four different heights: the Я/VK pair floated,
+   because it carried 52px of empty pixels under it, while the others touched the bottom of
+   theirs. Client, 2026-09-03: "иллюстрашки в нижнем ряду теперь вывалились со своих мест".
+
+   With the padding gone, the size is set per tile so the four read as **the same weight**
+   rather than the same box. The measure is the square root of each one's opaque area — its
+   visual side — normalised to about 100px against a 293px tile, which is what the heights
+   below work out to:
+
+     | still    | object    | opaque area | visual side | height |
+     | ads      | 750 × 345 | 233k px     | 483         | 24%    |
+     | bloggers | 860 × 433 | 272k px     | 522         | 28%    |
+     | loyalty  | 869 × 471 | 290k px     | 538         | 30%    |
+     | partners | 815 × 489 | 237k px     | 487         | 34%    |
+
+   A flat height would have made the widest, flattest one (the pair of logos) the heaviest
+   thing on the screen and the tallest one the lightest. */
 .tile__art {
   position: absolute;
   /* Standing on the tile's own padding rather than on its edge — the client, 2026-09-03:
-     "лого яндекса и вк наоброт слишком вжались в угол". Smaller too: 30 of the tile's
-     height against the 38 of the first cut. */
+     "лого яндекса и вк наоброт слишком вжались в угол". */
   left: 24px;
   right: 24px;
   bottom: 24px;
-  height: 30%;
   background-position: bottom left;
   background-size: contain;
   background-repeat: no-repeat;
 }
 
-.tile__art[data-art="ads"] { background-image: url("../images/growth-ads.webp"); }
-.tile__art[data-art="bloggers"] { background-image: url("../images/growth-bloggers.webp"); }
-.tile__art[data-art="partners"] { background-image: url("../images/growth-partners.webp"); }
+.tile__art[data-art="ads"] {
+  background-image: url("../images/growth-ads.webp");
+  height: 24%;
+}
 
-/* The heart is the one that reaches **into** the corner and is cut by it, which is what it
-   does in the mockup — I had it against the right edge for one round and the client caught
-   it: "иллюстрация с сердечком не залезла как должна была в левый нижний угол". */
+.tile__art[data-art="bloggers"] {
+  background-image: url("../images/growth-bloggers.webp");
+  height: 28%;
+}
+
+/* The heart is back in line with the others: it reached into the corner for one round and
+   the client read that as cramped — "сердце пережалось в угол". */
 .tile__art[data-art="loyalty"] {
   background-image: url("../images/growth-loyalty.webp");
-  left: -6%;
-  right: 24px;
-  bottom: -5%;
+  height: 30%;
+}
+
+.tile__art[data-art="partners"] {
+  background-image: url("../images/growth-partners.webp");
   height: 34%;
 }
 

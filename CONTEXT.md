@@ -193,12 +193,17 @@ and the copy in Figma (`276:54325`): "он будет черный, без ра�
     exports behind it). **This puts the brand red back on the page** — it had been nowhere
     since the hero went graphite.
   - Four tiles carry a 3D still at the foot: ads `279:54331`, loyalty `279:54334`, bloggers
-    `276:54324`, partners `279:54335`. Each is **30%** of the tile's height and stands on the
-    tile's own 24px padding, not on its edge — the client, 2026-09-03: "тридешные
-    иллюстрации хочется поменьше сделать… лого яндекса и вк наоброт слишком вжались в угол".
-  - **The heart is the exception**: it reaches into the **bottom-left corner** and is cut by
-    it (left -6%, bottom -5%, 34% tall), which is what it does in the mockup. It sat against
-    the right edge for one round and the client caught it.
+    `276:54324`, partners `279:54335`. Each stands on the tile's own 24px padding, left and
+    bottom, not on its edge.
+  - **Each file is trimmed to its object.** Figma exports them inside a padded box, and with
+    the padding on they stood at four different heights — the Я/VK pair floated on 52px of
+    empty pixels while the others touched the bottom of theirs. Trimmed with `ffmpeg crop` to
+    the alpha bounding box.
+  - **The four are sized by weight, not by box.** The measure is the square root of each
+    one's opaque area — its visual side — normalised to ~100px against a 293px tile: ads 24%
+    of the tile's height, bloggers 28%, loyalty 30%, partners 34%. A flat height made the
+    widest and flattest of them (the logo pair) the heaviest thing on the screen. Client:
+    "попробуй их расставить сбалансированно по визуальному весу."
   - **The stills come out of Figma on its `#1E1E1E` canvas, not on transparency**, so each
     was keyed on that colour (`ffmpeg colorkey`, threshold 0.02) and written as a webp with
     alpha. Without it every tile would carry a grey slab across its foot. Fewer than 30

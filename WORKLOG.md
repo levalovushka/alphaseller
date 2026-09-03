@@ -1,5 +1,28 @@
 # Worklog
 
+## 2026-09-03 — the tile stills trimmed and balanced by weight
+
+**What changed.** `assets/images/growth-{ads,loyalty,bloggers,partners}.webp` re-cut: each
+trimmed with `ffmpeg crop` to its alpha bounding box. `assets/css/base.css`: `.tile__art`
+loses the flat 30% height and each still gets one of its own — ads 24%, bloggers 28%,
+loyalty 30%, partners 34% — and the heart comes back in line with the rest instead of
+reaching into the corner. `CONTEXT.md` records the measure.
+
+**Why.** Client: the bottom-row stills had fallen out of place and the heart was cramped in
+its corner. The cause was the padding Figma exports around each object — the Я/VK pair
+carried 52px of empty pixels under it and floated, while the other three touched the bottom
+of their own boxes. With the padding gone the sizes are set by **visual weight**: the square
+root of each one's opaque area, normalised to about 100px against a 293px tile. A flat
+height makes the widest, flattest still the heaviest thing on the screen.
+
+**How verified.** Live page with a freshly loaded stylesheet at 1440×900 and 1920×1080, each
+still measured off its own pixels: visual side 99, 101, 99, 99 at 1440 and 130, 133, 131, 131
+at 1920 — within 2% of each other, where before they ranged over 11%. All four now sit 24px
+from the left edge and 24px up from the bottom, drawn widths 153-166 (1440) and 202-220
+(1920), none overlaps its text, no 4xx, grid still ends inside the screen.
+
+**Left undone.** Nothing on this section.
+
 ## 2026-09-03 — the tile shader becomes a voice-assistant orb that follows the pointer
 
 **What changed.** `assets/js/tile-shader.js` rewritten. The flat marbled field is gone; the
