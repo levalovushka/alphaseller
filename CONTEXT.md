@@ -891,7 +891,7 @@ not there. The slide is back to the dashed empty frame; putting it back is one
 
 ## 11. Verifying in the browser
 
-Two traps, both hit more than once:
+Five traps, all hit more than once:
 
 - **The stylesheet caches independently of the page.** A query string on the document does
   not bust `base.css`, so measurements can silently run against the previous CSS. Before
@@ -910,9 +910,39 @@ Two traps, both hit more than once:
 - **Console errors accumulate across loads**, so a clean page still shows old 404s. Check
   `performance.getEntriesByType('resource').filter((e) => e.responseStatus >= 400)` instead.
 
+- **A hidden preview pane has no viewport.** `innerWidth` and `innerHeight` come back 0, and
+  the layout does not merely shrink — `--frame-w` resolves to a negative number, so the
+  frame is 0×0 and the sections take their content height. Every measurement is then a lie.
+  Emulate a size first (`resize_window` to 1440×900; the frame is 424×318 there, 720×540
+  only past ~1830) and re-measure. It also pauses `requestAnimationFrame`, so nothing
+  animates on its own: drive GSAP by hand with `gsap.ticker.lagSmoothing(0)` and repeated
+  `gsap.ticker.tick()` in a busy loop, and prime it with two ticks after any `await` or the
+  first tick swallows the whole pause as one frame and jumps the tween to its end.
+
+- **A hidden pane does not repaint after a scroll.** Screenshots come back solid black
+  anywhere but the top of the document, however correct the geometry reads. To look at
+  something that lives further down, bring it to `scrollY` 0 instead — for a frame slide,
+  set its `--t` to 1 inline and the hero's to 0. The ground behind it will be the hero's,
+  not its own.
+
+- **Trusted input cannot be delivered to a hidden pane at all** — `computer{action:
+  "scroll"}` times out. Synthetic events do reach the page's own listeners, which is enough
+  to exercise anything that moves the page itself rather than asking the browser to:
+  `new WheelEvent('wheel', {deltaY, cancelable: true})` for the scroll controller, and
+  `new PointerEvent(...)` for the deck with `Element.prototype.setPointerCapture` stubbed to
+  a no-op (a synthetic `pointerId` has no active pointer, so the real one throws). Space the
+  moves out with real time if the code reads velocity.
+
+- **ScrollTrigger is starved inside a synchronous tick loop.** It updates off native scroll
+  events, which are not dispatched while JS holds the thread, so the ground colour and the
+  slides look frozen mid-measurement even though the scroll position is moving. Yield, or
+  call `ScrollTrigger.update()` explicitly, before reading anything it drives.
+
 ## 11. Open questions
 
 - Type scale — client is deciding.
 - Which screen / video / people go into which section frame — later; frames stay empty.
 - Date of the board meeting — unknown.
 - Font license for production — unresolved.
+- Taller screenshots for the style deck — the client's are ~1080×600, which crops to
+  836×627 and renders at 1.16x on a 1920 screen.
