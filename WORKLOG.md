@@ -1,5 +1,30 @@
 # Worklog
 
+## 2026-09-03 — the growth tiles get their artwork, and lg comes down
+
+**What changed.** `assets/css/base.css`: `lg` is now 18/24 → 22/28; `.tile` clips its
+children; new `.tile__art` layer with one file per tile, `.tile[data-tile="market"]` in the
+brand red with white type, and `.tile__mark` for the Alfa "А". `index.html`: each tile
+carries its art layer, the first the mark, the last nothing. Added
+`assets/images/growth-{ads,loyalty,bloggers,partners}.webp` and `assets/logos/alfa-a.svg`.
+`CONTEXT.md`: type table, the tiles section, the asset tables and the node index.
+
+**Why.** Client sent Figma `279:54342` and set the two sizes. The stills export on Figma's
+`#1E1E1E` canvas rather than on transparency, so each was keyed on that colour before
+encoding — otherwise every tile would carry a grey slab across its foot. The sixth tile
+stays bare: a shader is going there.
+
+**How verified.** Live page, freshly loaded stylesheet, both widths. Type computes 18/24 at
+1440 and 22/28 at 1920, 3-4 lines a tile, none overflows. The bank tile is
+`rgb(220, 32, 12)` with white type and a 42×65 mark. Each still is 38% of the tile's height
+and lands at 67-74% of its width — the mockup's own proportion — and every one of them
+clears the text box. All five files return 200, no 4xx, no horizontal overflow, grid still
+ends inside the screen. Keyed images measured on a canvas: corners fully transparent, fewer
+than 30 interior pixels lost per image. **Not verified visually** — the Browser pane is
+hidden and screenshots come back blank.
+
+**Left undone.** The shader on the sixth tile.
+
 ## 2026-09-03 — the frame's corners go 32 → 24
 
 **What changed.** `base.css`: `--radius: 16px` → `12px`, so `--radius-btn` (the frame, its

@@ -187,8 +187,20 @@ and the copy in Figma (`276:54325`): "он будет черный, без ра�
   "я тебя обманул про 'прижми' к нижнему краю, давай текст к верхнему всё таки и заодно
   сделаем покрупнее… снизу будут иллюстрации.") At 1440 that leaves 139-191px under the
   text, at 1920 244-274.
-- **No artwork is wired.** The client: "графика будет другой" — so nothing here reserves a
-  box for it.
+- **The tiles are styled after Figma `279:54342`**, which the client sent on 2026-09-03:
+  - The first tile is the bank's: `--c-red` ground, white type, the Alfa "А" standing at its
+    foot (`assets/logos/alfa-a.svg`, from `279:54330`, stripped of the canvas rect Figma
+    exports behind it). **This puts the brand red back on the page** — it had been nowhere
+    since the hero went graphite.
+  - Four tiles carry a 3D still on the bottom edge, cut by it: ads `279:54331`, loyalty
+    `279:54334`, bloggers `276:54324`, partners `279:54335`. Each is 38% of the tile's
+    height, which lands them at 67-74% of its width — the same proportion they hold in the
+    mockup. Left-aligned, except the heart, which runs off the right edge there too.
+  - **The stills come out of Figma on its `#1E1E1E` canvas, not on transparency**, so each
+    was keyed on that colour (`ffmpeg colorkey`, threshold 0.02) and written as a webp with
+    alpha. Without it every tile would carry a grey slab across its foot. Fewer than 30
+    pixels per image were bitten out of the object itself.
+  - **The sixth tile is deliberately bare** — the client is putting a shader behind it.
 - Tile ground is graphite `#1A1817` on the section's black, after the cash.app reference the
   client attached. Type is style md, like every other paragraph.
 - This is the section that carries `data-frame="none"`: the frame leaves upward on it, the
@@ -861,6 +873,10 @@ Figma's own `#1E1E1E` canvas in as a full-bleed `<rect>`.
 | 4 — deck ground | `assets/images/customization-fashion-ground.webp` | `275:39455` | the photograph that pairs with the fashion card. Node export 1222×824 → 900×606, `-q 60`, 34 KB |
 | 4 — deck ground | `assets/images/customization-care-ground.webp` | `275:39458` | pairs with the care card. 900×600, `-q 60`, 19 KB |
 | 4 — deck ground | `assets/images/customization-furniture-ground.webp` | `275:39467` | pairs with the furniture card. 900×600, `-q 60`, 12 KB |
+| 7 — growth tile, ads | `assets/images/growth-ads.webp` | `279:54331` | 3D Я + VK. @3x export, keyed off Figma's `#1E1E1E` canvas, `cwebp -q 90 -alpha_q 100`, 25 KB |
+| 7 — growth tile, loyalty | `assets/images/growth-loyalty.webp` | `279:54334` | 3D heart. Same treatment, 34 KB |
+| 7 — growth tile, bloggers | `assets/images/growth-bloggers.webp` | `276:54324` | 3D percent sign. Same treatment, 35 KB |
+| 7 — growth tile, partners | `assets/images/growth-partners.webp` | `279:54335` | 3D figure and plus. Same treatment, 28 KB |
 | 3 — speed | `assets/images/speed.webp` | `276:54234` (tablet inside it, `276:54238`) | the catalogue on an iPad. Instance export @3x, 2154×1641 (1.31:1). Figma paints its own `#1E1E1E` canvas behind the device, so the export was keyed on that colour and flattened onto black (`ffmpeg colorkey` + `overlay` on `color=black`) — the key also blackens the `#1E1E1E` text inside the screenshot, which at 520px wide is invisible. `cwebp -q 90`, 127 KB. **`contain`**, not cover |
 | 5 — marketplaces | `assets/images/marketplaces.webp` | `206:60376` | a woman in red on a street of falling paper. Node export 2298×1635 (1.41:1) → `cwebp -q 82 -resize 2236 0`, 2236×1591, 163 KB. Against the 4:3 frame `cover` trims about 6% off each side |
 
@@ -1140,7 +1156,7 @@ Verified with fontTools (2026-09-02):
 | Style | Cut | Size / leading | Tracking | Used for |
 |---|---|---|---|---|
 | `xxl` | Hyper Medium | 56 / 56 at 1440 → 64 / 64 at 1920 | normal | The closer heading — the only one left since the cases went back to `xl` on 2026-09-03 |
-| `lg` | Hyper Regular | 20 / 26 at 1440 → 24 / 30 at 1920 | `0.01em` | The growth tiles' text, and nothing else yet. Added 2026-09-03 on the client's word — the tile carries one block of text and md read too small at that size. **The four numbers are mine**, the style is his |
+| `lg` | Hyper Regular | 18 / 24 at 1440 → 22 / 28 at 1920 | `0.01em` | The growth tiles' text, and nothing else yet. Added 2026-09-03. **The sizes are the client's** ("18 на 1440 и 22 на 1920"); the leading is mine |
 | `xl` | Hyper Medium | 28 / 28 at 1440 → 40 / 40 at 1920 | normal | Section titles |
 | `md` | Hyper Regular | 14 / 18 at 1440 → 18 / 24 at 1920 | 1% (`0.01em`) | Everything else |
 
@@ -1280,6 +1296,7 @@ Known nodes:
 | `206:62480` | "Продвижение — 4×3 / content" — the capabilities frame's `promotion` pane. |
 | `223:37237` | «Товары и остатки» screen, 4:3 — the capabilities frame's `logistics` pane. |
 | `206:60376` | Street photograph, woman in red — the marketplaces frame. |
+| `279:54342` | Styled mockup of the growth tiles — red bank tile, 3D stills on the others. `279:54330` is the Alfa "А". |
 | `276:54234` | Full mockup of the speed section — tablet between the two text columns. `276:54236` is the tablet's own frame, `276:54238` the iPad instance that was exported. |
 | `275:39451` | Section "tinder" — the style deck's six images, as three pairs. Children `275:39475` / `39476` / `39477` are the pairs; in each, the upper rectangle is the ground and the lower one the shop screen. |
 | `275:39455` / `275:39469` | Pair 1 — fashion shoot ground, POLENE shop screen. |

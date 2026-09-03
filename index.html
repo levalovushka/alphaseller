@@ -247,13 +247,34 @@
       <div class="tiles__lead">
         <h2 class="section__title">Приводите<br>и&nbsp;удерживайте<br>клиентов</h2>
       </div>
+      <!-- One tile is the bank's own: red ground, white type, the Alfa "А" at the foot.
+           Four carry a 3D still from the client's Figma `279:54342`, keyed off the canvas
+           colour Figma paints behind an export. The last one is deliberately bare — a
+           shader is going in there. -->
       <ul class="tiles__grid">
-        <li class="tile"><p class="tile__text">Размести товары в&nbsp;разделе Маркет&nbsp;— их&nbsp;увидят клиенты Альфа-Банка</p></li>
-        <li class="tile"><p class="tile__text">Запускай рекламу в&nbsp;VK и&nbsp;Яндексе с&nbsp;кэшбэком 10% за&nbsp;оплату кабинетов</p></li>
-        <li class="tile"><p class="tile__text">Повышай лояльность: автоматические рассылки, бонусы и&nbsp;скидки</p></li>
-        <li class="tile"><p class="tile__text">Подбирай блогеров без&nbsp;пересечения аудитории&nbsp;— плати за&nbsp;охват, а&nbsp;не&nbsp;за&nbsp;повторы</p></li>
-        <li class="tile"><p class="tile__text">Размести предложение на&nbsp;витрине подарков и&nbsp;получай клиентов от&nbsp;партнёров</p></li>
-        <li class="tile"><p class="tile__text">Подключи умного бота&nbsp;— он&nbsp;ответит покупателям за&nbsp;тебя</p></li>
+        <li class="tile" data-tile="market">
+          <p class="tile__text">Размести товары в&nbsp;разделе Маркет&nbsp;— их&nbsp;увидят клиенты Альфа-Банка</p>
+          <img class="tile__mark" src="assets/logos/alfa-a.svg" alt="" width="63" height="96">
+        </li>
+        <li class="tile" data-tile="ads">
+          <p class="tile__text">Запускай рекламу в&nbsp;VK и&nbsp;Яндексе с&nbsp;кэшбэком 10% за&nbsp;оплату кабинетов</p>
+          <div class="tile__art" data-art="ads" aria-hidden="true"></div>
+        </li>
+        <li class="tile" data-tile="loyalty">
+          <p class="tile__text">Повышай лояльность: автоматические рассылки, бонусы и&nbsp;скидки</p>
+          <div class="tile__art" data-art="loyalty" aria-hidden="true"></div>
+        </li>
+        <li class="tile" data-tile="bloggers">
+          <p class="tile__text">Подбирай блогеров без&nbsp;пересечения аудитории&nbsp;— плати за&nbsp;охват, а&nbsp;не&nbsp;за&nbsp;повторы</p>
+          <div class="tile__art" data-art="bloggers" aria-hidden="true"></div>
+        </li>
+        <li class="tile" data-tile="partners">
+          <p class="tile__text">Размести предложение на&nbsp;витрине подарков и&nbsp;получай клиентов от&nbsp;партнёров</p>
+          <div class="tile__art" data-art="partners" aria-hidden="true"></div>
+        </li>
+        <li class="tile" data-tile="bot">
+          <p class="tile__text">Подключи умного бота&nbsp;— он&nbsp;ответит покупателям за&nbsp;тебя</p>
+        </li>
       </ul>
     </div>
   </section>

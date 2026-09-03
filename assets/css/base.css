@@ -69,8 +69,8 @@
      заведем новый стиль lg под это". It sits between md and xl on the same 1440→1920 window
      as md: 20/26 there, 24/30 at 1920, Regular like md rather than Medium like the titles —
      it is a block of text, not a heading. **The four numbers are mine, not the client's.** */
-  --fs-lg: clamp(20px, calc(8px + 0.8333vw), 24px);
-  --lh-lg: clamp(26px, calc(14px + 0.8333vw), 30px);
+  --fs-lg: clamp(18px, calc(6px + 0.8333vw), 22px);
+  --lh-lg: clamp(24px, calc(12px + 0.8333vw), 28px);
   --fs-md: clamp(14px, calc(2px + 0.8333vw), 18px);
   --lh-md: clamp(18px, 1.25vw, 24px);
   --weight-md: 400;  /* Hyper Regular, everything else */
@@ -1071,6 +1071,9 @@ img { display: block; max-width: 100%; height: auto; }
 /* Always square — the client's word. Width comes from the grid, height from the ratio;
    nothing caps the height, or the ratio would go instead. */
 .tile {
+  position: relative;
+  /* The artwork runs to the tile's edges and is cut by them. */
+  overflow: hidden;
   aspect-ratio: 1 / 1;
   display: flex;
   flex-direction: column;
@@ -1090,9 +1093,61 @@ img { display: block; max-width: 100%; height: auto; }
    it is the only text on the tile and md read too small at that size. */
 .tile__text {
   margin: 0;
+  /* Above the artwork, which is a layer of its own. */
+  position: relative;
+  z-index: 1;
   font-size: var(--fs-lg);
   line-height: var(--lh-lg);
 }
+
+/* ---------- what sits on a tile ----------
+   From the client's Figma `279:54342`. The 3D stills come out of Figma on its own `#1E1E1E`
+   canvas rather than on transparency, so each was keyed on that colour (`ffmpeg colorkey`)
+   before being written as a webp with alpha — otherwise every tile would carry a grey slab
+   across its foot. Sources: ads `279:54331`, loyalty `279:54334`, bloggers `276:54324`,
+   partners `279:54335`.
+
+   The still stands on the tile's bottom edge and is cut by it — that is the composition in
+   the mockup, and it is why the text moved to the top. Left-aligned, except the heart,
+   which runs off the right edge there. */
+.tile__art {
+  position: absolute;
+  inset: auto 0 0 0;
+  /* 38 of the tile's height, which is what the mockup's stills measure against their card
+     (154-168 against 442) — at the site's tile that puts each one at about 70% of the
+     width, the same as there. */
+  height: 38%;
+  background-position: bottom left;
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.tile__art[data-art="ads"] { background-image: url("../images/growth-ads.webp"); }
+.tile__art[data-art="bloggers"] { background-image: url("../images/growth-bloggers.webp"); }
+.tile__art[data-art="partners"] { background-image: url("../images/growth-partners.webp"); }
+
+.tile__art[data-art="loyalty"] {
+  background-image: url("../images/growth-loyalty.webp");
+  background-position: bottom right;
+}
+
+/* The bank's own tile: the brand red, white type, and the Alfa "А" standing at its foot.
+   The red is `--c-red`, the one the client fixed in §7 and had kept off the page until this
+   mockup put it back. */
+.tile[data-tile="market"] {
+  background: var(--c-red);
+  color: var(--c-white);
+}
+
+.tile__mark {
+  position: absolute;
+  left: 24px;
+  bottom: 24px;
+  height: 22%;
+  width: auto;
+}
+
+/* The last tile is bare on purpose — a shader is going in there. */
 
 /* ---------- closer + footer ----------
    The last screen is one section, not two: the closer's title and text sit at the top
