@@ -108,7 +108,7 @@ hand rather than leaving them to `text-wrap: balance`.
 
 ### Header
 
-- Logo (Alpha Seller only — no Alfa-Bank lockup).
+- Logo: the full Alpha Seller lockup, mark plus wordmark (no Alfa-Bank lockup).
 - Links: `Продукты`, `Тарифы`, `Крупному бизнесу`, `Примеры`, `Блог`.
 - Button: `Начать бесплатно`.
 - **Full-bleed**, not inside the page container: 16px from the top, 20px from both edges.
@@ -424,15 +424,17 @@ The page padding is **two tokens**, split on 2026-09-03:
 | Token | What | Value |
 |---|---|---|
 | `--page-pad` | vertical — the sections' bottom padding, and the frame's optical centre | `clamp(76px, calc(4.4vw + 12px), 96px)` |
-| `--page-pad-x` | horizontal — the side margin, and therefore what is left for the frame | `clamp(52px, calc(4.4vw - 12px), 96px)` |
+| `--page-pad-x` | horizontal — the side margin, and therefore what is left for the frame | `clamp(40px, calc(4.4vw - 24px), 96px)` |
 
-The same 4.4vw ramp, the horizontal one shifted down 24. They were one token until the client
-asked the laptop side margin to pay for a bigger frame (76 → 52 at 1440, frame 448 → 496) —
-keeping them joined would have taken 24 off the bottom padding and moved the frame's centre
-12px with it, which nobody asked for. **Anything horizontal takes `--page-pad-x`; anything
-vertical takes `--page-pad`.**
+The same 4.4vw ramp, the horizontal one shifted down 36. They were one token until the client
+asked the laptop side margin to pay for a bigger frame — keeping them joined would have taken
+the same off the sections' bottom padding and moved the frame's centre with it, which nobody
+asked for. **Anything horizontal takes `--page-pad-x`; anything vertical takes `--page-pad`.**
+The side margin at 1440 went 76 → 52 → 40 across 2026-09-03, all three of them his.
 
-`--col-gap` is `clamp(52px, calc(2.5vw + 28px), 76px)` — +12 on the client's word, 2026-09-03. The two text columns have a floor of `--col-min`
+`--col-gap` is `clamp(52px, calc(5vw - 20px), 76px)` — 52 at 1440, 76 at 1920. It was raised
++12 at both ends earlier the same day and then trimmed back at the laptop end only, which is
+why the ramp is 5vw: from 52 at 1440, a 2.5vw ramp cannot reach 76 at 1920. The two text columns have a floor of `--col-min`
 (380px) and the frame takes what is left, capped at 720px.
 
 On a 1920 screen the side margin comes from `--page-max` (1704px), not from the padding —
@@ -477,13 +479,19 @@ Measured:
 
 | viewport | xl | gap | frame | text column | side margin |
 |---|---|---|---|---|---|
-| 1440 | 32 / 32 | 64 | 496 | 356 (the floor) | 52 |
-| 1680 | 36 | 70 | 704 | 356 (the floor) | 62 |
+| 1440 | 32 / 32 | 52 | 544 | 356 (the floor) | 40 |
+| 1512 | 33.2 | 55.6 | 604 | 356 (the floor) | 43 |
+| 1680 | 36 | 64 | 720 (the cap) | 356 (the floor) | 50 |
 | 1920 | 40 / 40 | 76 | 720 (the cap) | 416 | 108 |
 
-At 1920 nothing the last two rounds touched shows at all: the side margin there comes from
-`--page-max`, not the padding, and the frame is at its own 720 cap. The frame reaches that
-cap at about 1700 now, where it used to reach it at 1830.
+**The frame is now at its cap from about 1655 up.** Below that it grows at 0.812px per px of
+viewport (`0.812vw - 624`, from the two ramps); above it, flat 720. The band where it still
+grows with the screen is 1440–1655 — it was 1440–1830 at the start of 2026-09-03. If it
+should keep growing past 1655, the 720 cap is the number to raise, not the gap or the margin.
+
+At 1920 nothing any of this touched shows: the side margin there comes from `--page-max`, not
+the padding, and the frame is capped. `--page-pad-x`'s own 96 ceiling is now unreachable
+below ~2700 and is only a guard.
 
 **Which side pays for the gap depends on the width.** Below ~1830 the frame is not at its
 cap: the two text columns sit on their floor and every pixel added to the gap comes out of
@@ -496,17 +504,25 @@ cap had to come down with the gap, 760 → 752 → 720. If the xl goes back up, 
 adding to the gap again.
 
 For anyone tempted to re-tune the frame: it has been 416, 473, 553, 513, 480, 456, 424, 400,
-448 and now **496** across this conversation. 400 was not chosen — it fell out of the gap going
+448, 496 and now **544** across this conversation. 400 was not chosen — it fell out of the gap going
 up — and 448 is the client's answer to it, 2026-09-03, paid for out of the columns
 (`--col-min` 380 → 356) rather than out of the page margin.
 
 **The arithmetic at 1440 leaves no slack.** 1440 = 2 margins + 2 columns + 2 gaps + frame,
-so every pixel the frame gains comes off the columns or off the margins, and the client has
-now spent both: the columns from 380 to 356 (which cost the hero and customization titles a
-line — 380 was the exact edge) and the side margin from 76 to 52. Measured headroom left, at
-the current gap and copy: the columns can go to 324 (frame 560) before the `speed` title
-breaks to four lines, and the margin below 52 starts crowding the header's own 16px inset.
-Measure the line counts, do not derive them, before spending either again.
+so every pixel the frame gains comes off one of the other three, and across 2026-09-03 the
+client spent all three: columns 380 → 356, side margin 76 → 40, gap 64 → 52. The frame went
+400 → 448 → 496 → 544 on those.
+
+Only the columns cost anything typographic, and they cost it immediately: **380 was the exact
+edge** — at 380 the hero and customization titles set in two lines, at 376 and below both go
+to three. Trimming the gap and the margin cost nothing at all, because the columns rest on
+their floor either way; the price there is only air.
+
+Measured headroom left at 1440: the columns can go to 324 (frame 560 at the old gap) before
+the `speed` title breaks to four lines, and the margin can go to 24 (frame 600 measured with
+the gap at 40) before the page's content sits level with the header's own 16px inset and the
+header stops reading as a separate system. Measure the line counts, do not derive them,
+before spending the columns again.
 
 ## 6. Content
 
@@ -539,8 +555,14 @@ Vendored in `assets/logo/`, pulled from Figma node `196:46920`:
 Both ship with hardcoded `fill="black"` — swap to `currentColor` when wiring the navbar
 recolor.
 
-**The header uses the mark only, inside a 52×52 rounded square.** The full lockup is not
-used on this page.
+**The header carries the full lockup** — mark with the wordmark to its right,
+`alphaseller-logo.svg` — since 2026-09-03. It is painted with a CSS mask, so it takes `--ink`
+and follows the scroll's colour like everything else on the ground. 24px tall, width derived
+from the file's 1037 × 91.13; the 24 is mine, chosen so the wordmark's caps sit close to the
+nav links.
+
+The rounded-square badge it replaces is gone, and with it the page's only `corner-shape:
+squircle` — nothing uses corner shaping now. `alphaseller-mark.svg` stays in the repo.
 
 ### Social icons
 

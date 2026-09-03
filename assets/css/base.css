@@ -18,9 +18,9 @@
   /* Brand palette — fixed, see CONTEXT.md §7. */
   --c-white: #ffffff;
   --c-smoke: #e9ebee;
-  --c-green: #a6ed00;
+  --c-green: #a6ed00;     /* brand accent — nothing on the page uses it since 2026-09-03 */
   --c-black: #000000;
-  --c-graphite: #1a1817;  /* the cards in the cases section */
+  --c-graphite: #1a1817;  /* the hero's ground and the cards in the cases section */
   --c-red: #dc200c;       /* unused on this page */
 
   /* Layout — provisional, not a design decision. */
@@ -32,11 +32,13 @@
   /* Vertical: the sections' bottom padding, and the frame's optical centre. */
   --page-pad: clamp(76px, calc(4.4vw + 12px), 96px);
   /* Horizontal: the side margin, and therefore what is left for the frame. Split off
-     from --page-pad on 2026-09-03: the client wanted the laptop side margin to pay for a
-     bigger frame (76 → 52 at 1440, frame 448 → 496) and the vertical rhythm to stay put.
-     The same 4.4vw ramp as the vertical one, shifted down 24. At 1920 it does not show:
-     the side margin there comes from --page-max and the frame is at its own cap. */
-  --page-pad-x: clamp(52px, calc(4.4vw - 12px), 96px);
+     from --page-pad on 2026-09-03, because the client wants the laptop side margin to pay
+     for a bigger frame and the vertical rhythm to stay put. Same 4.4vw ramp as the
+     vertical one, now shifted down 36: the floor is what binds at 1440, and it is set so
+     the margin lands on exactly 40 there (76 → 52 → 40 across the day). At 1920 none of
+     this shows — the side margin there comes from --page-max and the frame is at its own
+     cap — so the ceiling is only a guard for a screen wider than ~2700. */
+  --page-pad-x: clamp(40px, calc(4.4vw - 24px), 96px);
 
   /* Header: full-bleed. Its height follows from the padding plus the 52px
      controls — nothing fixes it. */
@@ -64,14 +66,19 @@
   --tracking-md: 0.01em;
 
   /* Control heights, fixed by the client. */
-  --logo-size: 48px;
+  /* The lockup's height; its width follows from the file's 1037 x 91.13.
+     TODO: 24 is my number — it puts the wordmark's caps close to the nav links. */
+  --logo-h: 24px;
   --btn-h-nav: 48px;
   --btn-h: 40px;
   --btn-pad-x: 20px;   /* both sizes, header and sections */
   /* The three-column stage. The text columns never go below --col-min; the frame
      takes what is left, capped at 720. Without the floor, a long word in a title
      runs out of its column and collides with the frame on a narrower screen. */
-  --col-gap: clamp(52px, calc(2.5vw + 28px), 76px);
+  /* Trimmed at the laptop end on 2026-09-03, after being raised there earlier the same
+     day: 52 at 1440, still 76 at 1920. Holding both ends needs the steeper 5vw ramp —
+     2.5vw cannot reach 76 at 1920 from 52 at 1440. */
+  --col-gap: clamp(52px, calc(5vw - 20px), 76px);
   /* The floor on the two text columns, and below ~1700 it is what sets the frame: the
      columns rest on it and the frame takes the remainder. Lowered 380 → 356 on 2026-09-03
      to pay for the +12 gap out of the columns rather than out of the frame, which the
@@ -95,9 +102,9 @@
      are the hero's, and the fallback when JS does not run. --ink-invert is what is drawn
      on top of the ink — a filled button's label, the logo mark — and it is the opposite
      ink, not the ground: a green label inside a black pill reads as a mistake. */
-  --ground: var(--c-green);
-  --ink: var(--c-black);
-  --ink-invert: var(--c-white);
+  --ground: var(--c-graphite);
+  --ink: var(--c-white);
+  --ink-invert: var(--c-black);
 
   /* Nothing tied to a section change is left on a discrete cross-fade — the slides moved
      onto the scroll too — so this is declared and unused. Kept as the one place a
@@ -198,33 +205,30 @@ img { display: block; max-width: 100%; height: auto; }
 
 /* Mark only, no wordmark, inside a 48×48 rounded square.
    TODO: the square's fill and the mark's size inside it are not specified. */
+/* The full lockup — mark with the wordmark to its right — rather than the mark alone in a
+   badge. No plate behind it any more, so the logo is just the artwork on the ground. */
 .header__logo {
   flex: 0 0 auto;
   display: grid;
-  place-items: center;
-  width: var(--logo-size);
-  height: var(--logo-size);
-  background: var(--ink);
-  /* Same radius as the buttons. Fallback: a plain rounded square (Safari, Firefox). */
-  border-radius: var(--radius-btn);
+  place-items: center start;
 }
 
-/* The logo square is the only squircle on the page. Everything else is either a plain
-   rounded rectangle (the frame and its slides at 32, the cards at their own 44) or a full
-   pill (the buttons and the tabs). `border-radius` above is the fallback for browsers
-   without CSS corner shaping (Safari, Firefox); Chromium takes this. */
-@supports (corner-shape: squircle) {
-  .header__logo { corner-shape: squircle; }
-}
+/* Nothing on the page carries `corner-shape` any more: the squircle lived on the logo's
+   badge, and the badge went when the full lockup replaced it. Left as a note for where one
+   would go back. Everything rounded is either a rounded rectangle (the frame and its slides
+   at 32, the cards at 44) or a full pill (the buttons and the tabs). */
 
-/* The mark is painted, not placed: a mask lets it take --ink-invert, so it stays the
-   inverse of the square it sits in through the whole colour change. */
+/* Painted, not placed: a mask lets the lockup take --ink and follow the scroll's colour
+   like everything else drawn on the ground. */
+/* Painted, not placed: a mask lets the lockup take --ink and follow the scroll's colour
+   like every other mark on the page. 1037 x 91.13 in the file, so the width follows the
+   height. TODO: 24 is my number — the wordmark's caps then sit close to the nav links. */
 .header__mark {
-  width: 24px;
-  height: 16px;
-  background: var(--ink-invert);
-  mask: url("../logo/alphaseller-mark.svg") center / contain no-repeat;
-  -webkit-mask: url("../logo/alphaseller-mark.svg") center / contain no-repeat;
+  height: var(--logo-h);
+  width: calc(var(--logo-h) * 1037 / 91.13);
+  background: var(--ink);
+  mask: url("../logo/alphaseller-logo.svg") left center / contain no-repeat;
+  -webkit-mask: url("../logo/alphaseller-logo.svg") left center / contain no-repeat;
 }
 
 .header__nav {
@@ -364,11 +368,22 @@ img { display: block; max-width: 100%; height: auto; }
 }
 
 /* ---------- the hero morph ----------
-   The hero's green is not painted as the page's ground but as a layer of its own, so it
+   The hero's ground is not painted as the page's ground but as a layer of its own, so it
    can leave as a shape instead of a cross-fade: across the crossing into capabilities it
    shrinks from full-bleed to exactly the frame's box, picking up the frame's radius on
    the way, and stops there. It never fades — it stays behind the frame, and the opaque
    dashboard simply arrives on top of it. Client's call, 2026-09-03.
+
+   Graphite since 2026-09-03, moved with the hero: the panel is the hero's own ground, so
+   the two can only ever be the same colour. It was green until then. The graphite is now
+   only what shows under the photograph and if it fails to load.
+
+   The photograph on it is the studio shot, Figma `196:53708` — the same file that used to
+   sit in the frame, which is why it is `hero.webp` and not a new asset. It is the panel's
+   own background and does not move: as the clip closes, the panel is a shrinking window
+   onto a photograph that stays where it is. Scaling the picture down with the panel would
+   read as the whole composition being pulled into the frame instead — a different move,
+   not asked for.
 
    Layer 0, the same as the photographic ground and for the same reason: above the ground
    the body is painted with, below the sections' own text (layer 1) so the hero's title
@@ -382,7 +397,7 @@ img { display: block; max-width: 100%; height: auto; }
   position: fixed;
   inset: 0;
   z-index: 0;
-  background: var(--c-green);
+  background: var(--c-graphite) url("../images/hero.webp") center / cover no-repeat;
   clip-path: inset(0 round 0);
   will-change: clip-path;
 }
@@ -429,9 +444,10 @@ img { display: block; max-width: 100%; height: auto; }
   opacity: var(--t, 0);
 }
 
-/* The hero slide is deliberately empty: the client took the photograph off the first
-   screen. `assets/images/hero.webp` stays in the repo — it is wanted again later. Figma
-   node `196:53708`. */
+/* The hero slide holds the interface again — the looping screen recording, restored on the
+   client's word, 2026-09-03. The street photograph that was here for one round
+   (`assets/images/hero-street.webp`, Figma `265:39107`) is unwired but kept in the repo,
+   as is the studio `hero.webp`, which now backs the morph panel instead. */
 
 /* ---------- the capabilities tabs ----------
    Three panes behind one strip of tabs under the frame. The pane swap is a wall-clock

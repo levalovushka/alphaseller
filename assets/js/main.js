@@ -28,7 +28,8 @@ const token = (name) => styles.getPropertyValue(name).trim();
 const GROUND = {
   white: token('--c-white'),
   smoke: token('--c-smoke'),
-  green: token('--c-green'),
+  green: token('--c-green'),   /* no section takes it since the hero went graphite */
+  graphite: token('--c-graphite'),
   black: token('--c-black'),
 };
 

@@ -1,5 +1,83 @@
 # Worklog
 
+## 2026-09-03 — the header takes the full logo lockup
+
+**What changed.** `assets/css/base.css`: `.header__logo` loses its badge — no plate, no
+size, no radius — and `.header__mark` now masks `alphaseller-logo.svg` (mark + wordmark)
+at `--logo-h: 24px`, width derived from the file's 1037 × 91.13. It is painted with `--ink`
+rather than `--ink-invert`, since there is no plate to sit on any more. The `--logo-size`
+token and the `@supports (corner-shape: squircle)` rule are gone; a comment marks where a
+squircle would go back. `CONTEXT.md` updated.
+
+**Why.** Client asked for the big version with the wordmark to the right.
+
+**Two consequences worth knowing.** The badge was the only thing on the page carrying
+`corner-shape`, so nothing uses corner shaping now — everything rounded is either a rounded
+rectangle or a full pill. And `alphaseller-mark.svg` is no longer referenced; it stays in
+the repo.
+
+**How it was verified.** Freshly loaded stylesheet. The lockup renders 273×24 at both 1440
+and 1920, `alphaseller-logo.svg` returns 200, no failed resources, no horizontal overflow.
+The mask follows the ink across the page: white on the graphite hero, black on smoke, white
+on both black sections, black on the cases. 40px of clear space to the nav at 1440.
+
+**Mine, not the client's.** The 24px height.
+
+## 2026-09-03 — 544 at 1440: gap and side margin trimmed there
+
+**What changed.** `assets/css/base.css`: `--col-gap`
+`clamp(52px, calc(2.5vw + 28px), 76px)` → `clamp(52px, calc(5vw - 20px), 76px)`;
+`--page-pad-x` `clamp(52px, calc(4.4vw - 12px), 96px)` →
+`clamp(40px, calc(4.4vw - 24px), 96px)`. `CONTEXT.md` §5: both tokens, the measured table,
+the 1440 arithmetic, the frame's history.
+
+**Why.** Client wants the frame bigger again and chose to trim the gap and the side margin at
+the laptop end rather than the columns. 52 / 40 out of the five combinations measured for him.
+
+**Why the ramp changed shape.** The gap had to stay 76 at 1920 while dropping to 52 at 1440,
+and a 2.5vw ramp cannot span that — hence 5vw. `--page-pad-x` keeps its 4.4vw slope, shifted
+24 further down so its floor binds at exactly 40 at 1440.
+
+**How it was verified.** 1440: gap 52, side margin 40, frame 544×408, columns 356, bottom
+padding still 76, the frame's centre still 454, nothing overflowing, every title's line count
+unchanged (3-2-3-3-3-2-2). 1512: gap 55.6, margin 43, frame 604. 1680: gap 64, margin 50,
+frame 720 — at the cap. 1920: gap 76, margin 108 (from `--page-max`), frame 720, columns 416,
+bottom padding 96 — nothing moved. Screenshot at 1440.
+
+**What is left undone.** **The frame is now capped from ~1655 up**, so it only grows across
+1440–1655; that band was 1440–1830 this morning. Raising the 720 cap is the only thing that
+changes it — flagged for the client, not touched. Headroom left at 1440 is in CONTEXT §5.
+
+**Noted, not mine.** The hero is now `data-theme="graphite"` with a video, and the morph
+panel's fill was moved from `--c-green` to `--c-graphite` to match — another session's work,
+landed while this was in progress. Verified the morph still lands on the frame's box.
+
+## 2026-09-03 — a photograph back in the hero frame
+
+**What changed.** New `assets/images/hero-street.webp` (1440×1080, 91 KB). `index.html`: the
+hero slide is empty markup again, filled from the stylesheet like the other picture slides —
+the `<video>` is gone from it. `assets/css/base.css`: a `background-image` rule for
+`[data-for="hero"]`, replacing the stale "deliberately empty" comment.
+
+**Why.** Client supplied the shot — Figma `265:39107` in the project file — and said it goes
+in the frame, which means the screen recording leaves it.
+
+**How it was verified.** `download_assets` on that node gave a 4096×2286 JPEG. Cropped centred
+to 4:3 and resized in one `cwebp -q 82 -crop 524 0 3048 2286 -resize 1440 1080` pass — lossy
+because it is a photograph, per CONTEXT §7. Looked at the output: man centred, hands inside
+the frame, both edge pedestrians partly kept. In the page at 1440: the slide's
+`background-image` resolves, `background-size: cover`, no `.stage-frame__video` left in the
+DOM, no console errors, and the dashed placeholder outline stays off (`data-filled="true"`).
+
+**What is left undone.** The client also asked for the first screen to go dark grey — not
+done, waiting on two answers: which grey (`--c-graphite` #1A1817 or another), and what
+happens to the morph panel, which is the hero's green ground and would either turn grey with
+it or need the green to come from somewhere else. `data-theme="graphite"` does not exist in
+the `GROUND` map in main.js yet either. The video is unwired, not deleted: `hero.mp4`, its
+poster and the old studio `hero.webp` all stay, and the controller in main.js is guarded on
+the element being present, so it stands down on its own — dead code left in place rather than
+ripped out of another session's work.
+
 ## 2026-09-03 — 496 at 1440, paid out of the side margin
 
 **What changed.** `assets/css/base.css`: new `--page-pad-x`,
