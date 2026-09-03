@@ -1,5 +1,54 @@
 # Worklog
 
+## 2026-09-03 — the section body flies in after its title
+
+**What changed.** `assets/js/main.js`: the reveal is now a `gsap.timeline` per section
+instead of one staggered tween. The title goes in at 0; everything else in the section —
+`.section__subtitle`, `.btn`, `.case` — goes in at **0.3s** and keeps its own 0.08s stagger
+inside that group. The numbers moved into a `REVEAL` object at the top of the block.
+`CONTEXT.md` §7 item 5 rewritten.
+
+**Why.** Client asked for the subtitle and its button to fly into place a little later than
+the title.
+
+**How it was verified.** `localhost:4321` at 1440×900, read off the live GSAP objects and
+then sampled by driving the timeline's own clock — the browser pane will not scroll (see
+below), so this is the timing itself rather than a recording of it.
+
+Structure, `#speed`: two children, `.section__title` at start 0, then
+`[.section__subtitle, .btn]` at start **0.3** with `stagger: 0.08`; timeline 1.18s long.
+`#audience`: `.section__title` at 0, then `[.btn, .case ×4]` at 0.3; 1.42s long.
+`#capabilities` has no CTA, so its late group is the subtitle alone.
+
+Opacity sampled with `tl.time(t)`, `#speed`:
+
+| t | title | subtitle | button |
+|---|---|---|---|
+| 0 | 0 | 0 | 0 |
+| 0.15 | 0.46 | 0 | 0 |
+| 0.30 | 0.76 | 0 | 0 |
+| 0.50 | 0.95 | 0.58 | 0.39 |
+| 0.80 | 1 | 0.95 | 0.89 |
+| 1.10 | 1 | 1 | 1 |
+
+So at the moment the body starts, the title is already three-quarters in, and the button
+trails its own subtitle by the group stagger. Console clean, no errors.
+
+**Left undone / not verified.**
+
+- **The 0.3 is my number**, not the client's — same standing as the tab timings.
+- **No rAF-driven playback was observed.** The browser pane is frozen: `gsap.ticker.frame`
+  stays at 0–2, and `window.scrollTo` leaves `scrollY` at 0, so no ScrollTrigger can fire
+  and the animation cannot be watched or screenshotted. Evidence is the timeline's
+  structure and its own clock, which is exactly what the change is about, but it is not a
+  recording of the real thing.
+- Pre-existing, unrelated, found while probing: a **deep link lands blank**. On
+  `/#audience` the browser applies the hash scroll after `catchUpReveals()` has run, so its
+  `scrollY > trigger.start` test sees 0 and skips, and the section's text stays at opacity
+  0 until something else fires. Not introduced here — the catch-up pass and its condition
+  are untouched — and in a live browser ScrollTrigger's own loop covers it on the next
+  frame. Worth a real fix, not done.
+
 ## 2026-09-03 — experiment: the deck's grounds without the blur
 
 **What changed.** `--deck-blur` 32px → 0, and the three ground files re-exported sharp:

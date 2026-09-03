@@ -254,10 +254,14 @@ changes; see "The wheel is ours, everything else is the browser's" below.
    against the sheet that *uses* it, so an inline one was fetched from
    `assets/css/assets/icons/…` and 404'd.
 4. The frame fades out across the footer's entrance, scrubbed to the scroll.
-5. Each section's title, subtitle and CTA reveal once on entry (rise 24px + fade, 0.8s,
-   staggered). The trigger is the **title**, not the section — sections are a viewport tall
-   with centred content, so a section-anchored trigger fires a full screen too early.
-   Skipped under `prefers-reduced-motion: reduce`.
+5. Each section's text reveals once on entry, rise 24px + fade, 0.8s, and in **two
+   groups**: the title lands first, and the body — subtitle, CTA, case cards — starts
+   **0.3s later** and keeps its own 0.08s stagger inside the group, so the button still
+   trails its subtitle. The lag is a wait, not a slower move: both groups travel the same
+   distance over the same duration. The client's call, 2026-09-03; the 0.3 is mine and his
+   to change (`REVEAL.lag` in `main.js`). The trigger is the **title**, not the section —
+   sections are a viewport tall with centred content, so a section-anchored trigger fires a
+   full screen too early. Skipped under `prefers-reduced-motion: reduce`.
 
 **The header does not hide on scroll** — tried, dropped at the client's request. It stays
 put; only its ink changes. No custom cursor, no magnetic buttons.

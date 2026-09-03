@@ -854,29 +854,46 @@ gsap.matchMedia().add('(prefers-reduced-motion: no-preference)', () => {
    The trigger is the title, not the section: sections are a full viewport tall with
    their content centred, so anything anchored to the section fires while the content
    is still a screen below the fold and the animation is over before it comes into
-   view. Skipped entirely when the visitor asked for less motion. */
+   view. Skipped entirely when the visitor asked for less motion.
+
+   The title lands first and the section's body — its subtitle, its CTA, the case cards —
+   flies in after it, which is the client's call (2026-09-03). `lag` is the gap between
+   the two groups; the body then keeps its own `stagger` inside the group, so the button
+   still trails its subtitle rather than arriving with it. The lag is a wait, not a slower
+   move: both groups travel the same 24px over the same 0.8s, so the body reads as coming
+   from the same place, only later. */
+const REVEAL = { travel: 24, duration: 0.8, ease: 'power2.out', stagger: 0.08, lag: 0.3 };
+
 const reveals = [];
 
 gsap.matchMedia().add('(prefers-reduced-motion: no-preference)', () => {
   gsap.utils.toArray('.section').forEach((section) => {
-    const targets = section.querySelectorAll(
-      '.section__title, .section__subtitle, .btn, .case'
-    );
+    const title = section.querySelector('.section__title');
+    if (!title) return;
 
-    reveals.push(
-      gsap.from(targets, {
-        y: 24,
-        opacity: 0,
-        duration: 0.8,
-        ease: 'power2.out',
-        stagger: 0.08,
-        scrollTrigger: {
-          trigger: section.querySelector('.section__title'),
-          start: 'top 90%',
-          once: true,
-        },
-      })
-    );
+    /* Everything in the section that is not the title. The cases section has no aside —
+       its CTA sits in the head next to the title and its cards below — so the group is
+       written as a selector list rather than `.section__aside > *`. */
+    const body = section.querySelectorAll('.section__subtitle, .btn, .case');
+
+    const move = {
+      y: REVEAL.travel,
+      opacity: 0,
+      duration: REVEAL.duration,
+      ease: REVEAL.ease,
+    };
+
+    /* A timeline rather than one staggered tween, because the two groups need a gap
+       between them that a single `stagger` cannot express. `catchUpReveals` below drives
+       it by `progress()`, which a timeline answers the same way a tween does. */
+    const tl = gsap.timeline({
+      scrollTrigger: { trigger: title, start: 'top 90%', once: true },
+    });
+
+    tl.from(title, { ...move });
+    if (body.length) tl.from(body, { ...move, stagger: REVEAL.stagger }, REVEAL.lag);
+
+    reveals.push(tl);
   });
 });
 
