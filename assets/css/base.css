@@ -1020,67 +1020,63 @@ img { display: block; max-width: 100%; height: auto; }
 .case-deck .deck-nav { margin-top: var(--tab-drop); }
 
 /* ---------- growth tiles ----------
-   The black screen after the cases: six small tiles across the two left columns, the
-   heading in the third — where every other section keeps its subtitle. No frame (the
-   section carries `data-frame="none"`, so the frame leaves upward on it), no subtitle and
-   no button; the client set all three.
+   The black screen after the cases: the heading in the left column, six square tiles across
+   the two on the right. No frame (the section carries `data-frame="none"`, so the frame
+   leaves upward on it), no subtitle and no button; the client set all three, and put the
+   text on the left on 2026-09-03 — "давай наоборот — текст слева, справа карточки".
 
    The tiles carry artwork later. Nothing here reserves room for it: the client has not
-   drawn them yet, and a placeholder box would decide the composition for him. */
+   drawn them yet, and a placeholder box would decide the composition for him. The square
+   already leaves the room — the text sits on the bottom edge and everything above it is
+   the space that artwork will take. */
 
 .section--tiles .tiles {
   width: 100%;
   max-width: var(--page-max);
   margin-inline: auto;
   display: grid;
-  /* The site's own three columns, with the tiles spanning the first two. */
+  /* The site's own three columns, with the tiles spanning the last two. */
   grid-template-columns: 1fr var(--frame-w) 1fr;
   gap: var(--col-gap);
   align-items: start;
 }
 
+.tiles__lead {
+  grid-column: 1;
+}
+
 .tiles__grid {
-  grid-column: 1 / 3;
+  grid-column: 2 / 4;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   /* Same 24 as the old card grid: the tiles read as one block, not as three columns of
-     the page. Equal rows, so a longer tile does not make its row taller than the other. */
-  grid-auto-rows: 1fr;
+     the page. */
   gap: 24px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
+/* Always square — the client's word. Width comes from the grid, height from the ratio;
+   nothing caps the height, or the ratio would go instead. */
 .tile {
+  aspect-ratio: 1 / 1;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  /* The text sits on the bottom edge; the room above it is for the artwork to come. */
+  justify-content: flex-end;
   padding: 24px;
   border-radius: var(--radius-card);
-  /* Graphite on black, like the reference: the tile is a plate, not a hole. It keeps its
-     own ground and follows --ink for the type, because this screen is black either way. */
+  /* Graphite on black, like the reference the client attached: the tile is a plate, not a
+     hole. It follows --ink for the type, because this screen is black either way. */
   background: var(--c-graphite);
 }
 
-/* Both styles are md — the site has only two — and the heading takes the Medium weight the
-   titles use. */
-.tile__title {
-  margin: 0;
-  font-weight: var(--weight-xl);
-  font-size: var(--fs-md);
-  line-height: var(--lh-md);
-  letter-spacing: var(--tracking-md);
-}
-
+/* One block of text per tile since 2026-09-03, not a title and a subtitle — the client
+   dropped the pair and had the copy shortened to fit one. Style md, like every other
+   paragraph on the page. */
 .tile__text {
   margin: 0;
-}
-
-/* The heading sits in the third column, at the top of the tiles rather than the middle of
-   the screen: the two blocks start on the same line, which is what the reference does. */
-.tiles__aside {
-  grid-column: 3;
 }
 
 /* ---------- closer + footer ----------

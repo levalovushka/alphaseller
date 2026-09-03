@@ -171,19 +171,37 @@ the site's voice. Replace it with real cases before this goes anywhere near a cu
 
 Section 7, added 2026-09-03. The client has not drawn it yet; he gave the layout in words
 and the copy in Figma (`276:54325`): "он будет черный, без рамки по центру а с шестью
-плашками… а справа вместо меню будет тайтл. тайтл — приводите и удерживайте клиентов.
-сабтайтла не будет, кнопки в блоке не будет."
+плашками… сабтайтла не будет, кнопки в блоке не будет", then, on seeing it: "давай наоборот
+— текст слева, справа карточки. карточки должны быть квадратные всегда. текст в карточках
+надо переработать — сократить и превратить в один блок текста, а не тайтл и сабтайтл. текст
+прижимай к нижней границе плашки."
 
-- Six tiles in a 3×2 grid across the **first two** page columns, the heading alone in the
-  third — the same three-column grid the rest of the page uses, so the tiles line up with
-  the frame above them. Tiles and heading start on the same line.
-- Tile ground is graphite `#1A1817` on the section's black, after the cash.app reference the
-  client attached. Type is the site's two styles: the tile's title is md at Medium, its text
-  md at Regular.
+- Heading alone in the **first** page column, six tiles in a 3×2 grid across the other two —
+  the same three-column grid the rest of the page uses. Both start on the same line.
+- **The tiles are always square.** Width comes from the grid, height from the ratio: 293 at
+  1440, 388 at 1920. Nothing caps the height, or the ratio would go instead.
+- One block of text per tile, on its **bottom edge**; 24px padding all round. Everything
+  above the text is the room the artwork will take — that is why the square is worth the
+  space it costs.
 - **No artwork is wired.** The client: "графика будет другой" — so nothing here reserves a
-  box for it, because a placeholder would decide the composition for him.
+  box for it.
+- Tile ground is graphite `#1A1817` on the section's black, after the cash.app reference the
+  client attached. Type is style md, like every other paragraph.
 - This is the section that carries `data-frame="none"`: the frame leaves upward on it, the
   way it used to leave on the cases screen.
+
+**Tile copy**, shortened by me from the client's Figma pairs, which were a title plus a
+sentence each. His originals mixed «ты» and «вы» (`Охвати` next to `Повышайте`); these are
+all «ты», like the rest of the site.
+
+| # | Figma original | On the page |
+|---|---|---|
+| 1 | Охвати аудиторию Альфа-Банка / Размести товары бесплатно в приложении в разделе Маркет — клиенты банка их увидят | Размести товары в разделе Маркет — их увидят клиенты Альфа-Банка |
+| 2 | Размещай рекламу в VK и Яндексе / Получите двойную выгоду: новых клиентов и кэшбэк 10% за оплату рекламных кабинетов | Запускай рекламу в VK и Яндексе с кэшбэком 10% за оплату кабинетов |
+| 3 | Повышайте лояльность / Автоматизируйте рассылки, предлагайте бонусы и скидки по категориям, товарам, брендам | Повышай лояльность: автоматические рассылки, бонусы и скидки |
+| 4 | Экономь на продвижении у блогеров / Подбери инфлюенсеров без пересечения аудитории, узнай подписки клиентов — получи максимальный охват и продажи | Подбирай блогеров без пересечения аудитории — плати за охват, а не за повторы |
+| 5 | Привлекай покупателей у партнёров / Размести своё предложение на витрине подарков и получи новых клиентов | Размести предложение на витрине подарков и получай клиентов от партнёров |
+| 6 | Прокачай сервис с помощью ИИ / Подключи человечного и умного бота для общения с покупателями | Подключи умного бота — он ответит покупателям за тебя |
 
 ### Closer + footer — one screen
 

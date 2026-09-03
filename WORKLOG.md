@@ -1,5 +1,27 @@
 # Worklog
 
+## 2026-09-03 — the tiles flip, go square, and lose their titles
+
+**What changed.** `index.html`: in `#growth` the heading moved to the left column and the
+tiles to the right two; each tile is now a single `.tile__text` instead of a title and a
+sentence, and the six strings were shortened. `assets/css/base.css`: `.tiles__lead`,
+`aspect-ratio: 1 / 1` and `justify-content: flex-end` on the tile, `.tile__title` gone.
+`CONTEXT.md`: the section rewritten with the client's words and a table of the copy against
+his Figma originals.
+
+**Why.** Client, on seeing the first cut: text left, cards right, always square, one block of
+text pushed to the bottom edge, padding as it was. The square is what leaves room for the
+artwork he is still drawing — the text sits under it rather than beside it. His originals
+mixed «ты» and «вы»; the shortened copy is all «ты», like the rest of the site.
+
+**How verified.** Live page at 1440×900 and 1920×1080. Heading in column 1 (left 52 / 108),
+grid in columns 2-3; tiles measure 293×293 and 388×388 — square at both widths; the text's
+bottom edge is 24px off the tile's on all six, none overflows, 2-3 lines each at 1920. Grid
+ends at 757 of 900 and 932 of 1080, so the screen still holds one section. No 4xx, no
+horizontal overflow.
+
+**Left undone.** Still no artwork on the tiles.
+
 ## 2026-09-03 — the carousel's arrows stood under every section
 
 **What changed.** `assets/css/base.css`: `.deck-nav` fades with its own slide
