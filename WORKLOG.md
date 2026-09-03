@@ -1,5 +1,42 @@
 # Worklog
 
+## 2026-09-02 — the layout moves onto a real page grid
+
+**What changed.** `assets/css/base.css`: `--col-gap`, `--col-min` and the hand-rolled
+`--frame-w` subtraction are gone, replaced by a page grid modelled on cash.app's —
+`--grid-cols: 12`, a fixed `--grid-gutter`, `--grid-col-max: 83px`, and `--grid-content`,
+`--grid-col` and `--frame-w` derived from them. `.section__inner` is now
+`1fr repeat(12, ≤83px) 1fr` with the three parts on `2 / span 4`, `6 / span 4`,
+`10 / span 4`. `.section` lost its horizontal padding — the edge tracks are the margin. The
+cases and closer sections take `--grid-content` as their width so all seven screens share
+the same edges. `--page-max` deleted. `CONTEXT.md` §5 rewritten.
+
+**What cash.app actually does**, measured on their live page: 12 columns, a flat 20px
+gutter, columns capped at 102px so the content stops at 1444, and the surplus goes to two
+flexible edge tracks — margins 0 at 1280, 16 at 1512, 220 at 1920. Their sections span
+`1 / -1` and their content wrapper is `grid-template-columns: subgrid`, so children place on
+the page's own columns: headline `1 / span 4`, phone `5 / span 4`, text `9 / span 4`.
+
+**How it was verified.** Freshly loaded stylesheet at each width.
+
+| viewport | edge track | column | gutter | margin | area |
+|---|---|---|---|---|---|
+| 1440×900 | 24 | 60 | 52 | 76 | 395 |
+| 1512×830 | — | 66 | 54 | 79 | 416 |
+| 1920×1080 | 46 | 83 (capped) | 64 | 110 | 524 |
+
+The fixed frame matches its in-flow slot exactly at every width. Titles keep their hand-set
+breaks — "Твоё приложение / и интернет магазин / за один день" at 1440 and 1920,
+"Управляй / своим бизнесом / на маркетплейсах" — no collisions, no horizontal overflow, no
+console errors. Alignment across sections at 1440: hero, cases and closer content all start
+at 76 and end at 1364.
+
+**For the client.** The three areas are equal now, which is the point of the architecture but
+also the cost: the frame used to take the leftover and was wider than a third on a big
+screen. 424/380 at 1440 → 395/395; 720/428 at 1920 → 524/524. `3 / 6 / 3` is the only other
+symmetric split and it starves the text columns (284 at 1440, titles need ~380), so getting
+the wide-screen frame back needs asymmetric spans or a wider cap — his call.
+
 ## 2026-09-02 — case cards rounded 12 harder
 
 **What changed.** `assets/css/base.css`: new `--radius-card: calc(var(--radius-btn) + 12px)`

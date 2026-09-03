@@ -408,49 +408,56 @@ document.addEventListener('section:change', (e) => {
 `id` is the section's element id (`'footer'` for the footer), `theme` and `ink` are the
 ground's own data attributes, `isSection` is false only for the footer.
 
-### The three-column stage
+### The page grid
 
-`--page-pad` is `clamp(76px, calc(4.4vw + 12px), 96px)` and `--col-gap` is
-`clamp(40px, calc(2.5vw + 16px), 64px)`. The two text columns have a floor of `--col-min`
-(380px) and the frame takes what is left, capped at 720px.
+**Built the way cash.app builds theirs**, read off their live page on 2026-09-02:
 
-On a 1920 screen the side margin comes from `--page-max` (1704px), not from the padding —
-the container hits its cap before the padding matters. Both numbers have to move together to
-change the margin there.
+- one grid for the whole page — `1fr [content] repeat(12, ≤cap) [content] 1fr`;
+- a **fixed** gutter, never a percentage;
+- the columns have a **maximum**, and once the screen is wider than the content can use the
+  surplus goes to the two edge tracks, not to the columns;
+- sections span the full width and place their parts on named lines, so everything lands on
+  the same rhythm. Theirs: headline `1 / span 4`, the phone `5 / span 4`, the text
+  `9 / span 4` — thirds of twelve.
 
-The **header is not on this grid**: it is full-bleed with a 16px side inset, so the logo and
-the CTA sit closer to the edge than any section content does. That is deliberate.
+Measured on cash.app: 12 columns, a flat 20px gutter, columns capped at 102px, so the
+content stops at 1444 and the margins grow — 0 at 1280, 16 at 1512, 220 at 1920.
 
-The column floor is a composition choice, not a constraint — how much screen the text keeps
-before the frame takes the rest. It stopped being a constraint when the xl size came down: at 36px the longest word in the
-copy sits well inside a 380px column.
+Ours keeps the architecture and our own proportions: our gutter rather than their 20, and a
+column cap picked so the content stops where it already did.
 
-**Titles are set with `text-wrap: balance`**, so lines even out instead of each being filled
-to the column edge. It never breaks a word, so it composes with the non-breaking spaces
-rather than fighting them.
+```css
+--grid-cols: 12;
+--grid-gutter: clamp(40px, calc(2.5vw + 16px), 64px);
+--grid-col-max: 83px;      /* 12 × 83 + 11 × 64 = 1700, the width the page already had */
+--grid-margin: var(--page-pad);
+```
 
-**Hyphenation is off, deliberately.** It was on while titles set at 44px and a long word
-could overflow, and it then did harm: `hyphens: auto` split `бизнесом` across two lines to
-even out the rag, when the word fits whole on the next line. Only `overflow-wrap: break-word`
-remains, which fires solely for a word too long for its column — no current title is.
+`--grid-content`, `--grid-col` and `--frame-w` are **derived from those** — do not set them
+by hand. The frame is the middle four columns; because `.stage-frame` is fixed-positioned it
+cannot read the grid, so `--frame-w` spells the same span out and the slot in the flow uses
+it too. They are measured equal in the browser.
 
-Measured:
-
-| viewport | xl | gap | frame | side margin |
+| viewport | margin | column | gutter | each area |
 |---|---|---|---|---|
-| 1440 | 36 / 36 | 52 | 424 | 76 |
-| 1512 | 37.2 | 54 | 487 | 79 |
-| 1920 | 44 / 44 | 64 | 720 | 108 |
+| 1440 | 76 | 60 | 52 | 395 |
+| 1512 | 79 | 66 | 54 | 416 |
+| 1920 | 110 | 83 (capped) | 64 | 524 |
 
-**The frame's cap and `--col-gap` are coupled.** At 1920 the cap is what sets the text
-columns, and they must stay at or above 428 for `и интернет магазин` (425 at the 44px xl) to
-keep the client's hand-set third line. Every 16px added to the gap costs each column 16, so
-the cap has to give the same back: 760 → 752 when the gap was 48, 752 → 720 now that it is
-64. Change one without the other and that title silently breaks to four lines.
+**What this changed.** The three areas are now equal — 4 / 4 / 4 of twelve. Before, the two
+text columns had a floor and the frame took whatever was left, which made it wider than a
+third on a big screen: 424 / 380 at 1440 became 395 / 395, and 720 / 428 at 1920 became
+524 / 524. On a laptop that is within a few percent of what it was; at 1920 the frame gives
+up nearly 200px to the text.
 
-For anyone tempted to re-tune the frame: it has been 416, 473, 553, 513, 480, 456 and now 424
-across this conversation. The client keeps choosing the moderate end — do not "fix" it
-upward without asking.
+**There is no third symmetric split available.** `3 / 6 / 3` would put the frame back up
+(818 at 1920) but leaves the text columns at 284 on a laptop, and the titles need about 380.
+So if the frame should be wider than a third again, it has to come from asymmetric spans or
+from a wider content cap — ask before changing it.
+
+The cases and closer sections lay themselves out rather than sitting on the grid, but they
+take `--grid-content` as their width, so all seven screens share the same left and right
+edges. Verified: every section's content starts at 76 and ends at 1364 on a 1440 screen.
 
 ## 6. Content
 
