@@ -911,6 +911,21 @@ Figma's own `#1E1E1E` canvas in as a full-bleed `<rect>`.
 | 3 — speed | `assets/images/speed.webp` | `276:54234` (tablet inside it, `276:54238`) | the catalogue on an iPad. Instance export @3x, 2154×1641 (1.31:1). Figma paints its own `#1E1E1E` canvas behind the device, so the export was keyed on that colour and flattened onto black (`ffmpeg colorkey` + `overlay` on `color=black`) — the key also blackens the `#1E1E1E` text inside the screenshot, which at 520px wide is invisible. `cwebp -q 90`, 127 KB. **`contain`**, not cover |
 | 5 — marketplaces | `assets/images/marketplaces.webp` | `206:60376` | a woman in red on a street of falling paper. Node export 2298×1635 (1.41:1) → `cwebp -q 82 -resize 2236 0`, 2236×1591, 163 KB. Against the 4:3 frame `cover` trims about 6% off each side |
 
+| 5 — marketplaces, **the conversion chip** | `assets/images/marketplaces-conversion.webp` | `279:55403` | the product's own card — «Конверсия в заказ», 12,92 %. Not the node export: that bakes Figma's `#1E1E1E` canvas into the rounded corners. `download_assets` returns the **raw fill** as well, 384×179 with the rounding already in its alpha, and that is what shipped — `cwebp -lossless`, 4.2 KB, smaller than `-q 90` at 5.2 |
+| 5 — marketplaces, **the status chip** | `assets/images/marketplaces-statuses.svg` | `279:55414` | the order-status list, five rows, the first badge green. Exported as **SVG** and the one baked `<rect fill="#1E1E1E">` deleted — the only edit, asserted in the script. Text comes as outlines, so it carries the product's UI font without the page loading one, and stays crisp at any frame width. 58 KB uncompressed, and it is paths, so it gzips hard |
+
+**Getting a clean export out of Figma.** Three of these assets fought the same thing: a node
+export composites Figma's `#1E1E1E` canvas, so anything with rounded corners or a soft edge
+arrives matted onto grey. The growth tiles and the speed screen were keyed on that colour
+after the fact. There are two cleaner routes, both used above and both worth trying first:
+
+- `download_assets` also returns `rawImages` — the original uploaded bitmap, no canvas, alpha
+  intact. Good when the node is a picture (the conversion chip).
+- `defaultFormat: "svg"` puts the canvas in as a single full-bleed `<rect>` that can be
+  deleted outright, and the rest is clean vector. Good when the node is UI (the status chip).
+- `get_screenshot` with `contentsOnly: true` also renders transparent, but only at the node's
+  natural size — no upscale — so it is a check, not a source.
+
 `209:35586` was on the `promotion` pane first; the client then said that screen is
 **Заказы** and supplied `206:62480` for Продвижение, so the file was renamed, not
 re-exported.
@@ -1327,6 +1342,7 @@ Known nodes:
 | `206:62480` | "Продвижение — 4×3 / content" — the capabilities frame's `promotion` pane. |
 | `223:37237` | «Товары и остатки» screen, 4:3 — the capabilities frame's `logistics` pane. |
 | `206:60376` | Street photograph, woman in red — the marketplaces frame. |
+| `279:55320` | Styled mockup of the **marketplaces** section — the picture with two product cards around it. Its own left and right text is section 3's and is to be ignored (client, 2026-09-03). `279:55403` is the conversion card, `279:55414` the status list. |
 | `279:54342` | Styled mockup of the growth tiles — red bank tile, 3D stills on the others. `279:54330` is the Alfa "А". |
 | `276:54234` | Full mockup of the speed section — tablet between the two text columns. `276:54236` is the tablet's own frame, `276:54238` the iPad instance that was exported. |
 | `275:39451` | Section "tinder" — the style deck's six images, as three pairs. Children `275:39475` / `39476` / `39477` are the pairs; in each, the upper rectangle is the ground and the lower one the shop screen. |

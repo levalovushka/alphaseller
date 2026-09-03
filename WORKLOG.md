@@ -1,5 +1,55 @@
 # Worklog
 
+## 2026-09-03 — two product cards around the marketplaces frame
+
+**What changed.** `index.html`: two `.frame-chip` divs in the marketplaces slide.
+`assets/css/base.css`: the `.frame-chip` block. New `assets/images/marketplaces-conversion.webp`
+(4.2 KB) and `assets/images/marketplaces-statuses.svg` (58 KB). Deleted
+`assets/images/marketplaces-statuses.webp` — my own first cut of the status card, matted onto
+Figma's grey, replaced by the SVG and referenced by nothing. `CONTEXT.md` §7 frame-content
+table (two rows plus a note on clean Figma exports) and §10 (the mockup's nodes).
+
+**Why.** Client styled the section in Figma (`279:55320`) and asked for the elements around
+the picture; the picture itself was already in the frame. He also said the mockup's left and
+right text is wrong — it is section 3's copy — and to ignore it, which is why no copy moved.
+
+**How it is built.** Both cards are flat pictures, not live UI. That is deliberate: the site
+has exactly two type styles and both cards are dense product UI at 12–14px, so building them
+in DOM would either add a third style or dress the product's UI in the brand's display face.
+
+Every number is the mockup's own at the frame width it was drawn at, 720, written as
+`calc(var(--frame-w) * N / 720)` so the cards scale with our frame — at 1440 the frame is 520,
+so they land at 72%. Each card is anchored to the frame corner it sits by, so the overhang is
+what holds. They cross the frame's box, so the curtain cannot mask them; like the tab strip
+they fade on `--t`.
+
+**A trap worth remembering:** `--chip-u: calc(var(--frame-w) / 720)` is a *length*, not a
+factor, so `calc(240px * var(--chip-u))` is an area and computes to nothing. Both cards
+measured 0×0 the first time. Written out as `var(--frame-w) * N / 720` it is a length again.
+
+**How it was verified.** `localhost:4321` at 1440×900, live DOM against the mockup's numbers
+(frame 520 wide, scale 0.722):
+
+| card | size | expected | overhang | expected |
+|---|---|---|---|---|
+| conversion | 173×81 | 173×81 | 41 left of the frame, 26 down | 41, 26 |
+| statuses | 118×127 | 118×127 | 33 inside the right edge, 43 below the bottom | 33, 43 |
+
+`--t` on the slide 1, both chips at opacity 1, both assets 200 on the wire. The corners were
+measured before shipping, by decoding each candidate to PAM and reading pixels: the node
+exports are `(30,30,30,255)` in all four corners — Figma's canvas — while the raw fill and the
+edited SVG are `(0,0,0,0)`.
+
+The app itself will not repaint in this browser pane, so to see the composition I served a
+throwaway page with the real assets at the measured geometry and screenshotted that: the white
+card hangs off the left edge near the top, the dark list crosses the bottom edge near the
+right, corners clean, the green «3» badge reading. The page was deleted straight after. **So
+the arrangement is verified in a browser, but not inside the running site.**
+
+**Left undone.** No motion — the cards sit still and fade with the section, which is all that
+was asked for. If they should fly out of the frame the way the client described earlier, that
+hangs off the same `--t` and is a separate piece of work.
+
 ## 2026-09-03 — the closer gets the brand in its heading and a call to action back
 
 **What changed.**
