@@ -181,9 +181,12 @@ and the copy in Figma (`276:54325`): "он будет черный, без ра�
   the same three-column grid the rest of the page uses. Both start on the same line.
 - **The tiles are always square.** Width comes from the grid, height from the ratio: 293 at
   1440, 388 at 1920. Nothing caps the height, or the ratio would go instead.
-- One block of text per tile, on its **bottom edge**; 24px padding all round. Everything
-  above the text is the room the artwork will take — that is why the square is worth the
-  space it costs.
+- One block of text per tile, on its **top edge**, in the new `lg` style; 24px padding all
+  round. Everything **below** the text is the room the illustrations will take — that is why
+  the square is worth the space it costs. (The text was on the bottom edge for one round:
+  "я тебя обманул про 'прижми' к нижнему краю, давай текст к верхнему всё таки и заодно
+  сделаем покрупнее… снизу будут иллюстрации.") At 1440 that leaves 139-191px under the
+  text, at 1920 244-274.
 - **No artwork is wired.** The client: "графика будет другой" — so nothing here reserves a
   box for it.
 - Tile ground is graphite `#1A1817` on the section's black, after the cash.app reference the
@@ -1137,6 +1140,7 @@ Verified with fontTools (2026-09-02):
 | Style | Cut | Size / leading | Tracking | Used for |
 |---|---|---|---|---|
 | `xxl` | Hyper Medium | 56 / 56 at 1440 → 64 / 64 at 1920 | normal | The closer heading — the only one left since the cases went back to `xl` on 2026-09-03 |
+| `lg` | Hyper Regular | 20 / 26 at 1440 → 24 / 30 at 1920 | `0.01em` | The growth tiles' text, and nothing else yet. Added 2026-09-03 on the client's word — the tile carries one block of text and md read too small at that size. **The four numbers are mine**, the style is his |
 | `xl` | Hyper Medium | 28 / 28 at 1440 → 40 / 40 at 1920 | normal | Section titles |
 | `md` | Hyper Regular | 14 / 18 at 1440 → 18 / 24 at 1920 | 1% (`0.01em`) | Everything else |
 

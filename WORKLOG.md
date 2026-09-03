@@ -1,5 +1,24 @@
 # Worklog
 
+## 2026-09-03 — a new type style, lg, and the tile text moves to the top
+
+**What changed.** `assets/css/base.css`: `--fs-lg` / `--lh-lg` added to the tokens, the tile
+text set in them, and `justify-content` on `.tile` flipped to `flex-start`. `CONTEXT.md`: lg
+in the type table, the tiles section rewritten.
+
+**Why.** Client: the text goes to the top edge after all, the illustrations go under it, and
+it wants a size of its own — "заведем новый стиль lg под это". **The numbers are mine**:
+20/26 at 1440 → 24/30 at 1920, Regular like md rather than Medium like the titles, since it
+is a block of text and not a heading. Same 1440→1920 window as md.
+
+**How verified.** Live page with a freshly loaded stylesheet at both widths. 1440: text
+computes 20/26, sits 24px off the top edge, runs 3-5 lines, leaves 139-191px under it, no
+tile overflows. 1920: 24/30, 3-4 lines, 244-274px under it. Grid still ends inside the
+screen (757 of 900, 932 of 1080), no 4xx, no horizontal overflow.
+
+**Left undone.** The illustrations themselves. The lg numbers are a guess until the client
+says otherwise.
+
 ## 2026-09-03 — a hard break before «клиентов»
 
 **What changed.** `index.html`: the growth heading is now three hand-set lines,

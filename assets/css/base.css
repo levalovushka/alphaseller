@@ -65,6 +65,12 @@
   /* Style md scales on the same window: 14/18 at 1440, 18/24 at 1920, held flat
      outside it. Size and leading each get their own clamp — the ratio is not
      constant across the window (1.286 at 1440, 1.333 at 1920). */
+  /* Style lg — added 2026-09-03 for the growth tiles, the client's "сделаем покрупнее —
+     заведем новый стиль lg под это". It sits between md and xl on the same 1440→1920 window
+     as md: 20/26 there, 24/30 at 1920, Regular like md rather than Medium like the titles —
+     it is a block of text, not a heading. **The four numbers are mine, not the client's.** */
+  --fs-lg: clamp(20px, calc(8px + 0.8333vw), 24px);
+  --lh-lg: clamp(26px, calc(14px + 0.8333vw), 30px);
   --fs-md: clamp(14px, calc(2px + 0.8333vw), 18px);
   --lh-md: clamp(18px, 1.25vw, 24px);
   --weight-md: 400;  /* Hyper Regular, everything else */
@@ -1064,8 +1070,10 @@ img { display: block; max-width: 100%; height: auto; }
   aspect-ratio: 1 / 1;
   display: flex;
   flex-direction: column;
-  /* The text sits on the bottom edge; the room above it is for the artwork to come. */
-  justify-content: flex-end;
+  /* The text sits on the top edge; the room under it is for the illustrations to come.
+     It was on the bottom edge for one round — the client turned it over on 2026-09-03:
+     "я тебя обманул про 'прижми' к нижнему краю… давай текст к верхнему всё таки". */
+  justify-content: flex-start;
   padding: 24px;
   border-radius: var(--radius-card);
   /* Graphite on black, like the reference the client attached: the tile is a plate, not a
@@ -1074,10 +1082,12 @@ img { display: block; max-width: 100%; height: auto; }
 }
 
 /* One block of text per tile since 2026-09-03, not a title and a subtitle — the client
-   dropped the pair and had the copy shortened to fit one. Style md, like every other
-   paragraph on the page. */
+   dropped the pair and had the copy shortened to fit one. Style lg, which exists for this:
+   it is the only text on the tile and md read too small at that size. */
 .tile__text {
   margin: 0;
+  font-size: var(--fs-lg);
+  line-height: var(--lh-lg);
 }
 
 /* ---------- closer + footer ----------
