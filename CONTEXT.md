@@ -193,15 +193,19 @@ and the copy in Figma (`276:54325`): "он будет черный, без ра�
     exports behind it). **This puts the brand red back on the page** — it had been nowhere
     since the hero went graphite.
   - Four tiles carry a 3D still at the foot: ads `279:54331`, loyalty `279:54334`, bloggers
-    `276:54324`, partners `279:54335`. Each stands on the tile's own 24px padding, left and
-    bottom, not on its edge.
+    `276:54324`, partners `279:54335`. **Three of them go into the bottom-left corner with no
+    margin at all** — the client took the rounded corners off those three in Figma on
+    2026-09-03 and re-exported them ("просто воткни с нулевым маржином в левый нижний угол…
+    касается исключительно сердца, процента и человечка с плюсом"). The Я/VK pair keeps the
+    tile's 24px padding: it is a pair of logos, not a plate, with nothing square to line up
+    against the edges.
   - **Each file is trimmed to its object.** Figma exports them inside a padded box, and with
     the padding on they stood at four different heights — the Я/VK pair floated on 52px of
     empty pixels while the others touched the bottom of theirs. Trimmed with `ffmpeg crop` to
     the alpha bounding box.
   - **The four are sized by weight, not by box.** The measure is the square root of each
     one's opaque area — its visual side — normalised to ~100px against a 293px tile: ads 24%
-    of the tile's height, bloggers 28%, loyalty 30%, partners 34%. A flat height made the
+    of the tile's height, bloggers 30%, loyalty 30%, partners 34%. A flat height made the
     widest and flattest of them (the logo pair) the heaviest thing on the screen. Client:
     "попробуй их расставить сбалансированно по визуальному весу."
   - **The stills come out of Figma on its `#1E1E1E` canvas, not on transparency**, so each
@@ -220,7 +224,12 @@ and the copy in Figma (`276:54325`): "он будет черный, без ра�
     "thinking" motion; smoothstep rings for the inner fade and an exponential halo outside.
     Nothing is imported: the demo runs with no network, and every library in that space is
     React.
-  - **The pointer**: the orb leans toward it (16% of the way), the uv ripples with it, and
+  - **Half the size and centred in the tile** since 2026-09-03 ("нужно его сделать в почти
+    два раза меньше и отцентровать в карточке"): radius 0.27 in uv units against 0.52, and
+    no vertical offset. Every distance-based constant moved with it — the rim's falloff
+    doubled, the lamps' quadrupled, the halo's steepened — or the smaller orb would have had
+    a fatter edge than the big one.
+  - **The pointer**: the orb leans toward it (10% of the way), the uv ripples with it, and
     the whole thing brightens and runs half again as fast. Everything the pointer drives is
     eased in JS toward its target each frame, so it follows the hand rather than snapping,
     and settles back to the middle on `pointerleave`. Tracked on the **tile**, not the

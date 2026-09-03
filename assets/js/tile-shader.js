@@ -83,43 +83,42 @@ if (canvas) {
         vec2 uv = (gl_FragCoord.xy - 0.5 * u_res) / size * 2.0;
         vec2 mouse = (u_mouse - 0.5 * u_res) / size * 2.0;
 
-        /* The orb sits low in the tile: the text is at the top and must stay on ink, not on
-           the body of the thing. */
-        uv.y += 0.34;
-        mouse.y += 0.34;
+        /* Centred in the tile since 2026-09-03, on the client's word, and half the size it
+           was — small enough that the text above it still sits on ink. */
 
         float t = u_time * (1.0 + 0.5 * u_hover);
 
         /* Lean toward the pointer, and ripple with it. Both are the hover alone — at rest
-           the orb is centred and smooth. */
-        uv -= 0.16 * u_hover * mouse;
-        uv += 0.022 * u_hover * sin(9.0 * uv.yx + t * 1.6);
+           the orb is centred and smooth. The lean is in uv units, so it shrank with the
+           orb; 0.10 keeps it reading as the same gesture against the smaller body. */
+        uv -= 0.10 * u_hover * mouse;
+        uv += 0.014 * u_hover * sin(14.0 * uv.yx + t * 1.6);
 
         float len = length(uv);
         float ang = atan(uv.y, uv.x);
 
         /* The breathing edge: a slow pulse plus a noise field, so the silhouette is never
            twice the same and never a circle. */
-        float n = fbm(vec3(uv * 1.6, t * 0.30));
-        float radius = 0.52 + 0.030 * sin(t * 0.9) + 0.115 * (n - 0.5) + 0.045 * u_hover;
+        float n = fbm(vec3(uv * 2.8, t * 0.30));
+        float radius = 0.27 + 0.016 * sin(t * 0.9) + 0.060 * (n - 0.5) + 0.024 * u_hover;
 
         /* Distance to the edge, which is what the rim light is attached to. */
         float edge = abs(len - radius);
-        float rim = wash(1.0, 26.0, edge) * smoothstep(radius * 1.55, radius * 0.55, len);
+        float rim = wash(1.0, 52.0, edge) * smoothstep(radius * 1.55, radius * 0.55, len);
 
         /* Two highlights orbiting inside, at different speeds and in opposite directions —
            the "thinking" motion. A third, slower one keeps the body from ever going flat. */
         vec2 p1 = vec2(cos(t * 0.62), sin(t * 0.62)) * radius * 0.62;
         vec2 p2 = vec2(cos(-t * 0.41 + 2.1), sin(-t * 0.41 + 2.1)) * radius * 0.74;
         vec2 p3 = vec2(cos(t * 0.23 + 4.0), sin(t * 0.23 + 4.0)) * radius * 0.35;
-        float l1 = lamp(0.85, 16.0, distance(uv, p1));
-        float l2 = lamp(0.65, 22.0, distance(uv, p2));
-        float l3 = lamp(0.45, 9.0, distance(uv, p3));
+        float l1 = lamp(0.85, 64.0, distance(uv, p1));
+        float l2 = lamp(0.65, 88.0, distance(uv, p2));
+        float l3 = lamp(0.45, 36.0, distance(uv, p3));
 
         /* Body and halo. The body is filled inward from the edge; the halo is what escapes
            it, and it is what makes the tile glow rather than hold a sticker. */
-        float body = smoothstep(radius + 0.02, radius - 0.30, len);
-        float halo = exp(-3.2 * max(len - radius, 0.0) * 6.0);
+        float body = smoothstep(radius + 0.01, radius - 0.15, len);
+        float halo = exp(-3.2 * max(len - radius, 0.0) * 12.0);
 
         vec3 green = vec3(0.651, 0.929, 0.0);   /* #A6ED00 */
         vec3 mint = mix(green, vec3(1.0), 0.55);

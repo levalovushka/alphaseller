@@ -1,5 +1,29 @@
 # Worklog
 
+## 2026-09-03 — three stills into the corner, the orb halved and centred
+
+**What changed.** `assets/images/growth-{loyalty,bloggers,partners}.webp` re-pulled from
+Figma (the client took their rounded corners off), keyed and trimmed to their objects.
+`assets/css/base.css`: those three sit at `left: 0; bottom: 0` — no margin — while the Я/VK
+pair keeps the 24px padding; bloggers' height 28% → 30% after the re-export changed its box.
+`assets/js/tile-shader.js`: orb radius 0.52 → 0.27, the vertical offset gone, and every
+distance constant rescaled with it (rim falloff ×2, lamps ×4, halo ×2, lean 0.16 → 0.10).
+`CONTEXT.md` updated.
+
+**Why.** Client's two notes: those three stills go into the bottom-left corner with nothing
+around them, and the orb should be about half the size and centred in its tile.
+
+**How verified.** Live page, freshly loaded stylesheet, 1440×900 and 1920×1080. The three
+measure 0px from the left edge and 0px from the bottom on both widths; the Я/VK pair still
+24/24; visual sides 99, 101, 99, 100 — still balanced; none overlaps its text. The orb's lit
+centroid is (0.496, 0.500) of the canvas and its span 29% of the width against 52% before —
+centred and halved. It still answers the pointer: centroid moves to 0.457 with the pointer
+left, 0.537 right, 0.546 up, 0.466 down, and the lit area grows from 6232 to ~6730 samples.
+Text stays on ink: luminance 22-26 across the strip it occupies. No 4xx.
+
+**Left undone.** Nothing on this section. **The motion still has not been seen** — the
+Browser pane is hidden here, so every reading came from hand-driven single frames.
+
 ## 2026-09-03 — two product cards around the marketplaces frame
 
 **What changed.** `index.html`: two `.frame-chip` divs in the marketplaces slide.

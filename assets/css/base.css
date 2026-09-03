@@ -1171,9 +1171,9 @@ img { display: block; max-width: 100%; height: auto; }
 
      | still    | object    | opaque area | visual side | height |
      | ads      | 750 × 345 | 233k px     | 483         | 24%    |
-     | bloggers | 860 × 433 | 272k px     | 522         | 28%    |
-     | loyalty  | 869 × 471 | 290k px     | 538         | 30%    |
-     | partners | 815 × 489 | 237k px     | 487         | 34%    |
+     | bloggers | 718 × 433 | 237k px     | 487         | 30%    |
+     | loyalty  | 869 × 471 | 295k px     | 543         | 30%    |
+     | partners | 815 × 489 | 240k px     | 490         | 34%    |
 
    A flat height would have made the widest, flattest one (the pair of logos) the heaviest
    thing on the screen and the tallest one the lightest. */
@@ -1194,13 +1194,23 @@ img { display: block; max-width: 100%; height: auto; }
   height: 24%;
 }
 
-.tile__art[data-art="bloggers"] {
-  background-image: url("../images/growth-bloggers.webp");
-  height: 28%;
+/* Three of the four went back to Figma on 2026-09-03 with their rounded corners taken off,
+   and those go **into the corner with no margin at all** — the client's call: "просто воткни
+   с нулевым маржином в левый нижний угол… касается исключительно сердца, процента и
+   человечка с плюсом". The Я/VK pair keeps its padding: it is a pair of logos, not a plate,
+   and it has nothing square to line up with the tile's edges. */
+.tile__art[data-art="bloggers"],
+.tile__art[data-art="loyalty"],
+.tile__art[data-art="partners"] {
+  left: 0;
+  bottom: 0;
 }
 
-/* The heart is back in line with the others: it reached into the corner for one round and
-   the client read that as cramped — "сердце пережалось в угол". */
+.tile__art[data-art="bloggers"] {
+  background-image: url("../images/growth-bloggers.webp");
+  height: 30%;
+}
+
 .tile__art[data-art="loyalty"] {
   background-image: url("../images/growth-loyalty.webp");
   height: 30%;
