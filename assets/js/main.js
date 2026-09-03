@@ -452,6 +452,11 @@ const deck = document.querySelector('.style-deck');
 
 if (deck) {
   const cards = gsap.utils.toArray('.style-card', deck);
+  /* The blurred ground behind the whole screen: one layer per card, paired with it by
+     `data-card`. The client shot the six images as pairs, so whichever card is in front
+     decides what is behind the section. */
+  const ground = document.querySelector('.deck-ground');
+  const groundLayers = gsap.utils.toArray('.deck-ground__layer', ground || undefined);
 
   const DECK = {
     /* Shrinking a card also pulls its bottom edge up — 8px at this size — so the drop has
@@ -503,6 +508,14 @@ if (deck) {
   const mix = (from, to, t) => from + (to - from) * t;
 
   function layout({ duration = 0, ease = 'power2.out' } = {}) {
+    /* Hung off `layout()` rather than off the throw: this runs on every path that can
+       change which card is in front — init, a throw's close-up, a return, a reset when the
+       section is left mid-air — so the ground can never disagree with the deck. */
+    const front = order[0]?.dataset.card;
+    groundLayers.forEach((layer) => {
+      layer.dataset.active = String(layer.dataset.card === front);
+    });
+
     order.forEach((card, i) => {
       /* The one in the air owns its position, its opacity and its place in the pile until
          it lands — it has to dissolve over the deck, not under it. */
@@ -691,6 +704,11 @@ if (deck) {
   let live = null;
 
   const gate = (t) => {
+    /* Scrubbed, not switched: the ground arrives with the section on the same value that
+       mixes the page's colours. Written before the edge check below, which returns early
+       for every step in between. */
+    if (ground) ground.style.opacity = String(t);
+
     const onStage = Number(t) > 0.99;
     if (onStage === live) return;
     live = onStage;

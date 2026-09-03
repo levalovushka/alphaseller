@@ -380,6 +380,65 @@ img { display: block; max-width: 100%; height: auto; }
   will-change: opacity, transform;
 }
 
+/* ---------- the style deck's ground ----------
+   One blurred photograph per card, behind the whole screen, cross-faded as the deck is
+   swiped: the client shot the six images as pairs, a shop screen and the photograph that
+   belongs with it, so the ground answers the card. Same layer 0 as the photographic ground
+   above, and the two never show at once — that one belongs to the closer.
+
+   The blur is the client's number ("минимум 32px") and it is a variable so it can be pushed
+   around without touching anything else. Two consequences worth knowing:
+
+     - The sources are deliberately small, 900px wide at `-q 60`, 12-35 KB each. A 32px blur
+       destroys detail, so resolution past that is bytes with nothing to show for them.
+     - A blur samples past the edges of its element, which would leave a soft border around
+       the viewport. The layers are inset by more than the blur radius and the container
+       clips them, so the bleed happens off-screen.
+
+   The layer's own opacity is written by JS against the scroll, like every other value a
+   section change drives. The cross-fade *between* layers is a wall-clock transition on
+   purpose: a swipe is a discrete event with no scroll to scrub it against — the same
+   reasoning as the capabilities tabs. */
+.deck-ground {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  opacity: 0;
+  --deck-blur: 32px;
+  --deck-ground-fade: 0.5s;
+}
+
+.deck-ground__layer {
+  position: absolute;
+  /* More than the blur radius, so the soft edge is outside the viewport. */
+  inset: calc(var(--deck-blur) * -2);
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  filter: blur(var(--deck-blur));
+  opacity: 0;
+  transition: opacity var(--deck-ground-fade) ease-in-out;
+}
+
+.deck-ground__layer[data-active="true"] { opacity: 1; }
+
+.deck-ground__layer[data-card="fashion"] {
+  background-image: url("../images/customization-fashion-ground.webp");
+}
+
+.deck-ground__layer[data-card="care"] {
+  background-image: url("../images/customization-care-ground.webp");
+}
+
+.deck-ground__layer[data-card="furniture"] {
+  background-image: url("../images/customization-furniture-ground.webp");
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .deck-ground__layer { transition: none; }
+}
+
 /* ---------- the hero morph ----------
    The hero's ground is not painted as the page's ground but as a layer of its own, so it
    can leave as a shape instead of a cross-fade: across the crossing into capabilities it
@@ -623,20 +682,22 @@ img { display: block; max-width: 100%; height: auto; }
   pointer-events: none;
 }
 
-/* One file per card, named after the shop it shows. Cropped to the frame's 4:3 out of the
-   client's 16:9 screens, `cwebp -q 90`: furniture 836x627 / 48 KB, bags 800x601 / 28 KB,
-   apparel 802x602 / 35 KB. Lossless was three to four times bigger on all three — these
-   came in already-lossy AVIF, so there was nothing to preserve. */
+/* One file per card, named after the shop it shows. From the client's Figma section
+   `275:39451` ("tinder"), which holds three pairs: a photograph for the ground and the shop
+   screen that goes with it. The screens came in at 2448x1740, were cropped to the frame's
+   4:3 and scaled to 1440x1080 — @2x for the frame's 720px cap — then `cwebp -q 90`:
+   fashion 84 KB, care 116 KB, furniture 74 KB. Lossless was four to six times bigger on all
+   three, so nothing was preserved by it. */
+.style-card[data-card="fashion"] {
+  background-image: url("../images/customization-fashion.webp");
+}
+
+.style-card[data-card="care"] {
+  background-image: url("../images/customization-care.webp");
+}
+
 .style-card[data-card="furniture"] {
   background-image: url("../images/customization-furniture.webp");
-}
-
-.style-card[data-card="bags"] {
-  background-image: url("../images/customization-bags.webp");
-}
-
-.style-card[data-card="apparel"] {
-  background-image: url("../images/customization-apparel.webp");
 }
 
 /* A slide carrying its own image fills the frame edge to edge, so the empty-frame chrome

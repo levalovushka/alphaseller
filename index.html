@@ -56,9 +56,9 @@
        one names the shop it shows. -->
   <div class="stage-frame__slide" data-for="customization" data-filled="true">
     <div class="style-deck" aria-label="Примеры магазинов — потяните карточку в сторону">
+      <div class="style-card" data-card="fashion" role="img" aria-label="Магазин одежды и сумок"></div>
+      <div class="style-card" data-card="care" role="img" aria-label="Магазин косметики и ухода"></div>
       <div class="style-card" data-card="furniture" role="img" aria-label="Магазин мебели"></div>
-      <div class="style-card" data-card="bags" role="img" aria-label="Магазин сумок"></div>
-      <div class="style-card" data-card="apparel" role="img" aria-label="Магазин одежды"></div>
     </div>
   </div>
   <div class="stage-frame__slide" data-for="marketplaces" aria-hidden="true"></div>
@@ -69,6 +69,15 @@
 <!-- A photographic ground for one section. Fades in and out with the section change
      and drifts slower than the content. Experimental — may be rolled back. -->
 <div class="stage-photo" aria-hidden="true"></div>
+
+<!-- The style deck's own ground: one blurred photograph per card, cross-faded as the deck
+     is swiped. Each pairs with the shop screen on its card — the client shot them as pairs.
+     The layer's own opacity follows the section's arrival; JS owns both. -->
+<div class="deck-ground" aria-hidden="true">
+  <div class="deck-ground__layer" data-card="fashion"></div>
+  <div class="deck-ground__layer" data-card="care"></div>
+  <div class="deck-ground__layer" data-card="furniture"></div>
+</div>
 
 <!-- The hero's green is a layer of its own, not the page's ground: across the crossing
      into capabilities it shrinks from full-bleed to exactly the frame's box and stops

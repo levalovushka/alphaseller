@@ -1,5 +1,62 @@
 # Worklog
 
+## 2026-09-03 — the deck's screens come from Figma, each with a blurred ground of its own
+
+**What changed.** The three placeholder screenshots in the style deck are replaced by the
+client's own, and each card now brings the photograph that belongs with it.
+
+- Six new files from Figma section `275:39451` ("tinder"), which holds three pairs. Cards:
+  raw fills at 2448×1740 → cropped to the frame's 4:3 → 1440×1080 (@2x for the 720px cap) →
+  `cwebp -q 90`, 84 / 116 / 74 KB. Grounds: the node exports → 900px wide → `-q 60`,
+  34 / 19 / 12 KB, because a 32px blur leaves nothing for more pixels to describe.
+  `customization-bags.webp` and `-apparel.webp` are gone; `-furniture.webp` is a new image
+  under the old name.
+- `index.html`: cards renamed `fashion` / `care` / `furniture`, and a `.deck-ground` layer
+  with one child per card. The pairing lives in `data-card` on both sides — no names in JS.
+- `base.css`: the ground layer — fixed, z-index 0, `overflow: hidden`, children inset by
+  twice `--deck-blur` (32px, the client's floor) and cross-faded on 0.5s.
+- `main.js`: `layout()` marks the ground layer matching the front card, so the ground cannot
+  disagree with the deck on any path; the deck's gate writes the layer's own opacity from
+  the scrubbed `--t`, before its edge check.
+
+**Why.** Client: "в фигме лежат три секции, в каждой по две фотки. первая — бэкграунд
+секции, вторая — связанный с ним пример стиля магазина... я листаю и меняется фон на
+привязанный. фон при этом надо заблюрить будет я думаю минимум на 32px."
+
+**How it was verified.** Emulated 1440×900, frame 584×438. Synthetic pointer events, GSAP on
+manual ticks, and — twice — the documented cache traps.
+
+```
+on load        ground layer opacity 0, active layer `fashion` (the front card)
+on section 4   layer opacity 1, blur(32px), inset -64px, overflow hidden, z-index 0
+sources        all six 200, no 4xx; cards point at fashion/care/furniture
+swipe right    40ms after release the ground is already `care` — it changes as the card
+               leaves, not after it lands; front card `care` when it settles
+swipe left     front `furniture`, ground `furniture`
+transitions    read with transitions forced off (a hidden pane gives them no frames):
+               active layer 1.00, the other two 0.00
+```
+
+Screenshotted at 1440×900 with the deck forced on stage: the POLENE screen fills the frame,
+the field-and-mountains photograph behind it is blurred to a soft grey-green, and the two
+veiled ledges show under the card. No console errors.
+
+**Two traps, both already in CONTEXT §11 and both hit again.** The stylesheet and the script
+cache independently of the document, so the first run showed the old CSS and JS with the new
+markup — `fetch(url, {cache: 'reload'})` on both, then navigate. And `performance
+.getEntriesByType('resource')` accumulates across loads, so a 200 in the list is not proof
+that *this* load fetched it: an image reused under the same file name (`-furniture.webp`)
+rendered as its old self until its cache entry was busted too.
+
+**What is left undone.**
+- **White ink over two of the three grounds.** The care and furniture photographs are beige;
+  the section's ink is white. It reads on the fashion ground and is weak on the others. A
+  scrim over the ground fixes it in one rule — the client's call, flagged in §11.
+- The blur is a live `filter` on a viewport-sized layer. It is cheap here because the layer
+  only exists on one screen, but it is the kind of thing to check on a weak GPU.
+- Still no trusted pointer input in this session; the deck has only ever been swiped by
+  synthetic events.
+
 ## 2026-09-03 — closer heading rewritten, its subtitle dropped
 
 **What changed.** `index.html`: the closer's heading is now "Работает на твою мечту" and its

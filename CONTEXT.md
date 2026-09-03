@@ -657,9 +657,12 @@ Figma's own `#1E1E1E` canvas in as a full-bleed `<rect>`.
 | 2 — capabilities, `promotion` pane | `assets/images/capabilities-promotion.webp` | `206:62480` | node is named "Продвижение — 4×3 / content". 1118×838.5, @2x → 2236×1677, cwebp **`-lossless`**, 172 KB |
 | 2 — `orders` pane | `assets/images/capabilities-orders.webp` | `209:35586` | same size and export, 188 KB. Re-pulled once after the client edited the node — the file name stays, so a re-pull is a byte swap and nothing else |
 | 2 — `logistics` pane | `assets/images/capabilities-logistics.webp` | `223:37237` | same size and export, but **`-q 90`**, 167 KB |
-| 4 — customization, deck card | `assets/images/customization-furniture.webp` | none — client's file | screenshot of a furniture shop, supplied as AVIF 1080×627. Centre-cropped to the frame's 4:3 → 836×627, `cwebp -q 90`, 48 KB |
-| 4 — deck card | `assets/images/customization-bags.webp` | none — client's file | a bag shop, AVIF 1080×601 → cropped 800×601, `-q 90`, 28 KB |
-| 4 — deck card | `assets/images/customization-apparel.webp` | none — client's file | an apparel shop, AVIF 1080×602 → cropped 802×602, `-q 90`, 35 KB |
+| 4 — customization, deck card | `assets/images/customization-fashion.webp` | `275:39469` | POLENE, a clothes-and-bags shop. Raw fill 2448×1740 → cropped to 4:3, scaled to 1440×1080, `cwebp -q 90`, 84 KB |
+| 4 — deck card | `assets/images/customization-care.webp` | `275:39470` | "The Department of Bed Intentions", self-care. Same treatment, 116 KB |
+| 4 — deck card | `assets/images/customization-furniture.webp` | `275:39472` | a furniture shop. Same treatment, 74 KB. **Supersedes** the first cut of this deck — three AVIF screenshots the client sent on 2026-09-03, ~1080×600, dropped the same day for these |
+| 4 — deck ground | `assets/images/customization-fashion-ground.webp` | `275:39455` | the photograph that pairs with the fashion card. Node export 1222×824 → 900×606, `-q 60`, 34 KB |
+| 4 — deck ground | `assets/images/customization-care-ground.webp` | `275:39458` | pairs with the care card. 900×600, `-q 60`, 19 KB |
+| 4 — deck ground | `assets/images/customization-furniture-ground.webp` | `275:39467` | pairs with the furniture card. 900×600, `-q 60`, 12 KB |
 
 `209:35586` was on the `promotion` pane first; the client then said that screen is
 **Заказы** and supplied `206:62480` for Продвижение, so the file was renamed, not
@@ -770,10 +773,16 @@ front card *is* the frame: same size, same 32px radius. Everything about it is t
 call on 2026-09-03, chosen against the alternatives offered:
 
 - **By hand only.** No 5s carousel like the tabs, and no buttons under the frame.
-- **`cover`, not letterboxed.** The screens are 16:9 and the frame is 4:3, so about a
-  quarter of each one's width is cropped away — which takes the shop logo on the left and
-  the cart on the right out of every screenshot's header. He picked that over fitting the
-  whole screen inside the card.
+- **`cover`, not letterboxed.** The screens are 1.41:1 against the frame's 4:3, so 5% of
+  each one's width is cropped away. This was the reason for a decision that no longer costs
+  anything: the first set of screens was 16:9 and lost a quarter of its width, and he picked
+  cropping over fitting the whole screen inside the card.
+- **Each card is paired with a ground.** The client supplied the images as three pairs in
+  Figma section `275:39451` ("tinder"): a photograph and the shop screen that belongs with
+  it — a fashion shoot with a clothes shop, a skincare shot with a self-care shop, a room
+  with a furniture shop. Swiping the deck changes the photograph behind the whole screen.
+  The pairing lives in the markup, in `data-card` on both the card and its ground layer;
+  nothing in the JS knows the names.
 - **A stack, not a fan.** Each card behind sits 28px lower and 5% smaller, with no
   rotation at all. A fan of ±3.2° was built first and he dropped it the same day: "не веер,
   а как у тиндера, неактивные меньше и ниже". Watch the interaction between the two
@@ -837,9 +846,23 @@ asked to swipe faster than that; allowing it would mean tracking several cards i
 **A thrown card rejoins the deck at the back, so it never runs out.** Mine, not his — three
 cards would otherwise leave an empty frame after three throws.
 
-**These files are short for a big screen.** The client's AVIFs are ~1080×600, so the crop
-tops out at 836×627. The frame is 424px wide at a 1440 viewport (2.0x — fine) but 720 at
-1920 (1.16x — soft). Ask for taller sources before this goes anywhere near production.
+**The blurred ground.** `.deck-ground` is a fixed layer on z-index 0 — the same layer the
+closer's photograph uses, and the two never show at once. One child per card, cross-faded on
+a 0.5s wall-clock transition, because a swipe is a discrete event with no scroll to scrub it
+against; the layer's *own* opacity is written by JS against the scroll, like every other
+value a section change drives. Three things about it are deliberate:
+
+- `--deck-blur` is 32px, the client's floor ("минимум 32px"), and it is a variable so it can
+  be pushed without touching anything else.
+- The sources are 900px wide at `-q 60`, 12-35 KB. A 32px blur destroys detail, so
+  resolution past that is bytes with nothing to show for them. Note the blur costs the same
+  either way — the browser blurs the rendered layer, not the file.
+- Each layer is inset by twice the blur radius and the container clips it. A blur samples
+  past its element's edges, so without that there is a soft band around the viewport.
+
+**The card sources are now @2x for the frame's cap.** 1440×1080 against a 720px frame; the
+first cut of this deck topped out at 836×627 and was soft on a big screen, which is why
+these were asked for.
 
 **No shadow and no hairline between the cards.** The dimmed ledges read against this
 section's black ground on their own — the dimming is plain `opacity`, so on black it lands
@@ -1016,6 +1039,10 @@ Known nodes:
 | `209:35586` | Dashboard screen, 4:3 — the capabilities frame's **`orders`** pane. Supersedes `206:58220`, which superseded `204:51472` (the 1.42:1 cut). |
 | `206:62480` | "Продвижение — 4×3 / content" — the capabilities frame's `promotion` pane. |
 | `223:37237` | «Товары и остатки» screen, 4:3 — the capabilities frame's `logistics` pane. |
+| `275:39451` | Section "tinder" — the style deck's six images, as three pairs. Children `275:39475` / `39476` / `39477` are the pairs; in each, the upper rectangle is the ground and the lower one the shop screen. |
+| `275:39455` / `275:39469` | Pair 1 — fashion shoot ground, POLENE shop screen. |
+| `275:39458` / `275:39470` | Pair 2 — skincare ground, "Bed Intentions" shop screen. |
+| `275:39467` / `275:39472` | Pair 3 — furnished room ground, furniture shop screen. |
 
 `get_metadata` on `1:49642` and on `196:46923` overflows the MCP transport. Read frame by
 frame; ask the client for direct links.
@@ -1082,5 +1109,6 @@ Five traps, all hit more than once:
 - Which screen / video / people go into which section frame — later; frames stay empty.
 - Date of the board meeting — unknown.
 - Font license for production — unresolved.
-- Taller screenshots for the style deck — the client's are ~1080×600, which crops to
-  836×627 and renders at 1.16x on a 1920 screen.
+- White ink over the blurred grounds: two of the three photographs are light (beige), and
+  the section's ink is white. Readable on the fashion ground, weak on the other two — a
+  scrim over the ground would fix it, and that is the client's call.
