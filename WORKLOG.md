@@ -1,5 +1,23 @@
 # Worklog
 
+## 2026-09-03 — the cases heading gets its middle line
+
+**What changed.** `index.html`: `#audience`'s title from `Работают ⏎ с нами` to
+`Работают ⏎ и побеждают ⏎ с нами`. `CONTEXT.md` §4's copy table follows. «и» is tied to
+«побеждают» with a non-breaking space, like every other conjunction on the page.
+
+**Why.** Client, with his own break marks: "работают → и побеждают → с нами".
+
+**How it was verified.** Emulated 1440×900, document and stylesheet cache-busted. The title
+renders three lines (96px at a 32px line height), does not overflow its 356px column, and
+every section is still exactly 900 tall — which matters beyond looks: the wheel controller
+stands down if any section outgrows the viewport. Not looked at rendered: a hidden preview
+pane will not repaint below the top of the document.
+
+**What is left undone.** Nothing here. Note the cases section itself is mid-rebuild in
+another session's working tree (an Apple-Wallet-style stack), so this heading will land on
+top of that.
+
 ## 2026-09-03 — the orb moves 8px further off the corner
 
 **What changed.** `assets/js/tile-shader.js`: `MARGIN` 20 → 28, with the comment.
