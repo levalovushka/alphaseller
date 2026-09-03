@@ -1,5 +1,31 @@
 # Worklog
 
+## 2026-09-02 — wider column gap, and the frame cap follows it down
+
+**What changed.** `assets/css/base.css`: `--col-gap` `clamp(24px, 2.5vw, 48px)` →
+`clamp(40px, calc(2.5vw + 16px), 64px)`, and the frame's cap 752 → 720. `CONTEXT.md` updated
+with the new numbers and the coupling.
+
+**Why the cap moved with it.** At 1920 the cap sets the text columns. Adding 16 to the gap
+took each column from 428 to 412, and "и интернет магазин" needs 425 — the client's hand-set
+third line broke to a fourth immediately. Giving the same 32 back off the cap restores 428.
+The two numbers are coupled; noted in `CONTEXT.md` so the next change to either does not
+silently break that title.
+
+**How it was verified.** Freshly loaded stylesheet at each width.
+
+| viewport | gap | frame | speed title |
+|---|---|---|---|
+| 1440×900 | 52 | 424 | three lines |
+| 1512×830 | 54 | 487 | — |
+| 1920×1080 | 64 | 720 | three lines, column 428 |
+
+No collisions on any frame-bearing section, no horizontal overflow. Cards in the cases grid
+follow the gap and are 283 wide at 1440, down from 295.
+
+**Worth the client's eye.** The frame is now 424 at 1440 and 720 at 1920 — the gap was paid
+for out of the frame, since the column floor and the page margins are fixed.
+
 ## 2026-09-02 — photograph off the hero
 
 **What changed.** `index.html`: `data-filled="true"` dropped from the hero slide.

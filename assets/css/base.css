@@ -64,7 +64,7 @@
   /* The three-column stage. The text columns never go below --col-min; the frame
      takes what is left, capped at 760. Without the floor, a long word in a title
      runs out of its column and collides with the frame on a narrower screen. */
-  --col-gap: clamp(24px, 2.5vw, 48px);
+  --col-gap: clamp(40px, calc(2.5vw + 16px), 64px);
   /* Titles hyphenate (see .section__title), so this floor no longer has to clear the
      longest word in the copy — "маркетплейсах" is 391px wide at the xl style and used
      to force 400 here. It is now a composition choice: how much of the screen the two
@@ -72,12 +72,13 @@
      1440 screen; dropping to 300 would give it 673, which the client judged too much
      for a laptop. */
   --col-min: 380px;
-  /* 752, not 760: at 1920 the cap is what sets the text columns, and at 760 they came out
-     424 while "и интернет магазин" needs 425 — the title broke to a fourth line one pixel
-     short. Eight pixels off the frame buys the columns four each. Below ~1830 the cap does
-     not bind and this number changes nothing. */
+  /* The cap is what sets the text columns at 1920, so it moves whenever --col-gap does:
+     the columns must stay at or above 428 for "и интернет магазин" (425 at the 44px xl) to
+     hold the client's hand-set third line. 760 → 752 when the gap was 48; the gap is now
+     64, which costs the columns 16 each, so 752 → 720. Below ~1830 the cap does not bind
+     and this number changes nothing. */
   --frame-w: min(
-    752px,
+    720px,
     calc(100vw - 2 * var(--page-pad) - 2 * var(--col-gap) - 2 * var(--col-min))
   );
 

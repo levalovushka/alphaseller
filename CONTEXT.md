@@ -346,8 +346,8 @@ ground's own data attributes, `isSection` is false only for the footer.
 ### The three-column stage
 
 `--page-pad` is `clamp(76px, calc(4.4vw + 12px), 96px)` and `--col-gap` is
-`clamp(24px, 2.5vw, 48px)`. The two text columns have a floor of `--col-min` (380px) and the
-frame takes what is left, capped at 760px.
+`clamp(40px, calc(2.5vw + 16px), 64px)`. The two text columns have a floor of `--col-min`
+(380px) and the frame takes what is left, capped at 720px.
 
 On a 1920 screen the side margin comes from `--page-max` (1704px), not from the padding —
 the container hits its cap before the padding matters. Both numbers have to move together to
@@ -371,13 +371,19 @@ remains, which fires solely for a word too long for its column — no current ti
 
 Measured:
 
-| viewport | xl | frame | side margin |
-|---|---|---|---|
-| 1440 | 36 / 36 | 456 | 76 |
-| 1512 | 37.2 | 519 | 79 |
-| 1920 | 44 / 44 | 760 | 108 |
+| viewport | xl | gap | frame | side margin |
+|---|---|---|---|---|
+| 1440 | 36 / 36 | 52 | 424 | 76 |
+| 1512 | 37.2 | 54 | 487 | 79 |
+| 1920 | 44 / 44 | 64 | 720 | 108 |
 
-For anyone tempted to re-tune the frame: it has been 416, 473, 553, 513, 480 and now 456
+**The frame's cap and `--col-gap` are coupled.** At 1920 the cap is what sets the text
+columns, and they must stay at or above 428 for `и интернет магазин` (425 at the 44px xl) to
+keep the client's hand-set third line. Every 16px added to the gap costs each column 16, so
+the cap has to give the same back: 760 → 752 when the gap was 48, 752 → 720 now that it is
+64. Change one without the other and that title silently breaks to four lines.
+
+For anyone tempted to re-tune the frame: it has been 416, 473, 553, 513, 480, 456 and now 424
 across this conversation. The client keeps choosing the moderate end — do not "fix" it
 upward without asking.
 
