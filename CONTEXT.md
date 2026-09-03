@@ -69,16 +69,17 @@ Header + 7 sections + footer.
 |---|---|---|
 | 1 | Hero | Green `#A6ED00` |
 | 2 | Key capabilities | Smoky white `#E9EBEE` |
-| 3 | Speed | Smoky white `#E9EBEE` |
+| 3 | Speed | Black `#000000` — since 2026-09-03; was smoky white |
 | 4 | Customization | Black `#000000` |
 | 5 | Marketplaces | Smoky white `#E9EBEE` |
 | 6 | Cases | Smoky white `#E9EBEE` — card grid, see below |
 | 7 | Closer + footer | Black `#000000` — one screen, see below |
 
-**Red is not used on this page at all** (for now). Both dark sections use pure `#000000`;
-`#1A1817` is unused. Pure white is no longer a section ground either — the four light
-sections are all smoky white, so the page reads green → smoke → smoke → black → smoke →
-smoke → black.
+**Red is not used on this page at all** (for now). All three dark sections use pure
+`#000000`; `#1A1817` is unused. Pure white is no longer a section ground either — the light
+sections are all smoky white, so the page reads green → smoke → **black** → black → smoke →
+smoke → black. Sections 3 and 4 are now adjacent blacks: nothing changes colour across that
+crossing, only the ink stays put and the frame's content swaps.
 
 ### Copy — v1, from the client, 2026-09-02
 

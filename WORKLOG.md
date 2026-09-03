@@ -1,5 +1,37 @@
 # Worklog
 
+## 2026-09-03 — section 3 goes black
+
+**What changed.** `index.html`: `#speed` moved from `data-theme="smoke" data-ink="dark"` to
+`data-theme="black" data-ink="light"`. `CONTEXT.md` §4: the background table and the
+colour-sequence note.
+
+**Why.** Client asked for it.
+
+**What follows.** The page now reads green → smoke → **black** → black → smoke → smoke →
+black, so sections 3 and 4 are adjacent blacks: the ground does not change colour across
+that crossing at all, and only the frame's content swaps. Nothing in the CSS or the JS keys
+on a section id or on `data-theme` — grepped for both — so the change is the attribute pair
+and nothing else. Everything the ground drives follows on its own: the section's text, the
+frame's tint and dashed outline, and the secondary CTA, which is now a white stroke with a
+white label.
+
+**How it was verified.** `localhost:4321` at 1440×900, snap off, scrolled to every section's
+own `offsetTop` with `ScrollTrigger.update()` and read the three live colours off `<html>`:
+
+| section | `--ground` | `--ink` |
+|---|---|---|
+| hero | `rgb(166, 237, 0)` | black |
+| capabilities | `rgb(233, 235, 238)` | black |
+| **speed** | **`rgb(0, 0, 0)`** | **white** |
+| customization | `rgb(0, 0, 0)` | white |
+| marketplaces | `rgb(233, 235, 238)` | black |
+| audience | `rgb(233, 235, 238)` | black |
+| closer | `rgb(0, 0, 0)` | white |
+
+**Left undone.** The `speed` slide has no screen, so its frame is an empty tint on black
+now. Nothing else on this item.
+
 ## 2026-09-03 — the deck's throw is integrated, not tweened
 
 **What changed.** `main.js`, `the style deck`: the exit tween is gone. A card that is let go
