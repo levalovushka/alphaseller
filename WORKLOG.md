@@ -1,5 +1,29 @@
 # Worklog
 
+## 2026-09-03 — the hero headline becomes "весь онлайн-бизнес"
+
+**What changed.** `index.html`: the `<h1>` and the `<title>`, "Одна платформа
+на всю онлайн-торговлю" → "Одна платформа на весь онлайн-бизнес". `CONTEXT.md` §4:
+the section 1 copy row. The `&nbsp;` after "на" is kept, so "на весь" cannot be split.
+
+**Why.** Client's call — the page is about the whole online business, not only the selling.
+
+**How it was verified.** `localhost:4321` at 1440×900, measured on the live DOM and then
+seen in a screenshot. Three lines, 96px tall at 32/32, inside the 356px text column, which
+is sitting on its `--col-min` floor:
+
+    Одна платформа
+    на·весь            (· = the nbsp, holding)
+    онлайн-бизнес
+
+Same line count as the old headline, but the hyphen break is gone — "онлайн-торговлю" used
+to split across lines 2 and 3 as "онлайн-" / "торговлю". The middle line is now short, two
+short words on their own.
+
+**Left undone.** Nothing on this item. The thin middle line is a consequence of the 356px
+column, not of the copy; a hand-set `<br>` after "на" would give two fuller lines
+("Одна платформа на" / "весь онлайн-бизнес") if he wants that instead.
+
 ## 2026-09-03 — the full picture on the panel, anchor solved to 18%
 
 **What changed.** New `assets/images/hero-full.webp` (1254×1254, 89 KB).
