@@ -1,9 +1,14 @@
 # Worklog
 
-## 2026-09-03 — logo down to 20, header items back on the centre line
+## 2026-09-03 — logo down to 20, an 8px left margin, header items back on the centre line
 
-**What changed.** `assets/css/base.css`: `--logo-h` 24 → 20, and `--header-pad-bottom` now
-just reads `--header-pad-top` instead of its own 20. `CONTEXT.md` updated.
+**What changed.** `assets/css/base.css`: `--logo-h` 24 → 20, `.header__logo` gains
+`margin-left: 8px`, and `--header-pad-bottom` now just reads `--header-pad-top` instead of
+its own 20. `CONTEXT.md` updated.
+
+**The 8px.** The lockup starts with the mark, which carries no side bearing, so at the bar's
+flat 16 inset it read as flush against the screen edge. The logo now starts at 24 while the
+button's right inset stays 16 — deliberately uneven, and the client asked for it.
 
 **The alignment was a real bug, not a feeling.** The header's padding was 16 top / 20 bottom
 — my placeholder, never a client number — so `align-items: center` centred everything in a
@@ -12,8 +17,8 @@ the button all had their centres at 40 against a bar centre of 42. After: all th
 offset.
 
 **How it was verified.** Freshly loaded stylesheet at 1440×900. Header 80 tall (was 84),
-padding a flat 16, all three items at exactly 0 from the centre line. Lockup 228×20. No
-horizontal overflow.
+padding a flat 16, all three items at exactly 0 from the centre line. Lockup 228×20, its
+left edge at 24 against the button's 16 on the right. No horizontal overflow.
 
 **Knock-on.** `--header-h` goes 84 → 80, so the sections' top padding and the frame's optical
 centre move up 4 and 2px respectively — the frame now sits at y 248 on the hero.

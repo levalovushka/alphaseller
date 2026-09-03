@@ -115,6 +115,9 @@ hand rather than leaving them to `text-wrap: balance`.
 - Button: `Начать бесплатно`.
 - **Full-bleed**, not inside the page container: a flat 16px inset on all four sides. The
   height follows from the padding plus the 48px controls; nothing fixes it — it lands at 80.
+  The logo takes 8px more on the left than the bar's inset (so it starts at 24, while the
+  button's right inset stays 16): the lockup begins with the mark, which has no side bearing
+  of its own, and at a flat 16 it read as flush against the edge.
   **The padding has to stay symmetric**: it was 16 top / 20 bottom for a while, and that put
   the logo, the links and the button 2px above the bar's centre line, which the client saw.
 - **The nav links sit on the screen's centre**, not in the middle of the space left over

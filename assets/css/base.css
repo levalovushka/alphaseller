@@ -214,6 +214,9 @@ img { display: block; max-width: 100%; height: auto; }
   flex: 0 0 auto;
   display: grid;
   place-items: center start;
+  /* 8 past the bar's own inset: the lockup starts with the mark, which has no side
+     bearing of its own, so at a flat 16 it read as flush against the edge. */
+  margin-left: 8px;
 }
 
 /* Nothing on the page carries `corner-shape` any more: the squircle lived on the logo's
