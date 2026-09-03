@@ -405,7 +405,10 @@ img { display: block; max-width: 100%; height: auto; }
   z-index: 0;
   overflow: hidden;
   opacity: 0;
-  --deck-blur: 32px;
+  /* EXPERIMENT, 2026-09-03: the blur is off at the client's request — "давай ради
+     эксперимента снимем блюр с фонов". Put 32px back and the grounds can go back to
+     900px / `-q 60`; sharp, they need 1920px and cost five times the bytes. */
+  --deck-blur: 0px;
   --deck-scrim: 15%;
   --deck-ground-fade: 0.5s;
 }

@@ -896,11 +896,15 @@ a 0.5s wall-clock transition, because a swipe is a discrete event with no scroll
 against; the layer's *own* opacity is written by JS against the scroll, like every other
 value a section change drives. Three things about it are deliberate:
 
-- `--deck-blur` is 32px, the client's floor ("минимум 32px"), and it is a variable so it can
-  be pushed without touching anything else.
-- The sources are 900px wide at `-q 60`, 12-35 KB. A 32px blur destroys detail, so
-  resolution past that is bytes with nothing to show for them. Note the blur costs the same
-  either way — the browser blurs the rendered layer, not the file.
+- `--deck-blur` is **0px right now** — the client asked to see the grounds sharp on
+  2026-09-03 ("давай ради эксперимента снимем блюр с фонов"). It was 32px, his own floor,
+  and it is a variable so this is one line either way. The two states want different
+  sources, though: blurred, the grounds were 900px at `-q 60` (12–35 KB); sharp, they are
+  1920px at `-q 78` (62–194 KB), because the blur was what made the small ones look fine.
+- A blur destroys detail, so a blurred ground needs no resolution — and note the blur costs
+  the same either way, since the browser blurs the rendered layer and not the file. The
+  sources are re-exported whenever the blur is turned on or off; the 2x node exports out of
+  Figma are what both sets come from.
 - Each layer is inset by twice the blur radius and the container clips it. A blur samples
   past its element's edges, so without that there is a soft band around the viewport.
 - `--deck-scrim` is 15% black, added on 2026-09-03 — "чуть ярковаты сейчас". It is one

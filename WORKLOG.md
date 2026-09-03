@@ -1,5 +1,37 @@
 # Worklog
 
+## 2026-09-03 — experiment: the deck's grounds without the blur
+
+**What changed.** `--deck-blur` 32px → 0, and the three ground files re-exported sharp:
+2x node exports out of Figma, scaled to 1920px wide, `cwebp -q 78` — 194 / 63 / 62 KB
+against 34 / 19 / 12 KB blurred. `CONTEXT.md` §7 says which sources belong to which state.
+
+**Why.** Client wants to see it: "давай ради эксперимента снимем блюр с фонов". The
+re-export is not optional for a fair look — the blurred set was 900px at `-q 60`, and
+stretched to a 1440–1920 viewport unblurred it would have shown its own upscaling rather
+than the photograph.
+
+**How it was verified.** Emulated 1440×900, CSS and the three images cache-busted. The layer
+computes `blur(0px)`, its inset collapses to 0 with the radius, the 15% scrim is untouched,
+and the three sharp files are the ones served. Screenshotted all three grounds by clicking
+the arrow button through the deck.
+
+**What it looks like, honestly.**
+
+- **fashion** is the one that works: a mid-tone field, the white headline holds, the card
+  reads as floating over it.
+- **care** fills the screen with skin and beige. The headline sits over the model's
+  shoulder and survives; the right-hand subtitle over her hair does not really.
+- **furniture** is the busiest — wood, shelves and a table all compete with the card, and
+  the headline over the table is the weakest of the three.
+- Across all three, the card's own white edges now melt into the light parts of the
+  photograph. Blurred, the card popped; sharp, it needs an edge of its own — which is the
+  shadow-or-hairline question §7 already flags, now with teeth.
+
+**What is left undone.** This is a state to look at, not a decision. Reverting is one line
+(`--deck-blur: 32px`) plus re-encoding the three grounds small again; the whole commit is
+`git revert`-able in one step.
+
 ## 2026-09-03 — the deck deals out on arrival and gets two arrow buttons
 
 **What changed.**
