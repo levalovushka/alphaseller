@@ -1,5 +1,20 @@
 # Worklog
 
+## 2026-09-03 — the cases heading drops to xl
+
+**What changed.** `index.html`: `#audience`'s heading loses `section__title--xxl`.
+`CONTEXT.md` and the rule's comment in `assets/css/base.css` now say the closer's heading is
+the only xxl left.
+
+**Why.** Client: "в 'работают с нами' сделай тайтл xl а не xxl". It carried xxl from when
+that screen was a card grid with nothing else on it; back in the three columns it sets like
+every other section's title.
+
+**How verified.** Live page at 1440×900: the heading computes 28px — same as the
+marketplaces title — in two lines, no overflow; the closer's is still 56px.
+
+**Left undone.** Nothing for this change.
+
 ## 2026-09-03 — the tiles flip, go square, and lose their titles
 
 **What changed.** `index.html`: in `#growth` the heading moved to the left column and the

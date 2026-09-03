@@ -345,9 +345,10 @@ img { display: block; max-width: 100%; height: auto; }
   letter-spacing: normal;
 }
 
-/* Style xxl, for the two headings that carry it — the cases and the closer. The measure is
-   ten times the size, so it grows with the type instead of forcing a third line on a wide
-   screen: 560 at 1440, 640 at 1920. (560 is a composition guess, not a client number.) */
+/* Style xxl. Only the closer's heading carries it now — the cases went back to xl on
+   2026-09-03. The measure is ten times the size, so it grows with the type instead of
+   forcing a third line on a wide screen: 560 at 1440, 640 at 1920. (560 is a composition
+   guess, not a client number.) */
 .section__title--xxl {
   max-width: calc(var(--fs-xxl) * 10);
   font-size: var(--fs-xxl);

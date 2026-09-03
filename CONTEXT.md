@@ -142,7 +142,8 @@ Section 6 went back to the ordinary three columns on 2026-09-03, on the client's
 плашках — должно встать в рамку, а рамка должна стать каруселью. переиспользуй стрелочки из
 блока с тиндер-механикой."
 
-- Title left (`xxl`, two hand-set lines), the frame in the middle, subtitle and the
+- Title left (`xl` since 2026-09-03 — it was `xxl` while this screen was a card grid —
+  two hand-set lines), the frame in the middle, subtitle and the
   `Все кейсы` button right — exactly like every other section.
 - **The frame is a carousel**: one case card at a time, white plate and black type of its
   own, walked by the same two arrow buttons the style deck carries (`.deck-nav`,
@@ -1134,7 +1135,7 @@ Verified with fontTools (2026-09-02):
 
 | Style | Cut | Size / leading | Tracking | Used for |
 |---|---|---|---|---|
-| `xxl` | Hyper Medium | 56 / 56 at 1440 → 64 / 64 at 1920 | normal | The cases and closer headings |
+| `xxl` | Hyper Medium | 56 / 56 at 1440 → 64 / 64 at 1920 | normal | The closer heading — the only one left since the cases went back to `xl` on 2026-09-03 |
 | `xl` | Hyper Medium | 28 / 28 at 1440 → 40 / 40 at 1920 | normal | Section titles |
 | `md` | Hyper Regular | 14 / 18 at 1440 → 18 / 24 at 1920 | 1% (`0.01em`) | Everything else |
 
