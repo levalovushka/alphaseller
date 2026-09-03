@@ -44,7 +44,10 @@
      controls — nothing fixes it. */
   --header-pad-top: 16px;
   --header-pad-side: 16px;
-  --header-pad-bottom: 20px;   /* TODO: not specified by the client */
+  /* Symmetric with the top, or nothing in the bar sits on its centre line: with 16/20 the
+     logo, the links and the button all rode 2px high and the client saw it. The client set
+     the 16 on top; this matches it. */
+  --header-pad-bottom: var(--header-pad-top);
   --header-h: calc(var(--header-pad-top) + var(--btn-h-nav) + var(--header-pad-bottom));
 
   /* Type — the whole site is two styles, both YFF Hyper
@@ -67,8 +70,8 @@
 
   /* Control heights, fixed by the client. */
   /* The lockup's height; its width follows from the file's 1037 x 91.13.
-     TODO: 24 is my number — it puts the wordmark's caps close to the nav links. */
-  --logo-h: 24px;
+     TODO: 20 is my number — 24 read too large to the client. */
+  --logo-h: 20px;
   --btn-h-nav: 48px;
   --btn-h: 40px;
   --btn-pad-x: 20px;   /* both sizes, header and sections */

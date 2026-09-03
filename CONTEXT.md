@@ -67,7 +67,7 @@ Header + 7 sections + footer.
 
 | # | Section | Background |
 |---|---|---|
-| 1 | Hero | Green `#A6ED00` |
+| 1 | Hero | Graphite `#1A1817` — since 2026-09-03; was green `#A6ED00`. A photograph is laid over it by the morph panel, see §5 |
 | 2 | Key capabilities | Smoky white `#E9EBEE` |
 | 3 | Speed | Black `#000000` — since 2026-09-03; was smoky white |
 | 4 | Customization | Black `#000000` |
@@ -75,10 +75,12 @@ Header + 7 sections + footer.
 | 6 | Cases | Smoky white `#E9EBEE` — card grid, see below |
 | 7 | Closer + footer | Black `#000000` — one screen, see below |
 
-**Red is not used on this page at all** (for now). All three dark sections use pure
-`#000000`; `#1A1817` is unused. Pure white is no longer a section ground either — the light
-sections are all smoky white, so the page reads green → smoke → **black** → black → smoke →
-smoke → black. Sections 3 and 4 are now adjacent blacks: nothing changes colour across that
+**Red is not used on this page at all** (for now). The three dark sections use pure
+`#000000` and the hero uses graphite. Pure white is no longer a section ground either — the
+light sections are all smoky white, so the page reads **graphite** → smoke → black → black →
+smoke → smoke → black. **Green is now on the page nowhere at all** — it was only ever the
+hero's ground and the morph panel, and both went graphite on 2026-09-03. Worth raising with
+the client: the brand accent has left the page. Sections 3 and 4 are now adjacent blacks: nothing changes colour across that
 crossing, only the ink stays put and the frame's content swaps.
 
 ### Copy — v1, from the client, 2026-09-02
@@ -111,9 +113,10 @@ hand rather than leaving them to `text-wrap: balance`.
 - Logo: the full Alpha Seller lockup, mark plus wordmark (no Alfa-Bank lockup).
 - Links: `Продукты`, `Тарифы`, `Крупному бизнесу`, `Примеры`, `Блог`.
 - Button: `Начать бесплатно`.
-- **Full-bleed**, not inside the page container: 16px from the top, 20px from both edges.
-  The height follows from the padding plus the 52px controls; nothing fixes it — it lands
-  at 88px. The bottom padding (20px) is still a placeholder.
+- **Full-bleed**, not inside the page container: a flat 16px inset on all four sides. The
+  height follows from the padding plus the 48px controls; nothing fixes it — it lands at 80.
+  **The padding has to stay symmetric**: it was 16 top / 20 bottom for a while, and that put
+  the logo, the links and the button 2px above the bar's centre line, which the client saw.
 - **The nav links sit on the screen's centre**, not in the middle of the space left over
   between the logo and the button. Implemented as a `1fr auto 1fr` grid.
 - The ground is light but sections 1, 4 and 7 are green/black. **The navbar must recolor
@@ -374,7 +377,8 @@ of its own: the frame's slides used to, and the client caught it — the ground 
 recolouring while the photograph was still most of a 0.9s fade behind, because the swap only
 fired once the boundary had passed the middle of the header.
 
-That one pass writes the three colours, the photographic ground's opacity, and each slide's
+That one pass writes the three colours, the photographic ground's opacity, the morph panel's
+shape, and each slide's
 `--t`. Two hooks come out of it, both synchronised by construction, for whatever a section
 has to do next — an element flying out of the frame, a caption, a video:
 
@@ -393,6 +397,47 @@ fade would go if anything needs one again.
 flips at the middle of the header, so crossing away from the hero it can reappear as a
 hairline while the photograph is still scrubbing out. Not fixed — the outline is also what
 the closer's morph overrides.
+
+### The hero morph — the ground becomes the frame
+
+The one crossing with a move of its own, copied from cash.app and asked for by the client on
+2026-09-03: the hero's ground does not cross-fade into the next one, it **shrinks into the
+frame**. A fixed layer, `.stage-morph`, starts full-bleed and square and ends on exactly the
+frame's box with exactly the frame's radius, scrubbed by the boundary pass like everything
+else.
+
+The client's calls, all 2026-09-03 — do not re-litigate:
+
+| | |
+|---|---|
+| Start | full-bleed, **no** radius. Not a visible inset panel sitting on the hero. |
+| End | it does **not** dissolve. It stops on the frame's box and stays there, behind the frame. |
+| Gone at t = 1 | `display: none` the moment it lands, not merely covered. Covered was the first attempt and he caught it: the tab strip cross-fades its panes, so mid-swap both are part transparent and the panel showed through the frame. |
+| The ground behind | goes smoky white on the **first movement**, not across the gesture — otherwise the first frames of the shrink are graphite on graphite and read as nothing moving. The step is invisible: at t = 0 the panel still covers the screen. |
+| Colour | graphite, moved with the hero. It was green; the panel **is** the hero's ground, so the two can only ever be the same colour. |
+| The photograph | `hero.webp` (Figma `196:53708`) is the panel's own background, `center / cover`, and it does **not** move. As the clip closes, the panel is a shrinking window onto a photograph that stays put. Scaling the picture down with the panel would read as the whole composition being pulled into the frame — a different move, not asked for. |
+
+How it is built:
+
+- **The target rect is measured off the frame itself** (`getBoundingClientRect`, re-measured
+  on every refresh), so the two cannot drift when `--frame-w`, the header height or the page
+  padding change. The radius is measured too.
+- **The shape is a `clip-path: inset(… round …)`**, not `inset` and not a `scale`. `inset`
+  would lay the element out again on every scrolled frame; a `scale` would squash the
+  corners, and a true 32 at the end is the whole point of the move.
+- **Layer 0**, the same as the photographic ground: above the ground the body is painted
+  with, below the sections' own content (layer 1) so the hero's title and CTA stay on top of
+  the photograph, far below the frame (layer 5).
+- `setMorph()` is the single writer of both the shape and the panel's presence, and both the
+  crossing and `settleMorph()` go through it — so load, refresh and a deep link land on it
+  too.
+
+**Known, not fixed:** the ground steps to smoke on the first movement while the **ink** still
+lerps white → black across the whole gesture. Around t = 0.4 at 1440 the title's leftmost
+~140px have left the panel and sit on smoke in mid-grey. It lasts ~0.3s at the wheel
+controller's speed. Two ways out if it shows: hold the ink white until the panel has cleared
+the text (lerp it over the tail of the crossing), or take the hero's text out with the panel.
+Both are motion decisions — ask.
 
 ### The `section:change` event
 
@@ -538,9 +583,9 @@ before spending the columns again.
 |---|---|---|---|
 | Чистый белый | Pure white | `#FFFFFF` | Ink on the dark sections. **No longer used as a section ground** — the client replaced both white sections with smoky white. |
 | Дымчато-белый | Smoky white | `#E9EBEE` | Light airy panels, readability, palette balance. |
-| Ярко-зелёный | Bright green | `#A6ED00` | Brand accent: entrepreneurial freedom, growth. |
+| Ярко-зелёный | Bright green | `#A6ED00` | Brand accent: entrepreneurial freedom, growth. **Unused on this page since 2026-09-03** — the hero and the morph panel were its only users. |
 | Чистый чёрный | Pure black | `#000000` | Base of the visual system. Sections 4, 7, footer. |
-| Глубокий графит | Deep graphite | `#1A1817` | Warm neutral dark. **Unused on this page.** |
+| Глубокий графит | Deep graphite | `#1A1817` | Warm neutral dark. The hero's ground and the morph panel since 2026-09-03, plus the cards in the cases section. |
 | Тициановый | Titian red | `#DC200C` | Action energy. **Unused on this page.** |
 
 ### Logo
@@ -557,9 +602,8 @@ recolor.
 
 **The header carries the full lockup** — mark with the wordmark to its right,
 `alphaseller-logo.svg` — since 2026-09-03. It is painted with a CSS mask, so it takes `--ink`
-and follows the scroll's colour like everything else on the ground. 24px tall, width derived
-from the file's 1037 × 91.13; the 24 is mine, chosen so the wordmark's caps sit close to the
-nav links.
+and follows the scroll's colour like everything else on the ground. 20px tall, width derived
+from the file's 1037 × 91.13, so 228 × 20 on screen. The 20 is mine — 24 read too large.
 
 The rounded-square badge it replaces is gone, and with it the page's only `corner-shape:
 squircle` — nothing uses corner shaping now. `alphaseller-mark.svg` stays in the repo.
@@ -585,7 +629,8 @@ Figma's own `#1E1E1E` canvas in as a full-bleed `<rect>`.
 | Section | File | Figma node | Source |
 |---|---|---|---|
 | 1 — hero | `assets/video/hero.mp4` + `assets/images/hero-poster.webp` | `247:42060` | screen recording, on a loop. See below |
-| 1 — hero, unused | `assets/images/hero.webp` | `196:53708` | the photograph the hero had before; kept, wanted again later |
+| 1 — hero, **the morph panel's ground** | `assets/images/hero.webp` | `196:53708` | 2236×1578 (1.42:1). Not in the frame — it backs the full-bleed morph panel, see §5. Re-pulled 2026-09-03 and byte-for-byte the same shot, so the file in the repo was already it |
+| 1 — hero, unused | `assets/images/hero-street.webp` | `265:39107` | a street shot that was in the frame for one round on 2026-09-03. 4096×2286 JPEG, centre-cropped to 4:3 and resized in one `cwebp -q 82 -crop 524 0 3048 2286 -resize 1440 1080` pass, 91 KB. Unwired, kept |
 | 2 — capabilities, `promotion` pane | `assets/images/capabilities-promotion.webp` | `206:62480` | node is named "Продвижение — 4×3 / content". 1118×838.5, @2x → 2236×1677, cwebp **`-lossless`**, 172 KB |
 | 2 — `orders` pane | `assets/images/capabilities-orders.webp` | `209:35586` | same size and export, 188 KB. Re-pulled once after the client edited the node — the file name stays, so a re-pull is a byte swap and nothing else |
 | 2 — `logistics` pane | `assets/images/capabilities-logistics.webp` | `223:37237` | same size and export, but **`-q 90`**, 167 KB |

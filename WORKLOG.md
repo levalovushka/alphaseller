@@ -1,5 +1,54 @@
 # Worklog
 
+## 2026-09-03 — logo down to 20, header items back on the centre line
+
+**What changed.** `assets/css/base.css`: `--logo-h` 24 → 20, and `--header-pad-bottom` now
+just reads `--header-pad-top` instead of its own 20. `CONTEXT.md` updated.
+
+**The alignment was a real bug, not a feeling.** The header's padding was 16 top / 20 bottom
+— my placeholder, never a client number — so `align-items: center` centred everything in a
+content box that sits 2px above the bar's own middle. Measured before: the logo, the nav and
+the button all had their centres at 40 against a bar centre of 42. After: all three read 0
+offset.
+
+**How it was verified.** Freshly loaded stylesheet at 1440×900. Header 80 tall (was 84),
+padding a flat 16, all three items at exactly 0 from the centre line. Lockup 228×20. No
+horizontal overflow.
+
+**Knock-on.** `--header-h` goes 84 → 80, so the sections' top padding and the frame's optical
+centre move up 4 and 2px respectively — the frame now sits at y 248 on the hero.
+
+**Mine, not the client's.** The 20px logo height, and reading "16 on top" as "16 all round".
+
+## 2026-09-03 — hero goes graphite, the photograph moves to the morph panel
+
+**What changed.** `index.html`: the hero section is `data-theme="graphite" data-ink="light"`,
+and the looping screen recording is back in its slide. `assets/js/main.js`: `graphite` added
+to the `GROUND` map. `assets/css/base.css`: the `:root` colour fallbacks are graphite / white
+/ black, the morph panel is `var(--c-graphite) url("../images/hero.webp") center / cover`,
+and the street-photo rule on the hero slide is gone. `CONTEXT.md`: §4 section table and the
+colour-rhythm note, §7 palette and the frame-content table, and §5's morph subsection —
+which a concurrent rewrite of that file had dropped — put back and brought up to date.
+
+**Why.** Client, in three steps: make the first screen dark grey (graphite, his pick), move
+the panel to graphite with it, then put the studio photograph on the panel and the interface
+back in the frame.
+
+**How it was verified.** `download_assets` on `196:53708` returned 2236×1578 — decoded the
+repo's `hero.webp` and compared: the same shot, so no new asset was added. In the page at
+1440 after a cache-busting reload: `--ground` `rgb(26, 24, 23)`, `--ink` `#ffffff`, title and
+nav links white, panel `background-image` resolves to `hero.webp` with `cover` over graphite,
+`.stage-frame__video` back in the DOM with the slide's `--t` at 1, 22 ScrollTriggers, no
+errors. Crossing swept: `inset(0px)` at t = 0 → `inset(250px 448px 242px 448px round 32px)`
+at t = 1 against a frame box of 544×408, `display: none` from t = 1.
+
+**What is left undone.** Video **playback** unverified — `play()` resolves and `readyState`
+is 4, but the element stays paused while the browser pane is hidden, which throttles it. The
+ink dip mid-crossing is real and unfixed, now written up in CONTEXT §5. Two things worth the
+client's eye: at 1440 `cover` on a 1.42:1 photograph in a 1.6:1 viewport puts the man's head
+right under the header, and the white masked lockup now sits on the bright part of the
+gradient. And green is now used **nowhere** on the page — the accent has left it entirely.
+
 ## 2026-09-03 — the header takes the full logo lockup
 
 **What changed.** `assets/css/base.css`: `.header__logo` loses its badge — no plate, no
