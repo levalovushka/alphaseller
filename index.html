@@ -91,7 +91,49 @@
   <div class="stage-frame__slide" data-for="marketplaces" data-filled="true" aria-hidden="true">
     <div class="frame-photo" data-photo="marketplaces"></div>
   </div>
-  <div class="stage-frame__slide" data-for="audience" aria-hidden="true"></div>
+  <!-- The cases, in the frame: one card at a time, walked by the same two arrows the style
+       deck uses. Not aria-hidden — the arrows take clicks; JS makes the subtree inert while
+       the slide is off stage, exactly as it does for the deck and the tabs. -->
+  <div class="stage-frame__slide" data-for="audience" data-filled="true">
+    <div class="case-deck">
+      <div class="case-deck__track">
+        <ul class="case-deck__rail">
+        <li class="case">
+          <img class="case__logo" data-invert="true" src="assets/logos/kinash.webp" alt="KINASH" width="120" height="40">
+          <p class="case__text">Нарастили продажи на&nbsp;40%, потому что смогли выйти из&nbsp;операционки</p>
+        </li>
+        <li class="case">
+          <img class="case__logo" data-invert="true" src="assets/logos/domodedovo.webp" alt="Домодедово" width="120" height="40">
+          <p class="case__text">Собрали витрину за&nbsp;выходные и&nbsp;в&nbsp;понедельник уже принимали заказы</p>
+        </li>
+        <li class="case">
+          <img class="case__logo" data-invert="true" src="assets/logos/12mesyatsev.webp" alt="12 месяцев" width="120" height="40">
+          <p class="case__text">Свели пять маркетплейсов в&nbsp;один кабинет и&nbsp;перестали терять остатки</p>
+        </li>
+        <li class="case">
+          <img class="case__logo" src="assets/logos/mreason.webp" alt="M.Reason" width="120" height="40">
+          <p class="case__text">Запустили второй бренд, не&nbsp;нанимая ни&nbsp;одного разработчика</p>
+        </li>
+        </ul>
+      </div>
+
+      <!-- Under the frame. Same markup and same styles as the deck's, with no stack to
+           clear, so it sits at the tab strip's drop. -->
+      <div class="deck-nav">
+        <button class="deck-arrow" type="button" data-dir="-1" aria-label="Предыдущий кейс">
+          <svg class="deck-arrow__icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+            <path d="M13 8H3.5M7.5 3.5 3 8l4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <button class="deck-arrow" type="button" data-dir="1" aria-label="Следующий кейс">
+          <svg class="deck-arrow__icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+            <path d="M13 8H3.5M7.5 3.5 3 8l4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="stage-frame__slide" data-for="growth" aria-hidden="true"></div>
   <div class="stage-frame__slide" data-for="closer" aria-hidden="true"></div>
 </div>
 
@@ -180,35 +222,56 @@
     </div>
   </section>
 
-  <!-- Cases. The one section with no frame: it leaves upward with the section before,
-       and comes back down as the closing call to action. -->
-  <section class="section section--cases" id="audience" data-theme="smoke" data-ink="dark" data-frame="none">
-    <div class="cases">
-
-      <div class="cases__head">
+  <!-- Cases. The frame is here like everywhere else; what used to be a grid of cards is
+       now the carousel inside it. -->
+  <section class="section" id="audience" data-theme="smoke" data-ink="dark">
+    <div class="section__inner">
+      <div class="section__lead">
         <h2 class="section__title section__title--xxl">Работают<br>с&nbsp;нами</h2>
+      </div>
+      <div class="section__frame-slot" aria-hidden="true"></div>
+      <div class="section__aside">
+        <p class="section__subtitle">Огромные корпорации и&nbsp;небольшие бизнесы уже вернули контроль в&nbsp;свои руки с&nbsp;нашей платформой</p>
         <button class="btn btn--secondary" type="button">Все кейсы</button>
       </div>
+    </div>
+  </section>
 
-      <ul class="cases__grid">
-          <li class="case">
-            <img class="case__logo" data-invert="true" src="assets/logos/kinash.webp" alt="KINASH" width="120" height="40">
-            <p class="case__text">Нарастили продажи на&nbsp;40%, потому что смогли выйти из&nbsp;операционки</p>
-          </li>
-          <li class="case">
-            <img class="case__logo" data-invert="true" src="assets/logos/domodedovo.webp" alt="Домодедово" width="120" height="40">
-            <p class="case__text">Собрали витрину за&nbsp;выходные и&nbsp;в&nbsp;понедельник уже принимали заказы</p>
-          </li>
-          <li class="case">
-            <img class="case__logo" data-invert="true" src="assets/logos/12mesyatsev.webp" alt="12 месяцев" width="120" height="40">
-            <p class="case__text">Свели пять маркетплейсов в&nbsp;один кабинет и&nbsp;перестали терять остатки</p>
-          </li>
-          <li class="case">
-            <img class="case__logo" src="assets/logos/mreason.webp" alt="M.Reason" width="120" height="40">
-            <p class="case__text">Запустили второй бренд, не&nbsp;нанимая ни&nbsp;одного разработчика</p>
-          </li>
+  <!-- Growth. The one section with no frame: it leaves upward with the section before,
+       and does not come back. Six tiles take the two left columns, the heading the third.
+       No subtitle and no button here — the client's call. The copy is his, from Figma
+       `276:54325`; the artwork on those tiles will be different, so none is wired yet. -->
+  <section class="section section--tiles" id="growth" data-theme="black" data-ink="light" data-frame="none">
+    <div class="tiles">
+      <ul class="tiles__grid">
+        <li class="tile">
+          <h3 class="tile__title">Охвати аудиторию<br>Альфа-Банка</h3>
+          <p class="tile__text">Размести товары бесплатно в&nbsp;приложении в&nbsp;разделе Маркет&nbsp;— клиенты банка их&nbsp;увидят</p>
+        </li>
+        <li class="tile">
+          <h3 class="tile__title">Размещай рекламу<br>в&nbsp;VK и&nbsp;Яндексе</h3>
+          <p class="tile__text">Получите двойную выгоду: новых клиентов и&nbsp;кэшбэк 10% за&nbsp;оплату рекламных кабинетов</p>
+        </li>
+        <li class="tile">
+          <h3 class="tile__title">Повышайте<br>лояльность</h3>
+          <p class="tile__text">Автоматизируйте рассылки, предлагайте бонусы и&nbsp;скидки по&nbsp;категориям, товарам, брендам</p>
+        </li>
+        <li class="tile">
+          <h3 class="tile__title">Экономь<br>на&nbsp;продвижении<br>у&nbsp;блогеров</h3>
+          <p class="tile__text">Подбери инфлюенсеров без&nbsp;пересечения аудитории, узнай подписки клиентов&nbsp;— получи максимальный охват и&nbsp;продажи</p>
+        </li>
+        <li class="tile">
+          <h3 class="tile__title">Привлекай<br>покупателей<br>у&nbsp;партнёров</h3>
+          <p class="tile__text">Размести своё предложение на&nbsp;витрине подарков и&nbsp;получи новых клиентов</p>
+        </li>
+        <li class="tile">
+          <h3 class="tile__title">Прокачай сервис<br>с&nbsp;помощью ИИ</h3>
+          <p class="tile__text">Подключи человечного и&nbsp;умного бота для&nbsp;общения с&nbsp;покупателями</p>
+        </li>
       </ul>
-
+      <div class="tiles__aside">
+        <h2 class="section__title">Приводите и&nbsp;удерживайте клиентов</h2>
+      </div>
     </div>
   </section>
 

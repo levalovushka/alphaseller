@@ -1,5 +1,37 @@
 # Worklog
 
+## 2026-09-03 — cases into the frame as a carousel, and a new tiles section
+
+**What changed.** `index.html`: `#audience` is an ordinary three-column section again —
+title, frame, subtitle and `Все кейсы` — and the four case cards moved into the frame as a
+carousel with the deck's two arrows; a new black section `#growth` follows it with six tiles
+and the heading «Приводите и удерживайте клиентов», and it is the one that now carries
+`data-frame="none"`. `assets/css/base.css`: the cases grid, head and frameless layout
+deleted; `.case-deck` / `__track` / `__rail` and the tiles block added; the track joined both
+curtain selector lists; `.section__title--xxl` moved up into the section block, where it is
+no longer inside a rule set that can be deleted with a layout. `assets/js/main.js`: a
+carousel controller next to the deck's, with the same gate. `CONTEXT.md`: structure table,
+copy table, a rewritten Cases section and a new Growth tiles one.
+
+**Why.** Client's brief, verbatim in CONTEXT §4. The subtitle is the v1 line from `f0286fd`
+("Огромные корпорации и небольшие бизнесы…") — he said to take it from the first iteration
+or invent one. The tile copy is his, read off Figma `276:54325`; no artwork is wired, since
+he said the graphics will be different.
+
+**How verified.** Live page, freshly loaded stylesheet, at 1440×900 and 1920×1080. Cases:
+slide `data-active=true`, `--t` 1, card = the frame's box (520×390 / 720×540), arrows under
+the frame at the tab strip's drop, a click steps the rail exactly one card (0 → -520 → -1040
+→ -1560 → 0 wrapping, and back the other way), leaving the section sets `inert` and resets
+the rail to 0, `xxl` title 56/64px in two lines with no overflow. Growth: ground `rgb(0,0,0)`,
+tiles 293×190 at 1440 and 388×232 at 1920 with no overflow in any of the six, heading in the
+third column, section exactly one viewport, frame parked above the screen (`top` -643/-818).
+No 4xx, no console errors, no horizontal overflow at either width. **Not verified: the
+carousel's motion.** The Browser pane is hidden, so `requestAnimationFrame` never fires and
+GSAP's ticker sits at frame 0 — the steps above were read by forcing each tween to
+`progress(1)`. The easing has not been seen moving.
+
+**Left undone.** The tiles have no artwork. The case copy is still my placeholder.
+
 ## 2026-09-03 — the tablet in the speed frame
 
 **What changed.** `assets/images/speed.webp` added. `index.html`: the speed slide carries

@@ -345,6 +345,15 @@ img { display: block; max-width: 100%; height: auto; }
   letter-spacing: normal;
 }
 
+/* Style xxl, for the two headings that carry it — the cases and the closer. The measure is
+   ten times the size, so it grows with the type instead of forcing a third line on a wide
+   screen: 560 at 1440, 640 at 1920. (560 is a composition guess, not a client number.) */
+.section__title--xxl {
+  max-width: calc(var(--fs-xxl) * 10);
+  font-size: var(--fs-xxl);
+  line-height: var(--lh-xxl);
+}
+
 .section__aside {
   display: flex;
   flex-direction: column;
@@ -598,6 +607,7 @@ img { display: block; max-width: 100%; height: auto; }
 .hero-photo,
 .frame-photo,
 .frame-pane,
+.case-deck__track,
 .style-deck:not([data-onstage="true"]) {
   /* The arriving shape, and the resting one: at --t 1 it is the whole box, at 0 nothing.
      The bottom corners are left square here — the layer's own `border-radius: inherit`
@@ -620,6 +630,7 @@ img { display: block; max-width: 100%; height: auto; }
 [data-wipe="out"] .hero-photo,
 [data-wipe="out"] .frame-photo,
 [data-wipe="out"] .frame-pane,
+[data-wipe="out"] .case-deck__track,
 [data-wipe="out"] .style-deck:not([data-onstage="true"]) {
   clip-path: inset(
     0 0
@@ -932,66 +943,53 @@ img { display: block; max-width: 100%; height: auto; }
 }
 
 /* ---------- cases ----------
-   The card grid, after cash.app's stats block: heading and a link at the top, a row of
-   equal cards below. The one section the frame does not appear on — it leaves upward with
-   the section before it, which is handled in main.js. */
+   The cases used to be a grid of four cards on a frameless screen. Since 2026-09-03 they
+   are one card at a time **inside the frame**, walked by the same two arrows the style deck
+   carries — the client's call: "давай сделаем секцию 'работают с нами' тоже с рамкой в
+   центре… а рамка должна стать каруселью. переиспользуй стрелочки из блока с
+   тиндер-механикой". The section itself went back to the ordinary three columns, so the
+   grid, its head and the frameless layout are gone; only the card survives.
 
-.section--cases {
-  display: grid;
-  align-items: stretch;
-  justify-items: stretch;
-  padding-top: calc(var(--header-h) + 32px);
-  padding-bottom: var(--page-pad);
+   The rail is a row of full-width cards and JS slides it by whole cards. The track is what
+   the curtain clips — a flat layer filling the frame's box exactly, like a picture — so the
+   rail may be wider than the frame without the wipe going wrong, and the arrows, which live
+   outside the box, are left alone. */
+
+.case-deck {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  /* The frame itself takes no pointer events; the arrows have to. */
+  pointer-events: auto;
 }
 
-.cases {
-  width: 100%;
-  max-width: var(--page-max);
-  margin-inline: auto;
-  display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
-  gap: 40px;
+.case-deck__track {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  overflow: hidden;
 }
 
-.cases__head {
+.case-deck__rail {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 32px;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  /* JS owns the transform. Nothing here may compete for it. */
+  will-change: transform;
 }
 
-/* Style xxl, for the two headings that carry it. The measure is wider than a text column
-   so they set in two lines — 560 is a composition guess, not a client number. */
-.section__title--xxl {
-  /* Ten times the size, so the measure grows with the type instead of forcing a third
-     line on a wide screen. 560 at 1440, 640 at 1920. */
-  max-width: calc(var(--fs-xxl) * 10);
-  font-size: var(--fs-xxl);
-  line-height: var(--lh-xxl);
-}
-
-/* Four equal cards along the bottom of the screen. Their width comes from the grid and
-   their height from the ratio, capped by whatever the row actually has. */
-/* The cards take the whole width and are only separated by 24 — the client wants them as
-   large as that leaves room for, not tied to the three-column gap. Their height follows
-   from the ratio, so the row grows with them. */
-.cases__grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 24px;
-  align-content: end;
-}
-
+/* One card fills the frame. The white plate and the black type are the card's own, as they
+   were in the grid: it does not follow --ink. */
 .case {
+  flex: 0 0 100%;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   gap: 32px;
-  /* The square is the point: never cap the height, or the ratio goes instead. */
-  aspect-ratio: 1 / 1;
-  padding: 28px;
-  border-radius: var(--radius-card);
-  /* The card keeps its own colours: white on the smoky section, whatever --ink is doing. */
+  padding: 32px;
+  border-radius: inherit;
   background: var(--c-white);
   color: var(--c-black);
 }
@@ -1009,6 +1007,74 @@ img { display: block; max-width: 100%; height: auto; }
   height: 40px;
   max-width: 100%;
   object-fit: contain;
+}
+
+/* The deck's drop clears its own stack of ledges; a carousel has none, so these sit where
+   the tab strip does. */
+.case-deck .deck-nav { margin-top: var(--tab-drop); }
+
+/* ---------- growth tiles ----------
+   The black screen after the cases: six small tiles across the two left columns, the
+   heading in the third — where every other section keeps its subtitle. No frame (the
+   section carries `data-frame="none"`, so the frame leaves upward on it), no subtitle and
+   no button; the client set all three.
+
+   The tiles carry artwork later. Nothing here reserves room for it: the client has not
+   drawn them yet, and a placeholder box would decide the composition for him. */
+
+.section--tiles .tiles {
+  width: 100%;
+  max-width: var(--page-max);
+  margin-inline: auto;
+  display: grid;
+  /* The site's own three columns, with the tiles spanning the first two. */
+  grid-template-columns: 1fr var(--frame-w) 1fr;
+  gap: var(--col-gap);
+  align-items: start;
+}
+
+.tiles__grid {
+  grid-column: 1 / 3;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  /* Same 24 as the old card grid: the tiles read as one block, not as three columns of
+     the page. Equal rows, so a longer tile does not make its row taller than the other. */
+  grid-auto-rows: 1fr;
+  gap: 24px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+  border-radius: var(--radius-card);
+  /* Graphite on black, like the reference: the tile is a plate, not a hole. It keeps its
+     own ground and follows --ink for the type, because this screen is black either way. */
+  background: var(--c-graphite);
+}
+
+/* Both styles are md — the site has only two — and the heading takes the Medium weight the
+   titles use. */
+.tile__title {
+  margin: 0;
+  font-weight: var(--weight-xl);
+  font-size: var(--fs-md);
+  line-height: var(--lh-md);
+  letter-spacing: var(--tracking-md);
+}
+
+.tile__text {
+  margin: 0;
+}
+
+/* The heading sits in the third column, at the top of the tiles rather than the middle of
+   the screen: the two blocks start on the same line, which is what the reference does. */
+.tiles__aside {
+  grid-column: 3;
 }
 
 /* ---------- closer + footer ----------

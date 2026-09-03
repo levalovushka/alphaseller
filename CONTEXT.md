@@ -63,7 +63,7 @@ What he explicitly liked:
 
 ## 4. Page structure
 
-Header + 7 sections + footer.
+Header + 8 sections + footer.
 
 | # | Section | Background |
 |---|---|---|
@@ -72,13 +72,14 @@ Header + 7 sections + footer.
 | 3 | Speed | Black `#000000` — since 2026-09-03; was smoky white |
 | 4 | Customization | Black `#000000` |
 | 5 | Marketplaces | Smoky white `#E9EBEE` |
-| 6 | Cases | Smoky white `#E9EBEE` — card grid, see below |
-| 7 | Closer + footer | Black `#000000` — one screen, see below |
+| 6 | Cases | Smoky white `#E9EBEE` — the ordinary three columns; the cards are a carousel in the frame, see below |
+| 7 | Growth tiles | Black `#000000` — six tiles, no frame, added 2026-09-03, see below |
+| 8 | Closer + footer | Black `#000000` — one screen, see below |
 
 **Red is not used on this page at all** (for now). The three dark sections use pure
 `#000000` and the hero uses graphite. Pure white is no longer a section ground either — the
 light sections are all smoky white, so the page reads **graphite** → smoke → black → black →
-smoke → smoke → black. **Green is now on the page nowhere at all** — it was only ever the
+smoke → smoke → black → black. **Green is now on the page nowhere at all** — it was only ever the
 hero's ground and the morph panel, and both went graphite on 2026-09-03. Worth raising with
 the client: the brand accent has left the page. Sections 3 and 4 are now adjacent blacks: nothing changes colour across that
 crossing, only the ink stays put and the frame's content swaps.
@@ -97,16 +98,22 @@ hand rather than leaving them to `text-wrap: balance`.
 | 3 | Твоё приложение ⏎ и интернет магазин ⏎ за один день | Онлайн-витрины без подрядчиков, с привязкой к Telegram и Max — рабочие, красивые и с твоей наценкой | Сделать сайт |
 | 4 | Стиль магазина уникальный, как ты сам | Выбирай из стильных шаблонов и докручивай, пока не будет идеально подходить под твой вкус | Посмотреть шаблоны |
 | 5 | Управляй своим бизнесом на маркетплейсах | Даём аналитику по заказам, остаткам, логистике и помогаем выбрать лучшие карточки товаров | Подключить |
-| 6 | Работают ⏎ с нами | *(unused — the cases layout has no subtitle column)* | Все кейсы |
-| 7 | Работает на твою мечту | — **dropped** | Начать бесплатно |
+| 6 | Работают ⏎ с нами | Огромные корпорации и небольшие бизнесы уже вернули контроль в свои руки с нашей платформой | Все кейсы |
+| 7 | Приводите и удерживайте клиентов | — **none** | — **none** |
+| 8 | Работает на твою мечту | — **dropped** | Начать бесплатно |
 
 - **Section 2 has no CTA.** `О платформе` was removed on 2026-09-02 once the frame got its
   tabs: the tabs are the thing to interact with there, and a second control next to them
   competed with the first.
 - Sections 1 and 7 share the CTA `Начать бесплатно`, and the header carries it too. **This
   repetition is intentional** — do not "fix" it.
-- **Section 7 has no subtitle** either, dropped on 2026-09-03: the heading carries that
+- **Section 8 has no subtitle** either, dropped on 2026-09-03: the heading carries that
   screen alone, over the photograph.
+- **Section 6's subtitle is back.** It went unused while that screen was a card grid; the
+  client asked for it again when the cards moved into the frame, "придумай или возьми из
+  первых итераций" — so it is the v1 line from `f0286fd`, unchanged.
+- **Section 7 carries a title and six tiles, nothing else** — no subtitle, no CTA, on the
+  client's word. The tile copy is his, read off Figma `276:54325`.
 - Copy is v1 and will change. Keep every string in one place in the markup so swapping is
   cheap.
 
@@ -130,11 +137,24 @@ hand rather than leaving them to `text-wrap: balance`.
 
 ### Cases
 
-Section 6 is a card grid, after cash.app's stats block: the title and a `Все кейсы` button
-at the top left, four equal cards along the bottom. The section keeps the smoky ground and the cards are
-**white and square**, carrying their own colours rather than following `--ink`. The client's
-screenshot showed the whole section black, but that was a layout reference, not a colour
-decision.
+Section 6 went back to the ordinary three columns on 2026-09-03, on the client's call:
+"давай сделаем секцию 'работают с нами' тоже с рамкой в центре. то, что в нём сейчас в
+плашках — должно встать в рамку, а рамка должна стать каруселью. переиспользуй стрелочки из
+блока с тиндер-механикой."
+
+- Title left (`xxl`, two hand-set lines), the frame in the middle, subtitle and the
+  `Все кейсы` button right — exactly like every other section.
+- **The frame is a carousel**: one case card at a time, white plate and black type of its
+  own, walked by the same two arrow buttons the style deck carries (`.deck-nav`,
+  `.deck-arrow` — one markup, one stylesheet, two users). No drag and no timer: these are
+  quotes, not a thing to play with. The rail wraps in both directions.
+- Leaving the section resets it to the first case, so a visitor who comes back sees the
+  screen as it was written.
+- What the curtain clips is the **track**, not the rail: the track fills the frame's box
+  exactly, so the wipe behaves like a picture's while the rail may be four cards wide, and
+  the arrows, which hang below the box, are untouched.
+- The card grid, `.cases__head` and the frameless layout for this section are **gone**. If
+  a grid is ever wanted again, `git show 48e3f11` has it.
 
 The partner logos (`assets/logos/`, from Figma node `32:29061` — KINASH, Домодедово,
 12 месяцев, M.Reason) ship **white on transparent**, and there is no dark version of the
@@ -142,26 +162,28 @@ source artwork. Three of them are therefore inverted in CSS (`[data-invert="true
 on a white card. M.Reason is not: it is dark lettering on its own white plate and already
 reads correctly. Proper dark exports would be better than the filter.
 
-The heading here is one of the two that carry the `xxl` size.
-
-**The cards are as large as a 24px gap between them allows**, and always square. Their gap
-is a flat 24 rather than `--col-gap`: the client wants them big, and the three-column gap has
-nothing to do with this grid. Width comes from the grid, height from the ratio — nothing caps
-the height, because a cap would take the square instead. Card sizes: 304 at 1440, 321 at
-1512, 408 at 1920.
-
-No subtitle column, so the subtitle that section used to have is currently unused.
-
-**The frame does not appear here, and does not come back.** The section carries
-`data-frame="none"`, and instead of fading out the frame *leaves* — upward, one viewport, at
-exactly the speed of the section it belonged to, so it reads as part of that screen
-departing. After that it stays parked above the screen for the rest of the page.
-
-It used to come back down and shrink into the closer's green button. **The client detached
-the two** while he redraws the footer — do not re-couple them without asking.
-
 **The card copy is placeholder written by me**, at the client's request, four sentences in
 the site's voice. Replace it with real cases before this goes anywhere near a customer.
+
+**The frame leaves on the section after this one**, not on this one — see below.
+
+### Growth tiles
+
+Section 7, added 2026-09-03. The client has not drawn it yet; he gave the layout in words
+and the copy in Figma (`276:54325`): "он будет черный, без рамки по центру а с шестью
+плашками… а справа вместо меню будет тайтл. тайтл — приводите и удерживайте клиентов.
+сабтайтла не будет, кнопки в блоке не будет."
+
+- Six tiles in a 3×2 grid across the **first two** page columns, the heading alone in the
+  third — the same three-column grid the rest of the page uses, so the tiles line up with
+  the frame above them. Tiles and heading start on the same line.
+- Tile ground is graphite `#1A1817` on the section's black, after the cash.app reference the
+  client attached. Type is the site's two styles: the tile's title is md at Medium, its text
+  md at Regular.
+- **No artwork is wired.** The client: "графика будет другой" — so nothing here reserves a
+  box for it, because a placeholder would decide the composition for him.
+- This is the section that carries `data-frame="none"`: the frame leaves upward on it, the
+  way it used to leave on the cases screen.
 
 ### Closer + footer — one screen
 

@@ -856,10 +856,73 @@ if (deck) {
   gate(currentSection().id === 'customization' ? 1 : 0);
 }
 
-/* One section has no frame: the cases grid fills the screen on its own. Rather than fade
-   the frame out there, it leaves the way everything else does — upward, at exactly the
+/* ---------- the case carousel ----------
+   The cases live in the frame since 2026-09-03, one card at a time, walked by the same two
+   arrow buttons the style deck carries. No drag and no timer: the client asked for the
+   deck's arrows, not for the deck's physics — this is a list of quotes, not a thing to play
+   with. The rail wraps, so either arrow always has somewhere to go.
+
+   Only the rail's x is animated. The track above it clips, so a card never leaves the
+   frame, and the curtain clips the track the way it clips a picture. */
+
+const caseDeck = document.querySelector('.case-deck');
+
+if (caseDeck) {
+  const rail = caseDeck.querySelector('.case-deck__rail');
+  const cards = gsap.utils.toArray('.case', rail);
+  const WALK = 0.5;   /* s per step */
+  let at = 0;
+
+  const place = (animate) => {
+    const x = -at * caseDeck.clientWidth;
+    if (animate) {
+      gsap.to(rail, { x, duration: WALK, ease: 'power3.out', overwrite: true });
+      return;
+    }
+    gsap.set(rail, { x });
+  };
+
+  const walk = (direction) => {
+    at = (at + direction + cards.length) % cards.length;
+    place(true);
+  };
+
+  gsap.utils.toArray('.deck-arrow', caseDeck).forEach((button) => {
+    button.addEventListener('click', () => walk(Number(button.dataset.dir)));
+  });
+
+  /* The frame's width comes from viewport-dependent custom properties, so a resize moves
+     the step. Re-place without animating — the card must not slide because a window did. */
+  ScrollTrigger.addEventListener('refresh', () => place(false));
+
+  /* Same gate as the tabs and the deck: a slide at opacity 0 still hit-tests, and these
+     buttons must not take a click or the focus from behind another section. Coming back on
+     stage the carousel starts from the first case again — a visitor who scrolls past and
+     returns should see the section as it was written, not where he left it. */
+  const caseSlide = caseDeck.closest('.stage-frame__slide');
+  let caseLive = null;
+
+  gates.set(caseSlide, (t) => {
+    const onStage = Number(t) > 0.99;
+    if (onStage === caseLive) return;
+    caseLive = onStage;
+
+    caseDeck.inert = !onStage;
+    if (onStage) return;
+
+    at = 0;
+    gsap.killTweensOf(rail);
+    place(false);
+  });
+
+  place(false);
+}
+
+/* One section has no frame: the growth tiles fill the screen on their own. Rather than
+   fade the frame out there, it leaves the way everything else does — upward, at exactly the
    speed of the section it belonged to, so it reads as part of that screen departing. It
-   does not come back: the closer draws its own call to action.
+   does not come back: the closer draws its own call to action. (Until 2026-09-03 this was
+   the cases section, which now keeps the frame and puts a carousel in it.)
 
    (It used to shrink into that button. The client detached the two while he redraws the
    footer — do not re-couple them without asking.) */
