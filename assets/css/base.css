@@ -45,7 +45,7 @@
      for the token before deciding where it goes. */
   --fs-xxl: clamp(56px, calc(32px + 1.6667vw), 64px);
   --lh-xxl: var(--fs-xxl);
-  --fs-xl: clamp(36px, calc(12px + 1.6667vw), 44px);
+  --fs-xl: clamp(32px, calc(8px + 1.6667vw), 40px);
   --lh-xl: var(--fs-xl);
   --weight-xl: 500;  /* Hyper Medium, titles */
   /* Style md scales on the same window: 14/18 at 1440, 18/24 at 1920, held flat
@@ -65,18 +65,15 @@
      takes what is left, capped at 760. Without the floor, a long word in a title
      runs out of its column and collides with the frame on a narrower screen. */
   --col-gap: clamp(40px, calc(2.5vw + 16px), 64px);
-  /* Titles hyphenate (see .section__title), so this floor no longer has to clear the
-     longest word in the copy — "маркетплейсах" is 391px wide at the xl style and used
-     to force 400 here. It is now a composition choice: how much of the screen the two
-     text columns keep before the frame takes the rest. 360 puts the frame at 553 on a
-     1440 screen; dropping to 300 would give it 673, which the client judged too much
-     for a laptop. */
+  /* The floor on the two text columns. What binds is not a word but the widest hard-broken
+     run in a title — "и интернет магазин", 309 at the 1440 xl and 386 at the 1920 one. The
+     longest single word ("маркетплейсах") only needs 236 and 295. 380 leaves 71px of slack
+     on a laptop and 42 at 1920. */
   --col-min: 380px;
-  /* The cap is what sets the text columns at 1920, so it moves whenever --col-gap does:
-     the columns must stay at or above 428 for "и интернет магазин" (425 at the 44px xl) to
-     hold the client's hand-set third line. 760 → 752 when the gap was 48; the gap is now
-     64, which costs the columns 16 each, so 752 → 720. Below ~1830 the cap does not bind
-     and this number changes nothing. */
+  /* At 1920 the cap is what sets the text columns, so it moves whenever --col-gap does:
+     every 16px added to the gap costs each column 16. They must stay above the widest hard
+     run in a title (386 at that width) or the client's hand-set third line wraps. Below
+     ~1830 the cap does not bind and this number changes nothing. */
   --frame-w: min(
     720px,
     calc(100vw - 2 * var(--page-pad) - 2 * var(--col-gap) - 2 * var(--col-min))
@@ -325,7 +322,10 @@ img { display: block; max-width: 100%; height: auto; }
   gap: 24px;
 }
 
-/* Style md — inherited from body, nothing to override. */
+/* Style md — inherited from body. The one override: the subtitle sets 30% narrower than
+   its column. The column itself stays put, so nothing else on the page moves — the frame
+   is fixed and centred on the screen, and asymmetric columns would take it off that axis. */
+.section__subtitle { max-width: 70%; }
 
 /* The middle grid column. The frame itself does not live here — this only holds the
    column open so the two text columns keep their places. */

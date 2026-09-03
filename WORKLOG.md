@@ -1,5 +1,36 @@
 # Worklog
 
+## 2026-09-02 — subtitle narrowed 30%, xl down 4px
+
+**What changed.** `assets/css/base.css`: `.section__subtitle` gets `max-width: 70%`, and
+`--fs-xl` goes `clamp(36px, calc(12px + 1.6667vw), 44px)` →
+`clamp(32px, calc(8px + 1.6667vw), 40px)`. Two stale comments corrected with the new
+measurements. `CONTEXT.md` updated.
+
+**Why this shape.** The client wanted the subtitle about 30% narrower but not at the cost of
+the title, and ruled out asymmetric columns. `max-width` on the paragraph does it without
+touching the grid: the column stays 380, so the fixed frame stays on the screen's axis and
+on its slot. The alternative — different column widths — would have moved the slot 57px off
+centre and forced the frame to be re-anchored.
+
+**Numbers behind the advice.** The text column's floor is set by the widest hard-broken run
+in a title, not by a word: `и интернет магазин` measures 309 at the 1440 size and 386 at
+1920, while the longest word `маркетплейсах` needs only 236 and 295. That is why a symmetric
+shrink could only have been ~8%, not 30%.
+
+**How it was verified.** Freshly loaded stylesheet.
+
+| viewport | xl | subtitle | frame |
+|---|---|---|---|
+| 1440×900 | 32 | 266 (was 380) | 424, unchanged |
+| 1512×830 | 33.2 | 266 | 487, unchanged |
+| 1920×1080 | 40 | 300 | 720, unchanged |
+
+Subtitle line counts at 1440 go 3→4, 2→3, 3→4, 2→3, 2→3, 2→2. Every title keeps its
+hand-set breaks — "Твоё приложение / и интернет магазин / за один день", "Весь цикл / в одном
+кабинете", "Управляй / своим бизнесом / на маркетплейсах". No collisions with the frame at
+any width, no horizontal overflow.
+
 ## 2026-09-02 — the twelve-column grid, tried and rolled back
 
 **What happened.** The layout was moved onto a page grid modelled on cash.app's — 12

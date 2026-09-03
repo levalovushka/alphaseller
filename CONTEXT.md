@@ -433,6 +433,18 @@ The column floor is a composition choice, not a constraint — how much screen t
 before the frame takes the rest. It stopped being a constraint when the xl size came down: at 36px the longest word in the
 copy sits well inside a 380px column.
 
+**The subtitle sets 30% narrower than its column** (`max-width: 70%` on
+`.section__subtitle`) — 266 at 1440, 300 at 1920. The column itself is untouched, which is
+the point: the frame is fixed and centred on the screen's axis, so making the two side
+columns different widths would take it off that axis and off its slot. The client ruled that
+out explicitly; the text is narrowed inside a column that stays put.
+
+What the text columns can actually give up is small. Their floor is set by the widest
+hard-broken run in a title — `и интернет магазин`, 309 at the 1440 size and 386 at 1920 —
+not by the longest word (`маркетплейсах`, 236 and 295). At the 380 floor that leaves 71px of
+slack on a laptop and 42 at 1920, so a symmetric shrink of more than ~8% breaks a hand-set
+line.
+
 **Titles are set with `text-wrap: balance`**, so lines even out instead of each being filled
 to the column edge. It never breaks a word, so it composes with the non-breaking spaces
 rather than fighting them.
@@ -626,7 +638,7 @@ Verified with fontTools (2026-09-02):
 | Style | Cut | Size / leading | Tracking | Used for |
 |---|---|---|---|---|
 | `xxl` | Hyper Medium | 56 / 56 at 1440 → 64 / 64 at 1920 | normal | The cases and closer headings |
-| `xl` | Hyper Medium | 36 / 36 at 1440 → 44 / 44 at 1920 | normal | Section titles |
+| `xl` | Hyper Medium | 32 / 32 at 1440 → 40 / 40 at 1920 | normal | Section titles |
 | `md` | Hyper Regular | 14 / 18 at 1440 → 18 / 24 at 1920 | 1% (`0.01em`) | Everything else |
 
 "Hyper" is the `wdth 87` width; "Medium" is `wght 500`, "Regular" is `wght 400`. In CSS:
