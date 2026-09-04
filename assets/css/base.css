@@ -642,6 +642,7 @@ img { display: block; max-width: 100%; height: auto; }
 
 .stage-frame__video,
 .hero-photo,
+.hero-street__window,
 .frame-photo,
 .frame-pane,
 .case-deck__track,
@@ -665,6 +666,7 @@ img { display: block; max-width: 100%; height: auto; }
 
 [data-wipe="out"] .stage-frame__video,
 [data-wipe="out"] .hero-photo,
+[data-wipe="out"] .hero-street__window,
 [data-wipe="out"] .frame-photo,
 [data-wipe="out"] .frame-pane,
 [data-wipe="out"] .case-deck__track,
@@ -744,6 +746,76 @@ img { display: block; max-width: 100%; height: auto; }
   inset: 0;
   background: var(--hero-frame-photo, url("../images/hero-portrait.webp")) center / cover no-repeat;
   border-radius: inherit;
+}
+
+/* ---------- variant 2's picture, in two layers ----------
+   One photograph, twice: the ground clipped to the frame, and a cut-out of the man over it
+   that is **not** clipped, so the papers in his raised hand break out above the frame's top
+   edge. The client's Figma `310:39454`, 2026-09-04.
+
+   The two layers are the same pixels at the same size, so where they overlap there is
+   nothing to see — no seam, no double edge. That is not luck, it is measured: the node
+   carries the shot on two canvases, 1794 wide for the ground and 1660 for the cut-out, and
+   correlating the cut-out's opaque pixels against the ground put it at **(dx 67, dy 0) with
+   a mean absolute difference of 0.0** — pixel-identical. Both assets are therefore cut from
+   one rect of the wider canvas, the cut-out padded back out to it, which makes the two boxes
+   below identical by construction and leaves nothing to align by hand.
+
+   The rect, all measured off the node's own render (1920 wide, so CSS px):
+
+     - its frame is 849 x 632 at x 535, y 200, and the picture inside is `cover`, so it is
+       scaled by width: 849 / 1794 = 0.4732,
+     - the source row that lands on the frame's top edge is **2227**, found by correlating
+       the render's frame interior against the source over every offset (mean |diff| 3.3
+       against this canvas, 31.1 against the narrower one — not a close call),
+     - the cut-out's topmost opaque row is **1949**, so the papers rise 278 source rows =
+       131px above the frame, which is 20.7% of its height,
+     - the window is 1346 rows for a **true 4:3** frame (1794 x 3/4) rather than the node's
+       1335, which is its 632 x 849 being a pixel off square; the extra ten rows go to the
+       bottom, so the anchor that matters — the man against the frame's top edge — is the
+       node's.
+
+   Hence the shared rect is rows 1949 to 3572, 1794 x 1624, shipped at 1440 x 1304. The box
+   is the frame's width by `1624 / 1346` of its height, pinned to the frame's bottom, and the
+   overflow above falls out of that ratio instead of being a number of its own. */
+.hero-street {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+/* The frame's box exactly, which is what lets it take the curtain's wipe like any other
+   picture layer. `overflow` as well as the wipe: the ground must not escape even if the
+   curtain's selector list is ever narrowed. */
+.hero-street__window {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+/* One geometry, both layers. `bottom` and a height in per cent of the frame: the picture's
+   bottom is the frame's bottom, and its top lands where the ratio puts it. */
+.hero-street__pic {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: calc(100% * 1624 / 1346);
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+.hero-street__pic[data-layer="ground"] {
+  background-image: url("../images/hero-papers.webp");
+}
+
+/* Outside the frame's box, so the curtain cannot clip it — it fades with the slide instead,
+   the same documented exception the capabilities tab strip takes. */
+.hero-street__pic[data-layer="cutout"] {
+  background-image: url("../images/hero-papers-cutout.webp");
+  opacity: var(--t, 0);
 }
 
 /* A slide whose whole content is one photograph. Its own layer rather than a background on
@@ -1500,46 +1572,49 @@ img { display: block; max-width: 100%; height: auto; }
    | | the morph panel | the frame |
    |---|---|---|
    | 1 | flat brand green | the portrait, `hero-portrait.webp` |
-   | 2 | the light-grey photograph, `hero-smoke.webp` | the looping screen recording |
+   | 2 | flat brand green | the street photograph, in two layers, its papers breaking out above the frame |
 
    **The page opens on variant 1** (client, 2026-09-04). Its portrait is the client's Figma
    `308:39424`, which is this variant drawn with a different photograph.
 
-   What went, and what it took with it: the graphite panel with the full square photograph
-   behind the interface, and the flat black panel with the studio shot in the frame. Three
-   photographs are unwired by that and kept in the repo — `hero-full.webp`, `hero.webp` and
-   `hero-green.webp`. The dropped numbering is in `WORKLOG.md`; both survivors were 1 and 4.
+   Then variant 2 was replaced outright on 2026-09-04 — "второй вариант давай заменим на
+   такой" — by the client's Figma `310:39454`: the same flat green, and in the frame the
+   street shot whose papers break out over it. **So both variants are green now, and the
+   screen recording is in neither.** Five photographs are unwired by all of this and kept in
+   the repo: `hero-full.webp`, `hero.webp`, `hero-green.webp`, `hero-smoke.webp` and
+   `hero-street.webp`. The dropped numbering is in `WORKLOG.md`.
 
    **The ink is black on both**, and it is still written on the hero section's `data-ink`
    rather than fixed here, because that is what the scrubbed colour pass reads and it is what
    would carry a light variant if one comes back. White type on green or on smoke is
    unreadable; nothing about that is a choice.
 
-   **Variant 2 used to have an invisible shrink** as a flat smoke, and it is worth knowing why
-   in case a flat ground comes back: the ground behind the panel steps to the *next* section's
-   colour on the first movement (see the morph, above), and capabilities is smoke — so a flat
-   smoke panel shrank against smoke and the move only reappeared when the dashboard wiped in.
-   The photograph fixed it by accident: its floor line and darker corners give the panel's
-   edge something to show against. */
+   **A flat smoke panel makes the shrink invisible**, which one of the dropped variants had to
+   live with and is worth keeping here: the ground behind the panel steps to the *next*
+   section's colour on the first movement (see the morph, above), and capabilities is smoke —
+   so a smoke panel shrank against smoke and the move only reappeared when the dashboard wiped
+   in. Neither variant is smoke now, so it does not bite; do not reintroduce one that is. */
 
 :root {
   --morph-bg: var(--c-green);
 }
 
-/* Variant 2's photograph is 1.79:1 against a 1.6-2.1 viewport, so `cover` crops a little off
-   whichever axis is tighter and `center` is enough. Smoke underneath it, which is also what
-   the ground behind the panel steps to — see the note on the shrink above. */
-:root[data-hero="2"] {
-  --morph-bg: var(--c-smoke) url("../images/hero-smoke.webp") center / cover no-repeat;
-}
+:root[data-hero="2"] { --morph-bg: var(--c-green); }
 
-/* The frame holds one or the other, never both: the portrait on variant 1, the interface on
-   2. `display` and not opacity — the video keeps decoding behind a transparent layer, and JS
-   pauses it on top of this. Which photograph the frame holds is still a variable
-   (`--hero-frame-photo`, declared with `.hero-photo`), so a second picture variant needs no
-   second layer and no addition to the curtain's selector lists. */
-:root[data-hero="2"] .hero-photo { display: none; }
+/* What the frame holds, per variant: the portrait on 1, the two-layer street photograph on
+   2. `display` and not opacity — a transparent layer still decodes, and for the video JS
+   pauses it on top of this. **No variant shows the recording now**, which is why it also
+   carries `preload="none"` in the markup.
+
+   Which photograph the *single-layer* picture holds is a variable (`--hero-frame-photo`,
+   declared with `.hero-photo`), so a third picture variant needs no new layer and no
+   addition to the curtain's selector lists. Variant 2 needed both because it is two layers,
+   one of which deliberately leaves the frame. */
+:root[data-hero="1"] .hero-street,
 :root[data-hero="1"] .stage-frame__video { display: none; }
+
+:root[data-hero="2"] .hero-photo,
+:root[data-hero="2"] .stage-frame__video { display: none; }
 
 /* ---------- the variant switch ----------
    Deliberately not designed: 18px squares hugging the corner on the header's own 16px

@@ -1,5 +1,65 @@
 # Worklog
 
+## 2026-09-04 — hero variant 2 becomes the street shot whose papers leave the frame
+
+**What changed.**
+
+- Two new assets from the client's Figma `310:39454`, both cut from one rect of the node's own
+  raw fills: `assets/images/hero-papers.webp` (1440×1304, 102 KB — the ground) and
+  `assets/images/hero-papers-cutout.webp` (1440×1304 with alpha, 103 KB — the man cut out).
+- `index.html`: variant 2's picture is `.hero-street` — a `__window` that clips the ground to
+  the frame and a second `__pic` outside it that is not clipped. The `<video>` drops to
+  `preload="none"`.
+- `base.css`: the two-layer geometry and the arithmetic behind it, `.hero-street__window`
+  added to both of the curtain's selector lists, the cut-out fading on `--t` like the tab
+  strip, variant 2's panel now a flat green, and the per-variant `display` rules rewritten.
+- `main.js`: `HERO_VIDEO` is empty — no variant shows the recording any more.
+- `CONTEXT.md`: §5's table and note, the curtain's exception table, and §7 — two rows added,
+  `hero-smoke.webp` marked unused.
+
+**Why.** Client: "второй вариант давай заменим на такой. будь внимателен — тут сложнее тк
+картинки две и одна вылезает из рамки."
+
+**How it was measured.** Nothing here was eyeballed.
+
+- The node's metadata would not come back (the MCP call fails parsing its own response, twice
+  in a row), so the geometry came off the node's render at 1920: its frame is 849×632 at
+  x 535, y 200, and the picture inside is `cover`, hence scaled by width.
+- **Which of the two source canvases is in the frame** was settled by correlating the render's
+  frame interior against both over every vertical offset: mean |diff| **3.3** for the
+  1794-wide one at row 2227, **31.1** for the 1660-wide one. Not a close call.
+- **The two layers are congruent**: correlating the cut-out's opaque pixels against the ground
+  over a (dx, dy) search returned **(67, 0) with mean |diff| 0.0** — pixel-identical, so the
+  narrower canvas is just the wider one less 67px a side.
+- The cut-out's topmost opaque row is 1949, which is 278 rows above the frame's top edge =
+  131px = **20.7% of the frame's height**.
+- The window is 1346 rows, not the node's 1335: 1794 × 3/4, because our frame is a true 4:3
+  and the node's 849×632 is a pixel off it. The ten extra rows go to the bottom, so the
+  anchor that matters — the man against the frame's top edge — is the node's.
+
+**How it was verified.** In the live page:
+
+- at 1920 the frame is 720×540, both layer boxes are `600,70,720,652` — identical to the
+  pixel, `congruent: [0,0,0,0]` — and the cut-out clears the frame's top by **112px, 0.2065**
+  of its height, against 0.2073 in the node;
+- at 1440 the frame is 520×390, the overflow is 81px and the fraction is the same **0.2065**;
+- mid-crossing (frozen at `--t` 0.583) the window takes the out-role clip and the
+  `brightness(0.8)` scrim like any other picture layer, and the cut-out fades with `--t`;
+- variant 1 is untouched — flat green, `hero-portrait.webp`, the street layers `display: none`;
+- the video is `display: none` and paused on both variants; no console errors.
+- Screenshotted at 1920 against the node's render, and the break-out inspected at 4× with a
+  temporary `scale(4)` on the frame: the papers cross the frame's top edge with no seam and no
+  halo against the green.
+
+**Left undone / known.**
+
+- **No variant shows the screen recording now.** It is kept wired — `preload="none"`,
+  `HERO_VIDEO` empty — so one number brings it back. If it is not coming back, `hero.mp4`
+  (933 KB) and its poster should go.
+- Five hero photographs are now referenced by nothing: `hero-full.webp`, `hero.webp`,
+  `hero-green.webp`, `hero-smoke.webp`, `hero-street.webp` — about 500 KB.
+- Both variants are the same flat green, so the switch now compares only what is in the frame.
+
 ## 2026-09-04 — two hero variants killed, two left
 
 **What changed.**

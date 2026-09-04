@@ -616,6 +616,7 @@ delete anything the slide keeps *outside* it, and two things do:
 | | |
 |---|---|
 | The tab strip | sits below the box (`top: 100%`). It keeps a fade of its own, `opacity: var(--t, 0)` — the one thing in a slide that still fades. Documented exception, not an oversight. |
+| Hero variant 2's cut-out | the whole point of it is that it leaves the frame's box, upward. Same answer as the tab strip: `opacity: var(--t, 0)`. What *does* take the wipe is `.hero-street__window`, which fills the box exactly |
 | The style deck | its cards are thrown out past the frame's edge, and a clip would cut the throw. The deck's gate in `main.js` marks it `data-onstage`, and the curtain stands down for as long as that is true — so it wipes through a crossing and is free at rest. |
 
 A future slide that paints a picture of its own must paint it into an **inner layer** and add
@@ -701,7 +702,7 @@ control small enough to stay out of a screenshot.
 | | the morph panel | the frame | the hero's ink |
 |---|---|---|---|
 | 1 | flat brand green `#A6ED00` | the portrait, `hero-portrait.webp` | black |
-| 2 | the light-grey photograph, `hero-smoke.webp` | the looping screen recording | black |
+| 2 | flat brand green `#A6ED00` | the street shot in **two layers**, its papers breaking out above the frame | black |
 
 **The page opens on variant 1** (client, 2026-09-04: "чтобы страница по умолчанию на нем
 открывалась"). Its portrait is the client's Figma `308:39424`, which is this variant drawn
@@ -714,8 +715,29 @@ interface, and the flat black panel with the studio shot in the frame. The two s
 1 and 4 under the numbering of the day before; the whole sequence of renumberings is in
 `WORKLOG.md`, and it is not worth reconstructing — read the table above and nothing else.
 
-Three photographs are unwired by all this and **kept** in the repo: `hero-full.webp`,
-`hero.webp` and `hero-green.webp`.
+**Variant 2 was replaced outright** on 2026-09-04 — "второй вариант давай заменим на такой" —
+by the client's Figma `310:39454`: the same flat green, and in the frame the street shot whose
+papers break out over it. So **both variants are green now, and the screen recording is in
+neither** — it is still wired, in the markup and in `main.js`, but `HERO_VIDEO` is empty and
+the element carries `preload="none"` so it does not fetch 933 KB for a layer nobody shows.
+Put a number back in that list and it plays again.
+
+Five photographs are unwired by all this and **kept** in the repo: `hero-full.webp`,
+`hero.webp`, `hero-green.webp`, `hero-smoke.webp` and `hero-street.webp`.
+
+**How variant 2 is built, and why it needs two layers.** One photograph, twice: the ground
+clipped to the frame, and a cut-out of the man over it that is *not* clipped, so the papers in
+his raised hand rise 20.7% of the frame's height above its top edge. The two are the same
+pixels at the same size, so where they overlap there is no seam and no double edge — and that
+is measured, not lucky: the node carries the shot on two canvases, 1794 wide for the ground
+and 1660 for the cut-out, and correlating the cut-out's opaque pixels against the ground put
+it at **(dx 67, dy 0) with a mean absolute difference of 0.0**. Both assets are therefore cut
+from one rect of the wider canvas, with the cut-out padded back out to it, which makes their
+two boxes identical by construction. The rect and the arithmetic behind it are in `base.css`
+under "variant 2's picture, in two layers" — including how the source row that lands on the
+frame's top edge was found (correlation against the node's own render: mean |diff| 3.3 on this
+canvas against 31.1 on the narrower one) and why the window is 1346 rows rather than the
+node's 1335.
 
 **Which photograph the frame holds is a variable** (`--hero-frame-photo`), not a layer each:
 any picture variant fills the frame's box the same way, and a second layer would have to be
@@ -963,11 +985,13 @@ Figma's own `#1E1E1E` canvas in as a full-bleed `<rect>`.
 
 | Section | File | Figma node | Source |
 |---|---|---|---|
+| 1 — hero, **variant 2's frame photograph, the ground layer** | `assets/images/hero-papers.webp` | `310:39454` | the street shot with the flying papers, from the node's own raw fill (1794×4096 PNG). Rows 1949-3572 of it, 1794×1624, shipped at 1440×1304, `cwebp -q 84`, 102 KB. Clipped to the frame |
+| 1 — hero, **variant 2's cut-out layer** | `assets/images/hero-papers-cutout.webp` | `310:39454` | the same photograph's cut-out of the man, from the node's other raw fill (1660×4096 PNG, which is the ground's canvas less 67px each side). Padded back to 1794 and cut to the same rows, so the two layers are congruent by construction. 1440×1304 with alpha, `cwebp -q 90 -alpha_q 100`, 103 KB. **Not** clipped — the papers break out above the frame |
 | 1 — hero, **variant 1's frame photograph** | `assets/images/hero-portrait.webp` | `308:39424` | the low-angle portrait, from the node's own raw fill: 4096×3058 JPEG, which is **1.3395 — the frame's own 4:3**, so `cover` crops half a percent off the width and nothing else. `cwebp -q 88 -crop 9 0 4077 3058 -resize 1440 1080`, 90 KB. 1440 is 2× the frame's widest, the same treatment the deck cards get |
 | 1 — hero | `assets/video/hero.mp4` + `assets/images/hero-poster.webp` | `247:42060` | screen recording, on a loop. See below |
 | 1 — hero, **unused** | `assets/images/hero-full.webp` | `275:53708` | 1254×1254, the full square shot. It backed the morph panel at `50% 18% / cover` on the variant the client killed on 2026-09-04; kept. Its bitmap is only 1254 on a 2030 node, which is why it is the softest of the four panels |
 | 1 — hero, **unused** | `assets/images/hero.webp` | `196:53708` | 2236×1578 (1.42:1), the tighter crop of the same studio shot. It backed the morph panel until the variants landed, then sat in the frame on the variant the client killed on 2026-09-04; kept |
-| 1 — hero, **variant 2's panel ground** | `assets/images/hero-smoke.webp` | — | the same shoot on a light-grey studio ground, 1.79:1. Client-supplied PNG, 2752×1536, `cwebp -q 88 -resize 2560 0`, 96 KB. `center / cover` in both places: full-bleed it crops a little off whichever axis is tighter, and in the 4:3 frame it loses about a quarter of its width |
+| 1 — hero, **unused** | `assets/images/hero-smoke.webp` | — | the same shoot on a light-grey studio ground, 1.79:1. Client-supplied PNG, 2752×1536, `cwebp -q 88 -resize 2560 0`, 96 KB. It backed the panel on the variant the client replaced on 2026-09-04; kept |
 | 1 — hero, **unused** | `assets/images/hero-green.webp` | — | the man against the brand green, 1.79:1. Client-supplied PNG, 5504×3072, `cwebp -q 88 -resize 2560 0`, 220 KB. It backed the green variant's panel for one round on 2026-09-03 and was unwired the same day, when that panel went back to a flat green. Kept |
 | 1 — hero, unused | `assets/images/hero-street.webp` | `265:39107` | a street shot that was in the frame for one round on 2026-09-03. 4096×2286 JPEG, centre-cropped to 4:3 and resized in one `cwebp -q 82 -crop 524 0 3048 2286 -resize 1440 1080` pass, 91 KB. Unwired, kept |
 | 2 — capabilities, `promotion` pane | `assets/images/capabilities-promotion.webp` | `206:62480` | node is named "Продвижение — 4×3 / content". 1118×838.5, @2x → 2236×1677, cwebp **`-lossless`**, 172 KB |

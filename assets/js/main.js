@@ -1164,10 +1164,11 @@ if (heroSwitch) {
      map rather than folded away: it is what would carry a dark variant if one comes back,
      and the colour pass reads it off the section either way. See the table in base.css. */
   const HERO_INK = { 1: 'dark', 2: 'dark' };
-  /* Which variants keep the screen recording in the frame; the other puts a photograph
-     there. CSS swaps the two layers on the same `data-hero` — this is only so the video
-     controller can stop decoding. */
-  const HERO_VIDEO = [2];
+  /* Which variants keep the screen recording in the frame. **None, since 2026-09-04** —
+     variant 1 holds the portrait and variant 2 the two-layer street shot — so the list is
+     empty and the video stays paused. It is still wired, both here and in the markup: put a
+     number back and it plays again. */
+  const HERO_VIDEO = [];
   /* Bumped whenever the numbering changes — twice on 2026-09-04, for the reorder and then
      for the two that were dropped. A number stored against an old order would restore a
      different variant under the new one. */

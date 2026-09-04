@@ -32,13 +32,27 @@
        pauses it while the slide is off stage and for a visitor who asked for less motion.
        The poster is its own first frame, so nothing flashes before playback starts. -->
   <div class="stage-frame__slide" data-for="hero" data-filled="true" aria-hidden="true">
+    <!-- Kept, wired and shown by no variant since 2026-09-04 — `preload="none"` so it does
+         not fetch its 933 KB for a layer nobody displays. Put a variant back in HERO_VIDEO
+         and it plays again. -->
     <video class="stage-frame__video" src="assets/video/hero.mp4"
            poster="assets/images/hero-poster.webp"
-           autoplay muted loop playsinline preload="auto"></video>
+           autoplay muted loop playsinline preload="none"></video>
     <!-- The photograph the frame holds instead of the video on hero variant 1 — which file
          is the variant's, see `--hero-frame-photo`. Its own layer rather than a background
          on the slide, so the curtain can clip it. -->
     <div class="hero-photo"></div>
+    <!-- Variant 2: one photograph in two layers, the client's Figma `310:39454`. The ground
+         is clipped to the frame; the cut-out of the man is not, so the papers in his raised
+         hand break out above the frame's top edge. The two are the same pixels at the same
+         size, so where they overlap the seam is invisible — see the geometry note in the
+         stylesheet. -->
+    <div class="hero-street">
+      <div class="hero-street__window">
+        <div class="hero-street__pic" data-layer="ground"></div>
+      </div>
+      <div class="hero-street__pic" data-layer="cutout"></div>
+    </div>
   </div>
   <!-- The one slide that holds more than a picture: three panes and a tab strip under the
        frame. The strip is real markup, not aria-hidden, because it takes clicks; JS makes
@@ -349,7 +363,7 @@
      2026-09-04, when the client killed two of them. -->
 <div class="hero-switch" role="group" aria-label="Вариант первого экрана">
   <button class="hero-switch__btn" type="button" data-variant="1" aria-pressed="true" title="Зелёная плашка, портрет в рамке">1</button>
-  <button class="hero-switch__btn" type="button" data-variant="2" aria-pressed="false" title="Мужчина на сером, интерфейс в рамке">2</button>
+  <button class="hero-switch__btn" type="button" data-variant="2" aria-pressed="false" title="Зелёная плашка, бумаги вылетают из рамки">2</button>
 </div>
 
 <script src="assets/vendor/gsap.min.js"></script>
