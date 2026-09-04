@@ -1,5 +1,24 @@
 # Worklog
 
+## 2026-09-04 — variant 2's panel again, #E0E0E0 → #D0D6E3
+
+**What changed.** `assets/css/base.css`: `:root[data-hero="2"] { --morph-bg }` → `#d0d6e3`,
+with the comment rewritten to carry both values and the reason. `CONTEXT.md` §5: the variants
+table and the paragraph on reading the panel against smoke.
+
+**Why.** Client's value. It also answers the problem logged in the entry below: the panel has
+to be told apart from the smoke ground it shrinks against, and `#E0E0E0` was only 9/11/14 off
+it. `#D0D6E3` is 25/21/11 off, and separates on hue as well as lightness.
+
+**How it was verified.** Variant 2 at 1440: panel `rgb(208, 214, 227)`, ink black,
+`data-hero="2"`, full-bleed at rest. Then the middle of the crossing, `inset(128.5px 230px
+126.5px round 12px)` over the smoke ground — screenshot taken at both, and the shrinking edge
+reads plainly now where at `#E0E0E0` it was faint.
+
+**What is left undone.** Nothing on this. Still thin against smoke by construction — a panel
+in that lightness range always will be; the note in CONTEXT says where to look if it needs
+more.
+
 ## 2026-09-04 — variant 2's morph panel goes light grey
 
 **What changed.** `assets/css/base.css`: `:root[data-hero="2"] { --morph-bg }`

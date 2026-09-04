@@ -1619,12 +1619,14 @@ img { display: block; max-width: 100%; height: auto; }
   --morph-bg: var(--c-green);
 }
 
-/* Variant 2's panel is a flat light grey, not the brand green — client, 2026-09-04. The
-   value is his and is **not in the brand palette** (§7), so it is written here rather than
-   promoted to a --c- token. Read the note above about a smoke panel before touching it: at
-   #e0e0e0 the panel is only 9/11/14 off the smoke ground it shrinks against, so the move is
-   nearly invisible on this variant. Raised with the client. */
-:root[data-hero="2"] { --morph-bg: #e0e0e0; }
+/* Variant 2's panel is a flat cool grey, not the brand green — client, 2026-09-04, #e0e0e0
+   first and then this. Both values are his and **neither is in the brand palette** (§7), so
+   it is written here rather than promoted to a --c- token.
+   Read the note above about a smoke panel before touching it: this panel shrinks against
+   smoke #e9ebee, and the whole move lives on that difference. #d0d6e3 is 25/21/11 off it —
+   thin, but two and a half times what #e0e0e0's 9/11/14 gave, and it separates on hue as
+   well as on lightness, which the first grey did not. */
+:root[data-hero="2"] { --morph-bg: #d0d6e3; }
 
 /* What the frame holds, per variant: the portrait on 1, the two-layer street photograph on
    2. `display` and not opacity — a transparent layer still decodes, and for the video JS

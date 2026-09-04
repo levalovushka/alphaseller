@@ -721,7 +721,7 @@ control small enough to stay out of a screenshot.
 | | the morph panel | the frame | the hero's ink |
 |---|---|---|---|
 | 1 | flat brand green `#A6ED00` | the portrait, `hero-portrait.webp` | black |
-| 2 | flat light grey `#E0E0E0` | the street shot in **two layers**, its papers breaking out above the frame | black |
+| 2 | flat cool grey `#D0D6E3` | the street shot in **two layers**, its papers breaking out above the frame | black |
 
 **The page opens on variant 1** (client, 2026-09-04: "чтобы страница по умолчанию на нем
 открывалась"). Its portrait is the client's Figma `308:39424`, which is this variant drawn
@@ -736,19 +736,22 @@ interface, and the flat black panel with the studio shot in the frame. The two s
 
 **Variant 2 was replaced outright** on 2026-09-04 — "второй вариант давай заменим на такой" —
 by the client's Figma `310:39454`: the same flat green, and in the frame the street shot whose
-papers break out over it. Its panel then went **light grey `#E0E0E0`** later the same day —
-his value, and not one of the brand colours in §7, so it is written at the variant's rule
-rather than promoted to a `--c-` token. **The screen recording is in neither variant** — it is still wired, in the markup and in `main.js`, but `HERO_VIDEO` is empty and
+papers break out over it. Its panel then went grey later the same day — `#E0E0E0`
+first, then **`#D0D6E3`** once the first grey turned out to blunt the morph. Both values are
+his and neither is a brand colour from §7, so it is written at the variant's rule rather than
+promoted to a `--c-` token. **The screen recording is in neither variant** — it is still wired, in the markup and in `main.js`, but `HERO_VIDEO` is empty and
 the element carries `preload="none"` so it does not fetch 933 KB for a layer nobody shows.
 Put a number back in that list and it plays again.
 
-**Variant 2's grey is close enough to smoke to blunt the morph, and this was raised.** The
-ground behind the panel steps to the *next* section's colour on the first movement, and
-capabilities is smoke `#E9EBEE` — so a `#E0E0E0` panel shrinks against a ground only 9/11/14
-off it. Measured in the live page at the middle of the crossing: the edge is there, but faint.
-This is the same trap a dropped variant had with a smoke panel, and it is the client's call
-whether to live with it. If it should read harder, the two ways are a panel further from smoke
-or holding the ground on the hero's own colour longer for this variant only.
+**Variant 2's panel is the one that has to be read against smoke.** The ground behind it
+steps to the *next* section's colour on the first movement, and capabilities is smoke
+`#E9EBEE`, so the whole move lives on the difference between the panel and that. `#E0E0E0`
+was 9/11/14 off it and the shrinking edge came out faint — measured in the live page at the
+middle of the crossing, which is where to look. `#D0D6E3` is 25/21/11 off it: still a thin
+difference, but two and a half times the first one's, and it separates on hue as well as on
+lightness. Verified the same way; the panel reads plainly through the whole crossing now.
+A panel *at* smoke is what a dropped variant had, and it made the move invisible — do not
+reintroduce one.
 
 Five photographs are unwired by all this and **kept** in the repo: `hero-full.webp`,
 `hero.webp`, `hero-green.webp`, `hero-smoke.webp` and `hero-street.webp`.
