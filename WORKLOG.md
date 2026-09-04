@@ -1,5 +1,47 @@
 # Worklog
 
+## 2026-09-04 — the portrait from Figma, and the green variant becomes the first one
+
+**What changed.**
+
+- New `assets/images/hero-portrait.webp` (1440×1080, 90 KB) — the low-angle portrait, pulled
+  as the raw fill of Figma `308:39424` (4096×3058 JPEG) and cut with
+  `cwebp -q 88 -crop 9 0 4077 3058 -resize 1440 1080`.
+- **The four hero variants are renumbered.** The flat-green one is variant 1 and the page
+  opens on it; the other three kept their order and shifted down. So `base.css`'s per-variant
+  blocks, the `display` rules, `HERO_INK`, `HERO_VIDEO` and the four button titles all moved
+  by one, and `:root`'s resting `--ink` / `--ink-invert` are variant 1's (black on green) with
+  the hero section's `data-ink` now `dark` for a no-JS visitor.
+- `main.js`: the `localStorage` key is `alphaseller:hero-variant:2` — a number stored against
+  the old order would restore a different variant under the new one.
+- `CONTEXT.md`: §4's section table, §5's variant table and note, and four rows of §7's asset
+  table.
+
+**Why.** Client, in two messages: the Figma node is this variant with a different photograph
+("давай вот это сделаем, подменим фотку"), and then "поставь этот вариант первым, а не
+третьим в селекторе в левом нижнем углу, чтобы страница по умолчанию на нем открывалась".
+
+**How it was verified.** The node's own render was pulled and measured against the raw fill
+first — head top at 15% of the frame's height, glasses at 24%, the same in both — so the
+Figma placement is the full frame, centred, and `center / cover` reproduces it. The source is
+1.3395 against the frame's 1.3333, so the crop is half a percent of the width.
+
+In the live page at 1440, `localStorage` cleared, all four clicked through in one pass:
+
+| | panel | frame | ink | video |
+|---|---|---|---|---|
+| 1 | flat `rgb(166,237,0)` | `hero-portrait.webp` | black | paused |
+| 2 | `hero-full.webp` / graphite | video | white | playing |
+| 3 | flat `rgb(0,0,0)` | `hero.webp` | white | paused |
+| 4 | `hero-smoke.webp` / smoke | video | black | playing |
+
+On a fresh load `data-hero` is `1` and only the first button reads `aria-pressed="true"`.
+Screenshotted against the Figma render: same composition.
+
+**Left undone.** Nothing on this piece. The node also shows a nav with `Платформа` and
+`Кейсы`, a logo in a white squircle and a wider frame — none of that was asked for and none
+of it was touched.
+
 ## 2026-09-03 — hero variant 3, third shape: flat green with variant 4's photograph
 
 **What changed.**

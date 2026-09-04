@@ -1160,12 +1160,14 @@ if (heroSwitch) {
   const buttons = gsap.utils.toArray('.hero-switch__btn', heroSwitch);
   const VARIANTS = [1, 2, 3, 4];
   /* Not a knob — it follows from the panel's ground. See the table in base.css. */
-  const HERO_INK = { 1: 'light', 2: 'light', 3: 'dark', 4: 'dark' };
+  const HERO_INK = { 1: 'dark', 2: 'light', 3: 'light', 4: 'dark' };
   /* Which variants keep the screen recording in the frame; the other two put a photograph
      there. CSS swaps the two layers on the same `data-hero` — this is only so the video
      controller can stop decoding. */
-  const HERO_VIDEO = [1, 4];
-  const STORE = 'alphaseller:hero-variant';
+  const HERO_VIDEO = [2, 4];
+  /* Bumped with the renumbering on 2026-09-04: a number stored against the old order would
+     restore a different variant under the new one. */
+  const STORE = 'alphaseller:hero-variant:2';
 
   function setVariant(variant) {
     root.dataset.hero = String(variant);

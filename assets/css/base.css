@@ -114,9 +114,10 @@
      are the hero's, and the fallback when JS does not run. --ink-invert is what is drawn
      on top of the ink — a filled button's label, the logo mark — and it is the opposite
      ink, not the ground: a green label inside a black pill reads as a mistake. */
+  /* Variant 1's, since the hero opens on the flat green: black ink on it, not white. */
   --ground: var(--c-graphite);
-  --ink: var(--c-white);
-  --ink-invert: var(--c-black);
+  --ink: var(--c-black);
+  --ink-invert: var(--c-white);
 
   /* Nothing tied to a section change is left on a discrete cross-fade — the slides moved
      onto the scroll too — so this is declared and unused. Kept as the one place a
@@ -734,16 +735,15 @@ img { display: block; max-width: 100%; height: auto; }
 
 /* The photograph in the frame, on the two hero variants that hold one instead of the video.
    Which file is a variant's choice (`--hero-frame-photo`, set with the variants at the foot
-   of this file); the default is variant 2's, the tighter 1.42:1 crop of the studio shot
-   (`hero.webp`, 2236 wide) — not the full square that backs the panel on variant 1, because
-   against a 4:3 frame it loses about 6% off each side instead of a quarter of its height,
-   and 2236 down to at most 720 CSS px is the sharpest source on the page. Client's call,
-   2026-09-03. */
+   of this file); the default here is variant 1's, the low-angle portrait from Figma
+   `308:39424`. Its source is 4096×3058 — 1.3395, so **the frame's own 4:3 is what it was
+   shot for** and `cover` crops half a percent off the width and nothing else. Shipped at
+   1440×1080, which is 2x the frame's widest, the same treatment the deck cards get. */
 .hero-photo {
   position: absolute;
   inset: 0;
+  background: var(--hero-frame-photo, url("../images/hero-portrait.webp")) center / cover no-repeat;
   border-radius: inherit;
-  background: var(--hero-frame-photo, url("../images/hero.webp")) center / cover no-repeat;
 }
 
 /* A slide whose whole content is one photograph. Its own layer rather than a background on
@@ -1497,18 +1497,21 @@ img { display: block; max-width: 100%; height: auto; }
 
    | | the morph panel | the frame | the hero's ink |
    |---|---|---|---|
-   | 1 | graphite + the full square photograph at 50% 18% | the looping screen recording | white |
-   | 2 | flat black | the studio photograph | white |
-   | 3 | flat brand green | `hero-smoke.webp` — variant 4's photograph | black |
+   | 1 | flat brand green | the portrait, `hero-portrait.webp` | black |
+   | 2 | graphite + the full square photograph at 50% 18% | the looping screen recording | white |
+   | 3 | flat black | the studio photograph, `hero.webp` | white |
    | 4 | the light-grey photograph, `hero-smoke.webp` | the looping screen recording | black |
 
-   Variant 3 has been all three ways round in one day, 2026-09-03: flat green with the man in
-   the frame, then the green-ground photograph on the panel with the interface in the frame,
-   and now flat green again with **variant 4's** photograph in the frame — "фон ровный
-   зеленый, а в рамку давай вставим фото мужчины из четвертого варианта". `hero-green.webp`
-   is unwired by that and kept in the repo.
+   **Variant 1 is the flat green with the portrait, and the page opens on it** — client,
+   2026-09-04: "поставь этот вариант первым, а не третьим в селекторе… чтобы страница по
+   умолчанию на нем открывалась". It was variant 3 until then; the other three kept their
+   order and shifted down, so what this file called 1, 2 and 3 the day before are 2, 3 and 4
+   now. The `localStorage` key was bumped with the renumbering — a choice stored against the
+   old numbers would mean a different variant under the new ones.
 
-   So the same file, `hero-smoke.webp`, is now on variant 3's frame and variant 4's panel.
+   The portrait is the client's Figma `308:39424`, which is this variant drawn with a
+   different photograph — "давай вот это сделаем, подменим фотку". `hero-green.webp` (the
+   green-ground shot that backed the panel for one round) stays in the repo, unwired.
 
    The ink is not a fourth knob — it follows from the ground and JS writes it on the hero
    section's `data-ink`, which the whole scrubbed colour pass already reads. White type on
@@ -1522,12 +1525,14 @@ img { display: block; max-width: 100%; height: auto; }
    something to show against. */
 
 :root {
+  --morph-bg: var(--c-green);
+}
+
+:root[data-hero="2"] {
   --morph-bg: var(--c-graphite) url("../images/hero-full.webp") 50% 18% / cover no-repeat;
 }
 
-:root[data-hero="2"] { --morph-bg: var(--c-black); }
-
-:root[data-hero="3"] { --morph-bg: var(--c-green); }
+:root[data-hero="3"] { --morph-bg: var(--c-black); }
 
 /* Variant 4's photograph is 1.79:1 against a 1.6-2.1 viewport, so `cover` crops a little off
    whichever axis is tighter and `center` is enough — unlike variant 1's square, which needed
@@ -1539,19 +1544,20 @@ img { display: block; max-width: 100%; height: auto; }
   --morph-bg: var(--c-smoke) url("../images/hero-smoke.webp") center / cover no-repeat;
 }
 
-/* The frame holds one or the other, never both: the interface on variants 1 and 4, a
-   photograph on 2 and 3. `display` and not opacity — the video keeps decoding behind a
+/* The frame holds one or the other, never both: a photograph on variants 1 and 3, the
+   interface on 2 and 4. `display` and not opacity — the video keeps decoding behind a
    transparent layer, and JS pauses it on top of this. */
-:root[data-hero="1"] .hero-photo,
+:root[data-hero="2"] .hero-photo,
 :root[data-hero="4"] .hero-photo { display: none; }
 
-:root[data-hero="2"] .stage-frame__video,
+:root[data-hero="1"] .stage-frame__video,
 :root[data-hero="3"] .stage-frame__video { display: none; }
 
 /* Which photograph the frame holds, for the two variants that hold one. A variable rather
    than a layer each: both fill the frame's box the same way, and a second layer would have
-   to be added to the curtain's selector lists as well. */
-:root[data-hero="3"] { --hero-frame-photo: url("../images/hero-smoke.webp"); }
+   to be added to the curtain's selector lists as well. Variant 1's is the default, declared
+   with `.hero-photo` itself; this is variant 3's. */
+:root[data-hero="3"] { --hero-frame-photo: url("../images/hero.webp"); }
 
 /* ---------- the variant switch ----------
    Deliberately not designed: four 18px squares hugging the corner on the header's own 16px

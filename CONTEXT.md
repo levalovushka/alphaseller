@@ -67,7 +67,7 @@ Header + 8 sections + footer.
 
 | # | Section | Background |
 |---|---|---|
-| 1 | Hero | **Four variants since 2026-09-03, switched live — see "The four hero variants" in §5.** Variant 1 is the one that stood before: graphite `#1A1817` with the photograph laid over it by the morph panel |
+| 1 | Hero | **Four variants since 2026-09-03, switched live — see "The four hero variants" in §5.** The page opens on variant 1: a flat brand green `#A6ED00` panel with the portrait in the frame, black ink |
 | 2 | Key capabilities | Smoky white `#E9EBEE` |
 | 3 | Speed | Black `#000000` — since 2026-09-03; was smoky white |
 | 4 | Customization | Black `#000000` |
@@ -700,19 +700,27 @@ control small enough to stay out of a screenshot.
 
 | | the morph panel | the frame | the hero's ink |
 |---|---|---|---|
-| 1 | graphite + `hero-full.webp` at `50% 18%` — the state that stood before | the looping screen recording | white |
-| 2 | flat black | `hero.webp` | white |
-| 3 | flat brand green `#A6ED00` | `hero-smoke.webp` — variant 4's photograph | black |
+| 1 | flat brand green `#A6ED00` | the portrait, `hero-portrait.webp` | black |
+| 2 | graphite + `hero-full.webp` at `50% 18%` — the state that stood first | the looping screen recording | white |
+| 3 | flat black | `hero.webp` | white |
 | 4 | the light-grey photograph, `hero-smoke.webp` | the looping screen recording | black |
 
-Variant 3 went all three ways round in one day, 2026-09-03: flat green with the man in the
-frame, then the green-ground photograph on the panel with the interface in the frame, and now
-flat green again with **variant 4's** photograph in the frame — "фон ровный зеленый, а в рамку
-давай вставим фото мужчины из четвертого варианта". Variant 4 kept the second shape. So the
-interface is in the frame on 1 and 4, a photograph on 2 and 3, and the same file
-(`hero-smoke.webp`) is variant 3's frame and variant 4's panel.
+**Variant 1 is the flat green with the portrait, and the page opens on it.** Client,
+2026-09-04: "поставь этот вариант первым, а не третьим в селекторе… чтобы страница по
+умолчанию на нем открывалась". It was variant 3 until then; the other three kept their order
+and shifted down, so **1, 2 and 3 as this file described them on 2026-09-03 are 2, 3 and 4
+now**. The `localStorage` key was bumped with the renumbering — a number stored against the
+old order would restore a different variant under the new one.
 
-`hero-green.webp` is unwired by that and kept in the repo.
+Its photograph is the client's Figma `308:39424`, which is this variant drawn with a
+different photograph: "давай вот это сделаем, подменим фотку". Before that the variant had
+been all three ways round on 2026-09-03 — flat green with the studio man in the frame, then
+the green-ground photograph on the panel with the interface in the frame, then flat green
+again with variant 4's photograph in the frame.
+
+So the interface is in the frame on variants 2 and 4, a photograph on 1 and 3.
+`hero-green.webp` (the green-ground shot that backed the panel for one round) is unwired and
+kept in the repo.
 
 **Which photograph the frame holds is a variable** (`--hero-frame-photo`), not a layer each:
 both fill the frame's box the same way, and a second layer would have to be added to the
@@ -962,10 +970,11 @@ Figma's own `#1E1E1E` canvas in as a full-bleed `<rect>`.
 
 | Section | File | Figma node | Source |
 |---|---|---|---|
+| 1 — hero, **variant 1's frame photograph** | `assets/images/hero-portrait.webp` | `308:39424` | the low-angle portrait, from the node's own raw fill: 4096×3058 JPEG, which is **1.3395 — the frame's own 4:3**, so `cover` crops half a percent off the width and nothing else. `cwebp -q 88 -crop 9 0 4077 3058 -resize 1440 1080`, 90 KB. 1440 is 2× the frame's widest, the same treatment the deck cards get |
 | 1 — hero | `assets/video/hero.mp4` + `assets/images/hero-poster.webp` | `247:42060` | screen recording, on a loop. See below |
-| 1 — hero, **variant 1's panel ground** | `assets/images/hero-full.webp` | `275:53708` | 1254×1254, the full square shot. Backs the morph panel on variant 1 at `50% 18% / cover`, see §5. Its bitmap is only 1254 on a 2030 node, which is why it is the softest of the four panels |
-| 1 — hero, **variant 2's frame photograph** | `assets/images/hero.webp` | `196:53708` | 2236×1578 (1.42:1), the tighter crop of the same studio shot. It backed the morph panel until the variants landed; now it is what variant 2 puts *in* the frame |
-| 1 — hero, **variant 4's panel ground and variant 3's frame photograph** | `assets/images/hero-smoke.webp` | — | the same shoot on a light-grey studio ground, 1.79:1. Client-supplied PNG, 2752×1536, `cwebp -q 88 -resize 2560 0`, 96 KB. `center / cover` in both places: full-bleed it crops a little off whichever axis is tighter, and in the 4:3 frame it loses about a quarter of its width |
+| 1 — hero, **variant 2's panel ground** | `assets/images/hero-full.webp` | `275:53708` | 1254×1254, the full square shot. Backs the morph panel on variant 2 at `50% 18% / cover`, see §5. Its bitmap is only 1254 on a 2030 node, which is why it is the softest of the four panels |
+| 1 — hero, **variant 3's frame photograph** | `assets/images/hero.webp` | `196:53708` | 2236×1578 (1.42:1), the tighter crop of the same studio shot. It backed the morph panel until the variants landed; now it is what variant 3 puts *in* the frame |
+| 1 — hero, **variant 4's panel ground** | `assets/images/hero-smoke.webp` | — | the same shoot on a light-grey studio ground, 1.79:1. Client-supplied PNG, 2752×1536, `cwebp -q 88 -resize 2560 0`, 96 KB. `center / cover` in both places: full-bleed it crops a little off whichever axis is tighter, and in the 4:3 frame it loses about a quarter of its width |
 | 1 — hero, **unused** | `assets/images/hero-green.webp` | — | the man against the brand green, 1.79:1. Client-supplied PNG, 5504×3072, `cwebp -q 88 -resize 2560 0`, 220 KB. It was variant 3's panel ground for one round on 2026-09-03; unwired the same day when variant 3 went back to a flat green. Kept |
 | 1 — hero, unused | `assets/images/hero-street.webp` | `265:39107` | a street shot that was in the frame for one round on 2026-09-03. 4096×2286 JPEG, centre-cropped to 4:3 and resized in one `cwebp -q 82 -crop 524 0 3048 2286 -resize 1440 1080` pass, 91 KB. Unwired, kept |
 | 2 — capabilities, `promotion` pane | `assets/images/capabilities-promotion.webp` | `206:62480` | node is named "Продвижение — 4×3 / content". 1118×838.5, @2x → 2236×1677, cwebp **`-lossless`**, 172 KB |
