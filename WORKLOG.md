@@ -1,5 +1,39 @@
 # Worklog
 
+## 2026-09-03 — hero variant 3, third shape: flat green with variant 4's photograph
+
+**What changed.**
+
+- `base.css`: `:root[data-hero="3"]` is a flat `--c-green` again, and the frame's photograph
+  becomes a variable — `.hero-photo` reads `--hero-frame-photo`, whose default is variant 2's
+  `hero.webp` and which variant 3 sets to `hero-smoke.webp`. The `display` rules now hide the
+  photo on 1 and 4 and the video on 2 and 3.
+- `main.js`: `HERO_VIDEO` is `[1, 4]`.
+- `index.html`: the `.hero-photo` comment.
+- `CONTEXT.md`: §5's variant table and note, §7's two asset rows — `hero-green.webp` is
+  unwired, `hero-smoke.webp` now serves two variants.
+
+**Why.** Client: "переделаем третий вариант — фон ровный зеленый, а в рамку давай вставим фото
+мужчины из четвертого варианта."
+
+**How it was verified.** In the live page at 1440, all four clicked through in one pass:
+
+| | panel | frame | ink | video |
+|---|---|---|---|---|
+| 1 | `hero-full.webp` / graphite | video | white | playing |
+| 2 | flat `rgb(0,0,0)` | `hero.webp` | white | paused |
+| 3 | flat `rgb(166,237,0)` | `hero-smoke.webp` | black | paused |
+| 4 | `hero-smoke.webp` / smoke | video | black | playing |
+
+Screenshotted variant 3 — the man reads fully inside the frame on the flat green.
+
+**Left undone.** In the 4:3 frame `center / cover` puts him a touch right of centre; a
+horizontal position on `--hero-frame-photo` would fix it if it bothers the client.
+
+**Note on the environment.** The other session's dev server on 4321 was gone but the harness
+still refused the port, so `.claude/launch.json` gained a second configuration,
+`alphaseller-4322`, on port 4322. `.claude/` is gitignored, so this is local only.
+
 ## 2026-09-03 — the stack's seam, and a documentation audit
 
 **What changed.**

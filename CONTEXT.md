@@ -702,13 +702,21 @@ control small enough to stay out of a screenshot.
 |---|---|---|---|
 | 1 | graphite + `hero-full.webp` at `50% 18%` — the state that stood before | the looping screen recording | white |
 | 2 | flat black | `hero.webp` | white |
-| 3 | the green-ground photograph, `hero-green.webp` | the looping screen recording | black |
+| 3 | flat brand green `#A6ED00` | `hero-smoke.webp` — variant 4's photograph | black |
 | 4 | the light-grey photograph, `hero-smoke.webp` | the looping screen recording | black |
 
-Variants 3 and 4 were flat colours with the man in the frame for one round on 2026-09-03. The
-client replaced both the same day with the photographs he was shot against those grounds in,
-built like variant 1 — the man on the panel, the interface in the frame. **Variant 2 is the
-only one that puts the man in the frame.**
+Variant 3 went all three ways round in one day, 2026-09-03: flat green with the man in the
+frame, then the green-ground photograph on the panel with the interface in the frame, and now
+flat green again with **variant 4's** photograph in the frame — "фон ровный зеленый, а в рамку
+давай вставим фото мужчины из четвертого варианта". Variant 4 kept the second shape. So the
+interface is in the frame on 1 and 4, a photograph on 2 and 3, and the same file
+(`hero-smoke.webp`) is variant 3's frame and variant 4's panel.
+
+`hero-green.webp` is unwired by that and kept in the repo.
+
+**Which photograph the frame holds is a variable** (`--hero-frame-photo`), not a layer each:
+both fill the frame's box the same way, and a second layer would have to be added to the
+curtain's selector lists as well.
 
 - **`data-hero` on `<html>` is the whole switch.** CSS reads it for the panel's ground
   (`--morph-bg`) and for which of the frame's two layers shows; the markup ships with `"1"`,
@@ -957,8 +965,8 @@ Figma's own `#1E1E1E` canvas in as a full-bleed `<rect>`.
 | 1 — hero | `assets/video/hero.mp4` + `assets/images/hero-poster.webp` | `247:42060` | screen recording, on a loop. See below |
 | 1 — hero, **variant 1's panel ground** | `assets/images/hero-full.webp` | `275:53708` | 1254×1254, the full square shot. Backs the morph panel on variant 1 at `50% 18% / cover`, see §5. Its bitmap is only 1254 on a 2030 node, which is why it is the softest of the four panels |
 | 1 — hero, **variant 2's frame photograph** | `assets/images/hero.webp` | `196:53708` | 2236×1578 (1.42:1), the tighter crop of the same studio shot. It backed the morph panel until the variants landed; now it is what variant 2 puts *in* the frame |
-| 1 — hero, **variant 4's panel ground** | `assets/images/hero-smoke.webp` | — | the same shoot on a light-grey studio ground, 1.79:1. Client-supplied PNG, 2752×1536, `cwebp -q 88 -resize 2560 0`, 96 KB. Same `center / cover` as variant 3's |
-| 1 — hero, **variant 3's panel ground** | `assets/images/hero-green.webp` | — | the man against the brand green, 1.79:1. Client-supplied PNG, 5504×3072, `cwebp -q 88 -resize 2560 0`, 220 KB. Wide enough to be *downscaled* at 1920 rather than blown up, which is variant 1's known softness. `center / cover` is enough here — a 1.79 source against a 1.6-2.1 viewport crops a little off whichever axis is tighter, unlike the square, which needed a solved vertical position |
+| 1 — hero, **variant 4's panel ground and variant 3's frame photograph** | `assets/images/hero-smoke.webp` | — | the same shoot on a light-grey studio ground, 1.79:1. Client-supplied PNG, 2752×1536, `cwebp -q 88 -resize 2560 0`, 96 KB. `center / cover` in both places: full-bleed it crops a little off whichever axis is tighter, and in the 4:3 frame it loses about a quarter of its width |
+| 1 — hero, **unused** | `assets/images/hero-green.webp` | — | the man against the brand green, 1.79:1. Client-supplied PNG, 5504×3072, `cwebp -q 88 -resize 2560 0`, 220 KB. It was variant 3's panel ground for one round on 2026-09-03; unwired the same day when variant 3 went back to a flat green. Kept |
 | 1 — hero, unused | `assets/images/hero-street.webp` | `265:39107` | a street shot that was in the frame for one round on 2026-09-03. 4096×2286 JPEG, centre-cropped to 4:3 and resized in one `cwebp -q 82 -crop 524 0 3048 2286 -resize 1440 1080` pass, 91 KB. Unwired, kept |
 | 2 — capabilities, `promotion` pane | `assets/images/capabilities-promotion.webp` | `206:62480` | node is named "Продвижение — 4×3 / content". 1118×838.5, @2x → 2236×1677, cwebp **`-lossless`**, 172 KB |
 | 2 — `orders` pane | `assets/images/capabilities-orders.webp` | `209:35586` | same size and export, 188 KB. Re-pulled once after the client edited the node — the file name stays, so a re-pull is a byte swap and nothing else |

@@ -732,16 +732,18 @@ img { display: block; max-width: 100%; height: auto; }
   pointer-events: none;
 }
 
-/* The studio photograph, in the frame on hero variants 2-4 in place of the video. The
-   tighter 1.42:1 crop (`hero.webp`, 2236 wide), not the full square that backs the panel on
-   variant 1: against a 4:3 frame it loses about 6% off each side instead of a quarter of its
-   height, and 2236 down to at most 720 CSS px is the sharpest source on the page. Which of
-   the two files goes here was the client's call, 2026-09-03. */
+/* The photograph in the frame, on the two hero variants that hold one instead of the video.
+   Which file is a variant's choice (`--hero-frame-photo`, set with the variants at the foot
+   of this file); the default is variant 2's, the tighter 1.42:1 crop of the studio shot
+   (`hero.webp`, 2236 wide) — not the full square that backs the panel on variant 1, because
+   against a 4:3 frame it loses about 6% off each side instead of a quarter of its height,
+   and 2236 down to at most 720 CSS px is the sharpest source on the page. Client's call,
+   2026-09-03. */
 .hero-photo {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: url("../images/hero.webp") center / cover no-repeat;
+  background: var(--hero-frame-photo, url("../images/hero.webp")) center / cover no-repeat;
 }
 
 /* A slide whose whole content is one photograph. Its own layer rather than a background on
@@ -1497,13 +1499,16 @@ img { display: block; max-width: 100%; height: auto; }
    |---|---|---|---|
    | 1 | graphite + the full square photograph at 50% 18% | the looping screen recording | white |
    | 2 | flat black | the studio photograph | white |
-   | 3 | the green-ground photograph, `hero-green.webp` | the looping screen recording | black |
+   | 3 | flat brand green | `hero-smoke.webp` — variant 4's photograph | black |
    | 4 | the light-grey photograph, `hero-smoke.webp` | the looping screen recording | black |
 
-   Variants 3 and 4 were flat colours with the man in the frame for one round on 2026-09-03;
-   the client replaced both the same day with the photographs he was shot against those
-   grounds in, built like variant 1 — the man on the panel, the interface in the frame. So
-   **variant 2 is the only one that puts the man in the frame.**
+   Variant 3 has been all three ways round in one day, 2026-09-03: flat green with the man in
+   the frame, then the green-ground photograph on the panel with the interface in the frame,
+   and now flat green again with **variant 4's** photograph in the frame — "фон ровный
+   зеленый, а в рамку давай вставим фото мужчины из четвертого варианта". `hero-green.webp`
+   is unwired by that and kept in the repo.
+
+   So the same file, `hero-smoke.webp`, is now on variant 3's frame and variant 4's panel.
 
    The ink is not a fourth knob — it follows from the ground and JS writes it on the hero
    section's `data-ink`, which the whole scrubbed colour pass already reads. White type on
@@ -1522,32 +1527,31 @@ img { display: block; max-width: 100%; height: auto; }
 
 :root[data-hero="2"] { --morph-bg: var(--c-black); }
 
-/* Variant 3's photograph is 1.79:1 against a 1.6-2.1 viewport, so `cover` crops a little off
-   whichever axis is tighter and `center` is enough — unlike variant 1's square, which needed
-   a solved vertical position. Green underneath for the moment before it decodes and if it
-   fails: it is the ground the shot was taken against. Shipped at 2560 from a 5504 original,
-   `cwebp -q 88`, 220 KB — wide enough to be downscaled at 1920 rather than blown up, which
-   is variant 1's known softness. */
-:root[data-hero="3"] {
-  --morph-bg: var(--c-green) url("../images/hero-green.webp") center / cover no-repeat;
-}
+:root[data-hero="3"] { --morph-bg: var(--c-green); }
 
-/* Variant 4's photograph is the same shoot on a light-grey studio ground, same 1.79:1 and
-   the same treatment. Smoke underneath it, which is also what the ground behind the panel
-   steps to — so unlike the flat version this one was, the shrink is legible: the panel's
-   edge shows against smoke as the photograph's floor line and its darker corners. */
+/* Variant 4's photograph is 1.79:1 against a 1.6-2.1 viewport, so `cover` crops a little off
+   whichever axis is tighter and `center` is enough — unlike variant 1's square, which needed
+   a solved vertical position. Smoke underneath it, which is also what the ground behind the
+   panel steps to — so unlike the flat smoke this variant used to be, the shrink stays
+   legible: the panel's edge shows against the ground as the photograph's floor line and its
+   darker corners. */
 :root[data-hero="4"] {
   --morph-bg: var(--c-smoke) url("../images/hero-smoke.webp") center / cover no-repeat;
 }
 
-/* The frame holds one or the other, never both — the interface everywhere except variant 2,
-   which is the only one with the man in the frame. `display` and not opacity: the video keeps
-   decoding behind a transparent layer, and JS pauses it on top of this. */
+/* The frame holds one or the other, never both: the interface on variants 1 and 4, a
+   photograph on 2 and 3. `display` and not opacity — the video keeps decoding behind a
+   transparent layer, and JS pauses it on top of this. */
 :root[data-hero="1"] .hero-photo,
-:root[data-hero="3"] .hero-photo,
 :root[data-hero="4"] .hero-photo { display: none; }
 
-:root[data-hero="2"] .stage-frame__video { display: none; }
+:root[data-hero="2"] .stage-frame__video,
+:root[data-hero="3"] .stage-frame__video { display: none; }
+
+/* Which photograph the frame holds, for the two variants that hold one. A variable rather
+   than a layer each: both fill the frame's box the same way, and a second layer would have
+   to be added to the curtain's selector lists as well. */
+:root[data-hero="3"] { --hero-frame-photo: url("../images/hero-smoke.webp"); }
 
 /* ---------- the variant switch ----------
    Deliberately not designed: four 18px squares hugging the corner on the header's own 16px
