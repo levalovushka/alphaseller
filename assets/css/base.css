@@ -1489,78 +1489,60 @@ img { display: block; max-width: 100%; height: auto; }
   height: 40px;
 }
 
-/* ---------- the four hero variants ----------
-   Four grounds for the first screen, switched live from the tiny control in the bottom-left
-   corner. `data-hero` on <html> is the single switch; JS writes it and mirrors the choice
-   to `localStorage`, and the markup ships with variant 1 so a visitor with no JS keeps
-   what the page had before. Asked for on 2026-09-03 to compare them in the live page.
+/* ---------- the two hero variants ----------
+   Two grounds for the first screen, switched live from the tiny control in the bottom-left
+   corner. `data-hero` on <html> is the single switch; JS writes it and mirrors the choice to
+   `localStorage`, and the markup ships with variant 1, which is what a visitor with no JS
+   keeps. Four were built on 2026-09-03 to compare in the live page; the client killed two of
+   them on 2026-09-04 — "вот эти два варианта можно убить вообще. в селекторе тогда останется
+   два — с зеленым фоном и с мужиком на сером + интерфейс".
 
-   | | the morph panel | the frame | the hero's ink |
-   |---|---|---|---|
-   | 1 | flat brand green | the portrait, `hero-portrait.webp` | black |
-   | 2 | graphite + the full square photograph at 50% 18% | the looping screen recording | white |
-   | 3 | flat black | the studio photograph, `hero.webp` | white |
-   | 4 | the light-grey photograph, `hero-smoke.webp` | the looping screen recording | black |
+   | | the morph panel | the frame |
+   |---|---|---|
+   | 1 | flat brand green | the portrait, `hero-portrait.webp` |
+   | 2 | the light-grey photograph, `hero-smoke.webp` | the looping screen recording |
 
-   **Variant 1 is the flat green with the portrait, and the page opens on it** — client,
-   2026-09-04: "поставь этот вариант первым, а не третьим в селекторе… чтобы страница по
-   умолчанию на нем открывалась". It was variant 3 until then; the other three kept their
-   order and shifted down, so what this file called 1, 2 and 3 the day before are 2, 3 and 4
-   now. The `localStorage` key was bumped with the renumbering — a choice stored against the
-   old numbers would mean a different variant under the new ones.
+   **The page opens on variant 1** (client, 2026-09-04). Its portrait is the client's Figma
+   `308:39424`, which is this variant drawn with a different photograph.
 
-   The portrait is the client's Figma `308:39424`, which is this variant drawn with a
-   different photograph — "давай вот это сделаем, подменим фотку". `hero-green.webp` (the
-   green-ground shot that backed the panel for one round) stays in the repo, unwired.
+   What went, and what it took with it: the graphite panel with the full square photograph
+   behind the interface, and the flat black panel with the studio shot in the frame. Three
+   photographs are unwired by that and kept in the repo — `hero-full.webp`, `hero.webp` and
+   `hero-green.webp`. The dropped numbering is in `WORKLOG.md`; both survivors were 1 and 4.
 
-   The ink is not a fourth knob — it follows from the ground and JS writes it on the hero
-   section's `data-ink`, which the whole scrubbed colour pass already reads. White type on
-   green or on smoke is unreadable; nothing about that is a choice.
+   **The ink is black on both**, and it is still written on the hero section's `data-ink`
+   rather than fixed here, because that is what the scrubbed colour pass reads and it is what
+   would carry a light variant if one comes back. White type on green or on smoke is
+   unreadable; nothing about that is a choice.
 
-   **Variant 4 used to have an invisible shrink**, and it is worth knowing why in case a flat
-   ground comes back: the ground behind the panel steps to the *next* section's colour on the
-   first movement (see the morph, above), and capabilities is smoke — so a flat smoke panel
-   shrank against smoke and the move only reappeared when the dashboard wiped in. The
-   photograph fixed it by accident: its floor line and darker corners give the panel's edge
-   something to show against. */
+   **Variant 2 used to have an invisible shrink** as a flat smoke, and it is worth knowing why
+   in case a flat ground comes back: the ground behind the panel steps to the *next* section's
+   colour on the first movement (see the morph, above), and capabilities is smoke — so a flat
+   smoke panel shrank against smoke and the move only reappeared when the dashboard wiped in.
+   The photograph fixed it by accident: its floor line and darker corners give the panel's
+   edge something to show against. */
 
 :root {
   --morph-bg: var(--c-green);
 }
 
+/* Variant 2's photograph is 1.79:1 against a 1.6-2.1 viewport, so `cover` crops a little off
+   whichever axis is tighter and `center` is enough. Smoke underneath it, which is also what
+   the ground behind the panel steps to — see the note on the shrink above. */
 :root[data-hero="2"] {
-  --morph-bg: var(--c-graphite) url("../images/hero-full.webp") 50% 18% / cover no-repeat;
-}
-
-:root[data-hero="3"] { --morph-bg: var(--c-black); }
-
-/* Variant 4's photograph is 1.79:1 against a 1.6-2.1 viewport, so `cover` crops a little off
-   whichever axis is tighter and `center` is enough — unlike variant 1's square, which needed
-   a solved vertical position. Smoke underneath it, which is also what the ground behind the
-   panel steps to — so unlike the flat smoke this variant used to be, the shrink stays
-   legible: the panel's edge shows against the ground as the photograph's floor line and its
-   darker corners. */
-:root[data-hero="4"] {
   --morph-bg: var(--c-smoke) url("../images/hero-smoke.webp") center / cover no-repeat;
 }
 
-/* The frame holds one or the other, never both: a photograph on variants 1 and 3, the
-   interface on 2 and 4. `display` and not opacity — the video keeps decoding behind a
-   transparent layer, and JS pauses it on top of this. */
-:root[data-hero="2"] .hero-photo,
-:root[data-hero="4"] .hero-photo { display: none; }
-
-:root[data-hero="1"] .stage-frame__video,
-:root[data-hero="3"] .stage-frame__video { display: none; }
-
-/* Which photograph the frame holds, for the two variants that hold one. A variable rather
-   than a layer each: both fill the frame's box the same way, and a second layer would have
-   to be added to the curtain's selector lists as well. Variant 1's is the default, declared
-   with `.hero-photo` itself; this is variant 3's. */
-:root[data-hero="3"] { --hero-frame-photo: url("../images/hero.webp"); }
+/* The frame holds one or the other, never both: the portrait on variant 1, the interface on
+   2. `display` and not opacity — the video keeps decoding behind a transparent layer, and JS
+   pauses it on top of this. Which photograph the frame holds is still a variable
+   (`--hero-frame-photo`, declared with `.hero-photo`), so a second picture variant needs no
+   second layer and no addition to the curtain's selector lists. */
+:root[data-hero="2"] .hero-photo { display: none; }
+:root[data-hero="1"] .stage-frame__video { display: none; }
 
 /* ---------- the variant switch ----------
-   Deliberately not designed: four 18px squares hugging the corner on the header's own 16px
+   Deliberately not designed: 18px squares hugging the corner on the header's own 16px
    inset, numbers in the platform mono. It reads the live `--ink`, so it inverts with each
    variant for free. Above the frame (5) and the header (10) so nothing can cover it.
 

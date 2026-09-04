@@ -35,9 +35,9 @@
     <video class="stage-frame__video" src="assets/video/hero.mp4"
            poster="assets/images/hero-poster.webp"
            autoplay muted loop playsinline preload="auto"></video>
-    <!-- The photograph the frame holds instead of the video on hero variants 1 and 3 —
-         which file is the variant's, see `--hero-frame-photo`. Its own layer rather than a
-         background on the slide, so the curtain can clip it. -->
+    <!-- The photograph the frame holds instead of the video on hero variant 1 — which file
+         is the variant's, see `--hero-frame-photo`. Its own layer rather than a background
+         on the slide, so the curtain can clip it. -->
     <div class="hero-photo"></div>
   </div>
   <!-- The one slide that holds more than a picture: three panes and a tab strip under the
@@ -344,13 +344,12 @@
 
 </main>
 
-<!-- Four grounds for the hero, switched live. A technical control for the demo, not part
-     of the design: it only shows while the hero is the section under the header. -->
+<!-- Two grounds for the hero, switched live. A technical control for the demo, not part
+     of the design: it only shows while the hero is the section under the header. Four until
+     2026-09-04, when the client killed two of them. -->
 <div class="hero-switch" role="group" aria-label="Вариант первого экрана">
   <button class="hero-switch__btn" type="button" data-variant="1" aria-pressed="true" title="Зелёная плашка, портрет в рамке">1</button>
-  <button class="hero-switch__btn" type="button" data-variant="2" aria-pressed="false" title="Фото на плашке, видео в рамке">2</button>
-  <button class="hero-switch__btn" type="button" data-variant="3" aria-pressed="false" title="Чёрная плашка, фото в рамке">3</button>
-  <button class="hero-switch__btn" type="button" data-variant="4" aria-pressed="false" title="Светло-серая плашка, видео в рамке">4</button>
+  <button class="hero-switch__btn" type="button" data-variant="2" aria-pressed="false" title="Мужчина на сером, интерфейс в рамке">2</button>
 </div>
 
 <script src="assets/vendor/gsap.min.js"></script>

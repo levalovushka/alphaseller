@@ -1,5 +1,44 @@
 # Worklog
 
+## 2026-09-04 — two hero variants killed, two left
+
+**What changed.**
+
+- `index.html`: the switch has two buttons; the `.hero-photo` comment.
+- `base.css`: the variants block is rewritten for two — variant 1 is the flat green with the
+  portrait (the `:root` default), variant 2 the light-grey photograph with the interface in
+  the frame. The `[data-hero="3"]` and `[data-hero="4"]` blocks and the `--hero-frame-photo`
+  override are gone; the `display` rules are one line each.
+- `main.js`: `VARIANTS` is `[1, 2]`, `HERO_INK` is dark on both, `HERO_VIDEO` is `[2]`, and
+  the `localStorage` key is bumped to `:3`.
+- `CONTEXT.md`: §5's section rewritten as "The two hero variants", §4's row, and three rows of
+  §7's asset table — `hero-full.webp` and `hero.webp` join `hero-green.webp` as unwired.
+
+**Why.** Client, with two screenshots: "вот эти два варианта можно убить вообще. в селекторе
+тогда останется два — с зеленым фоном и с мужиком на сером + интерфейс." The two he showed
+were the graphite panel with the full square photograph behind the interface and the flat
+black panel with the studio shot in the frame — numbered 2 and 3 after yesterday's reorder.
+
+**How it was verified.** In the live page at 1440 with `localStorage` cleared: the switch
+renders two buttons, a fresh load lands on `data-hero="1"` with only the first pressed, and
+no console errors. Both clicked through:
+
+| | panel | frame | ink | video |
+|---|---|---|---|---|
+| 1 | flat `rgb(166,237,0)` | `hero-portrait.webp` | black | paused |
+| 2 | `hero-smoke.webp` / smoke | video | black | playing |
+
+Screenshotted both.
+
+**Left undone.** `hero-full.webp` (90 KB), `hero.webp` (103 KB) and `hero-green.webp`
+(220 KB) are now referenced by nothing. Kept deliberately — this project keeps unwired
+photographs — but that is 413 KB of dead weight in the repo if the client never comes back to
+them.
+
+**Note on the ink.** Both variants are black-inked, so nothing on the page varies the ink any
+more. The per-variant map and the boundary pass's per-frame colour read are kept anyway: they
+are what a light variant would need, and they cost one hex parse a frame.
+
 ## 2026-09-04 — the portrait from Figma, and the green variant becomes the first one
 
 **What changed.**

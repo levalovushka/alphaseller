@@ -67,7 +67,7 @@ Header + 8 sections + footer.
 
 | # | Section | Background |
 |---|---|---|
-| 1 | Hero | **Four variants since 2026-09-03, switched live — see "The four hero variants" in §5.** The page opens on variant 1: a flat brand green `#A6ED00` panel with the portrait in the frame, black ink |
+| 1 | Hero | **Two variants, switched live — see "The two hero variants" in §5.** The page opens on variant 1: a flat brand green `#A6ED00` panel with the portrait in the frame, black ink |
 | 2 | Key capabilities | Smoky white `#E9EBEE` |
 | 3 | Speed | Black `#000000` — since 2026-09-03; was smoky white |
 | 4 | Customization | Black `#000000` |
@@ -692,54 +692,45 @@ controller's speed. Two ways out if it shows: hold the ink white until the panel
 the text (lerp it over the tail of the crossing), or take the hero's text out with the panel.
 Both are motion decisions — ask.
 
-### The four hero variants
+### The two hero variants
 
-Four grounds for the first screen, switched live from four 18px buttons in the bottom-left
+Two grounds for the first screen, switched live from two 18px buttons in the bottom-left
 corner. Asked for on 2026-09-03: the client wants them compared in the live page, and the
 control small enough to stay out of a screenshot.
 
 | | the morph panel | the frame | the hero's ink |
 |---|---|---|---|
 | 1 | flat brand green `#A6ED00` | the portrait, `hero-portrait.webp` | black |
-| 2 | graphite + `hero-full.webp` at `50% 18%` — the state that stood first | the looping screen recording | white |
-| 3 | flat black | `hero.webp` | white |
-| 4 | the light-grey photograph, `hero-smoke.webp` | the looping screen recording | black |
+| 2 | the light-grey photograph, `hero-smoke.webp` | the looping screen recording | black |
 
-**Variant 1 is the flat green with the portrait, and the page opens on it.** Client,
-2026-09-04: "поставь этот вариант первым, а не третьим в селекторе… чтобы страница по
-умолчанию на нем открывалась". It was variant 3 until then; the other three kept their order
-and shifted down, so **1, 2 and 3 as this file described them on 2026-09-03 are 2, 3 and 4
-now**. The `localStorage` key was bumped with the renumbering — a number stored against the
-old order would restore a different variant under the new one.
+**The page opens on variant 1** (client, 2026-09-04: "чтобы страница по умолчанию на нем
+открывалась"). Its portrait is the client's Figma `308:39424`, which is this variant drawn
+with a different photograph — "давай вот это сделаем, подменим фотку".
 
-Its photograph is the client's Figma `308:39424`, which is this variant drawn with a
-different photograph: "давай вот это сделаем, подменим фотку". Before that the variant had
-been all three ways round on 2026-09-03 — flat green with the studio man in the frame, then
-the green-ground photograph on the panel with the interface in the frame, then flat green
-again with variant 4's photograph in the frame.
+**There were four until 2026-09-04**, when the client killed two: "вот эти два варианта можно
+убить вообще. в селекторе тогда останется два — с зеленым фоном и с мужиком на сером +
+интерфейс". What went was the graphite panel with the full square photograph behind the
+interface, and the flat black panel with the studio shot in the frame. The two survivors were
+1 and 4 under the numbering of the day before; the whole sequence of renumberings is in
+`WORKLOG.md`, and it is not worth reconstructing — read the table above and nothing else.
 
-So the interface is in the frame on variants 2 and 4, a photograph on 1 and 3.
-`hero-green.webp` (the green-ground shot that backed the panel for one round) is unwired and
-kept in the repo.
+Three photographs are unwired by all this and **kept** in the repo: `hero-full.webp`,
+`hero.webp` and `hero-green.webp`.
 
 **Which photograph the frame holds is a variable** (`--hero-frame-photo`), not a layer each:
-both fill the frame's box the same way, and a second layer would have to be added to the
-curtain's selector lists as well.
+any picture variant fills the frame's box the same way, and a second layer would have to be
+added to the curtain's selector lists as well.
 
 - **`data-hero` on `<html>` is the whole switch.** CSS reads it for the panel's ground
   (`--morph-bg`) and for which of the frame's two layers shows; the markup ships with `"1"`,
-  so a visitor with no JS keeps what the page had before.
-- **The ink is not a fifth knob.** White type is unreadable on green and on smoke, so it
-  follows the ground. JS writes it on the **hero section's own `data-ink`**, which the
-  scrubbed colour pass already reads — so the header, the buttons, the counter-ink and the
-  crossing into capabilities all come along for free. Nothing else had to learn about
-  variants.
-- **The photograph in the frame is `hero.webp`, the tighter 1.42:1 crop**, not the full
-  square that backs the panel on variant 1. Client's call: against a 4:3 frame it loses about
-  6% off each side instead of a quarter of its height, and 2236 down to at most 720 CSS px is
-  the sharpest source on the page. It is a layer of its own (`.hero-photo`) rather than a
-  background on the slide, because the curtain has to be able to clip it — see the rule in
-  §5's curtain notes.
+  so a visitor with no JS gets variant 1 — which is why `:root`'s resting `--ink` is black and
+  the hero section's own `data-ink` is `dark`.
+- **The ink is not a second knob.** White type is unreadable on green and on smoke, so it
+  follows the ground — black on both of the two that are left. JS still writes it on the
+  **hero section's own `data-ink`** rather than fixing it in the stylesheet, because that is
+  what the scrubbed colour pass reads, so the header, the buttons, the counter-ink and the
+  crossing into capabilities all come along for free, and a light variant would need no new
+  machinery.
 - **The video is taken out with `display: none` and paused.** `display` alone does not stop it
   decoding, so the controller listens for a `hero:variant` event on `document` and gates
   playback on the variant as well as on `--t`.
@@ -747,21 +738,23 @@ curtain's selector lists as well.
   of colours when the trigger is built. Without that, flipping the hero's ink while the page
   is up changes nothing — the crossing keeps painting the ink the page had at load.
   `settleColours()` is the resting-state counterpart, and the switch repaints through it.
-- The choice is mirrored to `localStorage`: the demo is shown by scrolling and refreshing, and
-  starting over from variant 1 each time would make the four impossible to hold side by side.
+- The choice is mirrored to `localStorage`, and **its key carries a version** — bumped on
+  every renumbering, because a number stored against an old order restores a different
+  variant under the new one.
 - The control is visible only while the hero is the section under the header, off the same
   `section:change` event everything else hangs on (`data-hero-focus` on `<html>`).
 
-**Variant 4's shrink used to be invisible**, and the reason is worth keeping in case a flat
-ground comes back. The ground behind the panel steps to the *next* section's colour on the
-first movement (see the morph, above), and capabilities is smoke — so a flat smoke panel
-shrank against smoke, both `rgb(233, 235, 238)`, and the move only reappeared when the
-dashboard wiped into the frame. The photograph fixed it by accident: its floor line and darker
-corners give the panel's edge something to show against. Verified at t = 0.5 on 2026-09-03.
+**Variant 2's shrink used to be invisible** while its panel was a flat smoke, and the reason
+is worth keeping in case a flat ground comes back. The ground behind the panel steps to the
+*next* section's colour on the first movement (see the morph, above), and capabilities is
+smoke — so a flat smoke panel shrank against smoke, both `rgb(233, 235, 238)`, and the move
+only reappeared when the dashboard wiped into the frame. The photograph fixed it by accident:
+its floor line and darker corners give the panel's edge something to show against. Verified at
+t = 0.5 on 2026-09-03.
 
 Smaller, known: clicking a variant *mid-crossing* repaints the ground from the section at
-rest, so on 3 and 4 the ground behind the panel flashes graphite until the next scroll frame.
-It self-corrects, and the control is meant to be used on the hero at rest.
+rest, so the ground behind the panel can flash graphite until the next scroll frame. It
+self-corrects, and the control is meant to be used on the hero at rest.
 
 ### The `section:change` event
 
@@ -972,10 +965,10 @@ Figma's own `#1E1E1E` canvas in as a full-bleed `<rect>`.
 |---|---|---|---|
 | 1 — hero, **variant 1's frame photograph** | `assets/images/hero-portrait.webp` | `308:39424` | the low-angle portrait, from the node's own raw fill: 4096×3058 JPEG, which is **1.3395 — the frame's own 4:3**, so `cover` crops half a percent off the width and nothing else. `cwebp -q 88 -crop 9 0 4077 3058 -resize 1440 1080`, 90 KB. 1440 is 2× the frame's widest, the same treatment the deck cards get |
 | 1 — hero | `assets/video/hero.mp4` + `assets/images/hero-poster.webp` | `247:42060` | screen recording, on a loop. See below |
-| 1 — hero, **variant 2's panel ground** | `assets/images/hero-full.webp` | `275:53708` | 1254×1254, the full square shot. Backs the morph panel on variant 2 at `50% 18% / cover`, see §5. Its bitmap is only 1254 on a 2030 node, which is why it is the softest of the four panels |
-| 1 — hero, **variant 3's frame photograph** | `assets/images/hero.webp` | `196:53708` | 2236×1578 (1.42:1), the tighter crop of the same studio shot. It backed the morph panel until the variants landed; now it is what variant 3 puts *in* the frame |
-| 1 — hero, **variant 4's panel ground** | `assets/images/hero-smoke.webp` | — | the same shoot on a light-grey studio ground, 1.79:1. Client-supplied PNG, 2752×1536, `cwebp -q 88 -resize 2560 0`, 96 KB. `center / cover` in both places: full-bleed it crops a little off whichever axis is tighter, and in the 4:3 frame it loses about a quarter of its width |
-| 1 — hero, **unused** | `assets/images/hero-green.webp` | — | the man against the brand green, 1.79:1. Client-supplied PNG, 5504×3072, `cwebp -q 88 -resize 2560 0`, 220 KB. It was variant 3's panel ground for one round on 2026-09-03; unwired the same day when variant 3 went back to a flat green. Kept |
+| 1 — hero, **unused** | `assets/images/hero-full.webp` | `275:53708` | 1254×1254, the full square shot. It backed the morph panel at `50% 18% / cover` on the variant the client killed on 2026-09-04; kept. Its bitmap is only 1254 on a 2030 node, which is why it is the softest of the four panels |
+| 1 — hero, **unused** | `assets/images/hero.webp` | `196:53708` | 2236×1578 (1.42:1), the tighter crop of the same studio shot. It backed the morph panel until the variants landed, then sat in the frame on the variant the client killed on 2026-09-04; kept |
+| 1 — hero, **variant 2's panel ground** | `assets/images/hero-smoke.webp` | — | the same shoot on a light-grey studio ground, 1.79:1. Client-supplied PNG, 2752×1536, `cwebp -q 88 -resize 2560 0`, 96 KB. `center / cover` in both places: full-bleed it crops a little off whichever axis is tighter, and in the 4:3 frame it loses about a quarter of its width |
+| 1 — hero, **unused** | `assets/images/hero-green.webp` | — | the man against the brand green, 1.79:1. Client-supplied PNG, 5504×3072, `cwebp -q 88 -resize 2560 0`, 220 KB. It backed the green variant's panel for one round on 2026-09-03 and was unwired the same day, when that panel went back to a flat green. Kept |
 | 1 — hero, unused | `assets/images/hero-street.webp` | `265:39107` | a street shot that was in the frame for one round on 2026-09-03. 4096×2286 JPEG, centre-cropped to 4:3 and resized in one `cwebp -q 82 -crop 524 0 3048 2286 -resize 1440 1080` pass, 91 KB. Unwired, kept |
 | 2 — capabilities, `promotion` pane | `assets/images/capabilities-promotion.webp` | `206:62480` | node is named "Продвижение — 4×3 / content". 1118×838.5, @2x → 2236×1677, cwebp **`-lossless`**, 172 KB |
 | 2 — `orders` pane | `assets/images/capabilities-orders.webp` | `209:35586` | same size and export, 188 KB. Re-pulled once after the client edited the node — the file name stays, so a re-pull is a byte swap and nothing else |

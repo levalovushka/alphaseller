@@ -1132,10 +1132,11 @@ window.addEventListener(
 ScrollTrigger.addEventListener('refresh', () => { wheelOwned = oneScreenEach(); });
 
 
-/* ---------- the four hero variants ----------
-   Four grounds for the first screen, compared in the live page (client, 2026-09-03). The
-   table is in `base.css` under the same heading; everything visual is there. This is only
-   the switch, and it writes exactly three things:
+/* ---------- the two hero variants ----------
+   Two grounds for the first screen, compared in the live page (four were built on
+   2026-09-03; the client killed two on 2026-09-04). The table is in `base.css` under the
+   same heading; everything visual is there. This is only the switch, and it writes exactly
+   three things:
 
      - `data-hero` on <html>, which CSS reads for the panel's ground and for which of the
        two layers the frame shows,
@@ -1158,16 +1159,19 @@ const heroSwitch = document.querySelector('.hero-switch');
 if (heroSwitch) {
   const heroSection = document.getElementById('hero');
   const buttons = gsap.utils.toArray('.hero-switch__btn', heroSwitch);
-  const VARIANTS = [1, 2, 3, 4];
-  /* Not a knob — it follows from the panel's ground. See the table in base.css. */
-  const HERO_INK = { 1: 'dark', 2: 'light', 3: 'light', 4: 'dark' };
-  /* Which variants keep the screen recording in the frame; the other two put a photograph
+  const VARIANTS = [1, 2];
+  /* Not a knob — it follows from the panel's ground, and both grounds are light. Kept as a
+     map rather than folded away: it is what would carry a dark variant if one comes back,
+     and the colour pass reads it off the section either way. See the table in base.css. */
+  const HERO_INK = { 1: 'dark', 2: 'dark' };
+  /* Which variants keep the screen recording in the frame; the other puts a photograph
      there. CSS swaps the two layers on the same `data-hero` — this is only so the video
      controller can stop decoding. */
-  const HERO_VIDEO = [2, 4];
-  /* Bumped with the renumbering on 2026-09-04: a number stored against the old order would
-     restore a different variant under the new one. */
-  const STORE = 'alphaseller:hero-variant:2';
+  const HERO_VIDEO = [2];
+  /* Bumped whenever the numbering changes — twice on 2026-09-04, for the reorder and then
+     for the two that were dropped. A number stored against an old order would restore a
+     different variant under the new one. */
+  const STORE = 'alphaseller:hero-variant:3';
 
   function setVariant(variant) {
     root.dataset.hero = String(variant);
