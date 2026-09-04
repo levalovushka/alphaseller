@@ -1,5 +1,51 @@
 # Worklog
 
+## 2026-09-04 — the growth tiles outgrew 100vh at 1920 and killed the wheel controller
+
+**What changed.** `base.css`: `.tiles__grid` gains a `--tile-gap` token, a `max-width` derived
+from the height the section leaves, and `justify-self: end`. `CONTEXT.md`: §4's tiles bullets
+and §5's note on the wheel guard.
+
+**Why.** Client: "на 1920 почему-то сломался скролл посекционный. на 1512 работает ок, на 1920
+не крутится с одного движения колесика."
+
+The tiles are square and their width comes from the page grid, so their height follows the
+screen's *width*. At 1920 with an ordinary window height the two rows wanted more than the
+padding leaves: 800px against 784 at 1920×960, so the section came out **976 tall against a
+960 viewport**. The wheel controller's guard is `grounds.every(h <= innerHeight + 1)`, so one
+section 16px over turned it off **for the whole page**, and native mandatory snapping took
+over — which does not advance a section on one wheel click. At 1512, and at the 1920×1080 the
+design was drawn at, everything fits, which is why it looked fine there.
+
+The fix caps the grid's width by the height budget instead of breaking the square: a tile can
+be at most `(A - gap) / 2` for a budget A, so three of them plus two gaps is `1.5A + gap/2`.
+
+**How it was verified.** Measured before and after at several sizes, with `ScrollTrigger.refresh()`
+between:
+
+| | before | after |
+|---|---|---|
+| 1920×1080 | growth 1080, tile 388, owned | unchanged — the cap is 1368 against a natural 1212 |
+| 1920×960 | growth **976**, over by 16, `wheelOwned: false` | growth 960, grid 1188×784, tile 380, `wheelOwned: true` |
+| 1920×860 | — | growth 860, tile 330, nothing over |
+| 1920×780 | — | nothing over, doc height exactly 8 × innerHeight |
+| 1512×860 | — | growth 860, tile 314 — the cap does not bind, the column span still sets it |
+
+Screenshotted the section at 1920×960: six squares, the grid 108px from the right edge (the
+page's own margin at that width) and 96 above the bottom (`--page-pad`).
+
+**What I could not test here, and why.** The wheel gesture itself cannot be exercised in the
+preview pane: it keeps the page hidden, `requestAnimationFrame` is frozen there, so the
+GSAP tween `glide()` runs never advances — a synthetic wheel event leaves `locked` stuck true
+and `scroll-snap-type: none` on the root. That is an artifact of the pane, not of the page;
+what was verified is the condition the controller keys off (`wheelOwned` and every section's
+height), not the gesture.
+
+**Left undone.** Below about 780px of viewport height the six framed sections overflow on
+their own (the frame is 540 tall plus 176 of padding), and the guard turns the controller off
+again. That is the frame's fixed 4:3 against a short window, not this bug, and no real desktop
+window is that short.
+
 ## 2026-09-04 — hero variant 2 becomes the street shot whose papers leave the frame
 
 **What changed.**

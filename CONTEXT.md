@@ -227,7 +227,19 @@ and the copy in Figma (`276:54325`): "он будет черный, без ра�
 - Heading alone in the **first** page column, six tiles in a 3×2 grid across the other two —
   the same three-column grid the rest of the page uses. Both start on the same line.
 - **The tiles are always square.** Width comes from the grid, height from the ratio: 293 at
-  1440, 388 at 1920. Nothing caps the height, or the ratio would go instead.
+  1440, 388 at 1920×1080. The ratio is never broken; what gives instead is the width — the
+  grid carries a `max-width` off the **height** the section leaves, so two rows and a gap can
+  never outgrow one screen. It works out to `1.5A + gap/2` for a height budget A, and below
+  that it does not bind: at 1920×1080 the cap is 1368 against a natural 1212, so nothing
+  moves there. Narrowed, the block stays against the page's right edge (`justify-self: end`),
+  where every other section's content ends.
+- **Why the cap exists** (2026-09-04): at 1920 with an ordinary window — 960 of viewport
+  height, not 1080 — the rows wanted 800px against the 784 the padding leaves, the section
+  came out 976 tall, and **one section over 100vh takes the wheel controller down for the
+  whole page**, because its guard is an `every()`. The page then fell back to native mandatory
+  snapping, which does not advance on one wheel click. That was the client's "на 1920 не
+  крутится с одного движения колесика", and it is the reason to keep every section inside
+  100vh at every size, not only at the two the design was drawn at.
 - One block of text per tile, on its **top edge**, in the new `lg` style; 24px padding all
   round. Everything **below** the text is the room the illustrations will take — that is why
   the square is worth the space it costs. (The text was on the bottom edge for one round:
@@ -488,6 +500,13 @@ a continuous spin also moves exactly one section. If that ever reads as unrespon
 content that can only be reached by scrolling inside it, and hijacking the wheel would trap
 it. Re-checked on every `ScrollTrigger` refresh. The design keeps every section exactly one
 viewport tall, so this is a guard, not a mode.
+
+**It is an `every()`, so it is all or nothing: one section 16px over turns the controller off
+on all eight**, and the page falls back to native mandatory snapping, which does not advance
+on a single wheel click. That is exactly what the growth tiles did at 1920×960 on 2026-09-04
+(see §4). Two things follow: a section that outgrows 100vh at *any* window size is a real
+bug, not a cosmetic one, and if the wheel ever feels wrong the first thing to measure is
+`grounds.map(s => s.getBoundingClientRect().height)` against `innerHeight`.
 
 ### The photographic ground
 

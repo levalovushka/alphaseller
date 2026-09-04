@@ -1325,10 +1325,30 @@ img { display: block; max-width: 100%; height: auto; }
   grid-template-columns: repeat(3, 1fr);
   /* Same 24 as the old card grid: the tiles read as one block, not as three columns of
      the page. */
-  gap: 24px;
+  gap: var(--tile-gap);
   margin: 0;
   padding: 0;
   list-style: none;
+
+  /* **Two rows of squares must fit the height the screen leaves.** The tiles are square and
+     their width comes from this grid, so on a wide screen with an ordinary window height the
+     rows outgrew the section: at 1920 x 960 the grid wanted 800px against the 784 the padding
+     leaves, the section came out 976 tall, and one section over 100vh takes the wheel
+     controller down **for the whole page** — its guard is `every()` (see `oneScreenEach` in
+     `main.js`). That is what "не крутится с одного движения колесика" on 1920 was, 2026-09-04.
+
+     So cap the width by the height budget rather than break the square. With A as the height
+     the section leaves, a tile can be at most (A - gap) / 2, and three of them plus two gaps
+     is 1.5A + gap/2. Below that the cap does not bind and nothing moves: at 1920 x 1080 it
+     works out to 1368 against a natural 1212.
+
+     `justify-self: end` is what the cap needs to be safe: narrowed, the block stays against
+     the page's right edge, where every other section's content ends. */
+  --tile-gap: 24px;
+  max-width: calc(
+    (100vh - var(--header-h) - var(--page-pad)) * 1.5 + var(--tile-gap) / 2
+  );
+  justify-self: end;
 }
 
 /* Always square — the client's word. Width comes from the grid, height from the ratio;
@@ -1599,7 +1619,12 @@ img { display: block; max-width: 100%; height: auto; }
   --morph-bg: var(--c-green);
 }
 
-:root[data-hero="2"] { --morph-bg: var(--c-green); }
+/* Variant 2's panel is a flat light grey, not the brand green — client, 2026-09-04. The
+   value is his and is **not in the brand palette** (§7), so it is written here rather than
+   promoted to a --c- token. Read the note above about a smoke panel before touching it: at
+   #e0e0e0 the panel is only 9/11/14 off the smoke ground it shrinks against, so the move is
+   nearly invisible on this variant. Raised with the client. */
+:root[data-hero="2"] { --morph-bg: #e0e0e0; }
 
 /* What the frame holds, per variant: the portrait on 1, the two-layer street photograph on
    2. `display` and not opacity — a transparent layer still decodes, and for the video JS
