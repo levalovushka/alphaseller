@@ -1,5 +1,26 @@
 # Worklog
 
+## 2026-09-04 — variant 2's morph panel goes light grey
+
+**What changed.** `assets/css/base.css`: `:root[data-hero="2"] { --morph-bg }`
+`var(--c-green)` → `#e0e0e0`. `CONTEXT.md` §5: the variants table, the replacement note, and
+a new paragraph on the panel-against-smoke problem this reintroduces.
+
+**Why.** Client: "у второго варианта хиро замени фон морфящейся плашки на E0E0E0". The value
+is his and is not in the brand palette, so it sits at the variant's own rule rather than
+becoming a `--c-` token.
+
+**How it was verified.** Switched to variant 2 in the live page at 1440: panel
+`rgb(224, 224, 224)`, ink still black, `data-hero="2"`, the panel full-bleed at rest.
+Screenshot of the hero, and one at the middle of the crossing with the panel at
+`inset(128.5px 230px 126.5px round 12px)` over the smoke ground.
+
+**What is left undone.** **The move is now nearly invisible on this variant.** The ground
+steps to smoke `#E9EBEE` on the first movement and the panel is `#E0E0E0` — 9/11/14 apart, so
+the shrinking edge is there but faint. Exactly the trap the CSS note warned about for a smoke
+panel. Raised with the client, not worked around; the two ways out are written down in
+CONTEXT §5.
+
 ## 2026-09-04 — the growth tiles outgrew 100vh at 1920 and killed the wheel controller
 
 **What changed.** `base.css`: `.tiles__grid` gains a `--tile-gap` token, a `max-width` derived
